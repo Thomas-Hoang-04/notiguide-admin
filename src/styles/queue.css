@@ -1,0 +1,201 @@
+/* ── Queue Dashboard Component Styles ────────────────────── */
+
+.queue-page-shell {
+  position: relative;
+  min-height: calc(100% + 1.5rem);
+  background-size: cover;
+}
+
+@media (min-width: 24.375rem) {
+  /* s breakpoint — 390px */
+  .queue-page-shell {
+    min-height: calc(100% + 2rem);
+  }
+}
+
+@media (min-width: 48rem) {
+  /* xl breakpoint — 768px */
+  .queue-page-shell {
+    min-height: calc(100% + 2.5rem);
+  }
+}
+
+@media (min-width: 80rem) {
+  /* 3xl breakpoint — 1280px */
+  .queue-page-shell {
+    min-height: calc(100% + 3rem);
+  }
+}
+
+.queue-divider {
+  width: 1px;
+  height: 3rem;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.5) 48%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.dark .queue-divider {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.16) 48%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.queue-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  min-width: 120px;
+  text-align: center;
+  gap: 0.25rem;
+}
+
+@media (min-width: 37.5rem) {
+  /* l breakpoint — 600px */
+  .queue-stat-card {
+    padding: 1.5rem;
+    min-width: 140px;
+  }
+}
+
+.queue-stat-value {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 37.5rem) {
+  .queue-stat-value {
+    font-size: 2.5rem;
+  }
+}
+
+.queue-stat-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.5rem;
+  color: var(--muted-foreground);
+}
+
+.ticket-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  gap: 0.75rem;
+}
+
+@media (min-width: 37.5rem) {
+  .ticket-display {
+    padding: 2rem;
+  }
+}
+
+.ticket-number {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+@media (min-width: 37.5rem) {
+  .ticket-number {
+    font-size: 4rem;
+  }
+}
+
+.ticket-time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.ticket-time-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+}
+
+.ticket-time-value {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--foreground);
+  letter-spacing: -0.01em;
+}
+
+/* Touch-friendly action buttons for tablet use */
+.queue-action-btn {
+  min-height: 2.75rem;
+  min-width: 7rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  transition: all 0.15s ease;
+}
+
+@media (min-width: 37.5rem) {
+  /* l breakpoint — 600px */
+  .queue-action-btn {
+    min-height: 3rem;
+    min-width: 8rem;
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 48rem) {
+  /* xl breakpoint — 768px */
+  .queue-action-btn {
+    min-height: 3.5rem;
+    min-width: 10rem;
+    font-size: 1.125rem;
+  }
+}
+
+.queue-call-next-button {
+  background: var(--gradient-action);
+  color: var(--action-foreground);
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+}
+
+.queue-call-next-button:hover:not(:disabled) {
+  filter: brightness(1.03);
+  box-shadow: 0 0 24px rgba(249, 115, 22, 0.34);
+}
+
+.queue-call-next-button:disabled {
+  opacity: 0.5;
+  box-shadow: none;
+  filter: grayscale(0.3);
+  cursor: not-allowed;
+}
+
+.dark .queue-call-next-button {
+  box-shadow: 0 0 22px rgba(251, 146, 60, 0.32);
+}
+
+.dark .queue-call-next-button:hover:not(:disabled) {
+  box-shadow: 0 0 26px rgba(251, 146, 60, 0.36);
+}
+
+.dark .queue-call-next-button:disabled {
+  box-shadow: none;
+}
