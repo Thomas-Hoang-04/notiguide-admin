@@ -1,0 +1,70 @@
+export interface StoreDto {
+  id: string;
+  name: string;
+  address: string | null;
+  isActive: boolean;
+  allowJumpCall: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface CreateStoreRequest {
+  name: string;
+  address?: string;
+}
+
+export interface UpdateStoreRequest {
+  name?: string;
+  address?: string | null;
+  isActive?: boolean;
+  allowJumpCall?: boolean;
+}
+
+export interface StorePageResponse {
+  items: StoreDto[];
+  page: number;
+  size: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+export interface StoreSettingsDto {
+  storeId: string;
+  maxQueueSize: number;
+  gracePeriodSec: number;
+  noShowAction: string;
+  maxRequeues: number;
+  requeueOffset: number;
+  alertThreshold: number;
+  updatedAt: string | null;
+}
+
+export interface UpdateStoreSettingsRequest {
+  maxQueueSize?: number;
+  gracePeriodSec?: number;
+  noShowAction?: string;
+  maxRequeues?: number;
+  requeueOffset?: number;
+  alertThreshold?: number;
+}
+
+export interface ServiceTypeDto {
+  id: string;
+  storeId: string;
+  name: string;
+  prefix: string;
+  isActive: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface CreateServiceTypeRequest {
+  name: string;
+  prefix: string;
+}
+
+export interface UpdateServiceTypeRequest {
+  name?: string;
+  prefix?: string;
+  isActive?: boolean;
+}
