@@ -282,7 +282,8 @@ export function CreateAdminDialog({
                 >
                   <span>
                     {storeId
-                      ? (stores.find((s) => s.id === storeId)?.name ?? tCommon("unknown"))
+                      ? (stores.find((s) => s.id === storeId)?.name ??
+                        tCommon("unknown"))
                       : tAdmins("storePlaceholder")}
                   </span>
                 </SelectTrigger>

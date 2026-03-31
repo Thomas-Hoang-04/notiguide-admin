@@ -5,10 +5,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  listServiceTypes,
-  updateServiceType,
-} from "@/features/store/api";
+import { listServiceTypes, updateServiceType } from "@/features/store/api";
 import { DeleteServiceTypeDialog } from "@/features/store/delete-service-type-dialog";
 import { ServiceTypeFormDialog } from "@/features/store/service-type-form-dialog";
 import { ServiceTypesTable } from "@/features/store/service-types-table";
@@ -61,6 +58,7 @@ export default function ServiceTypesPage() {
   }, [fetchServiceTypes]);
 
   if (!storeId) return null;
+  const currentStoreId = storeId;
 
   function openCreate() {
     setEditTarget(null);
@@ -79,7 +77,7 @@ export default function ServiceTypesPage() {
 
   async function handleToggleActive(st: ServiceTypeDto) {
     try {
-      const updated = await updateServiceType(storeId!, st.id, {
+      const updated = await updateServiceType(currentStoreId, st.id, {
         isActive: !st.isActive,
       });
       setItems((prev) =>
@@ -125,7 +123,7 @@ export default function ServiceTypesPage() {
         open={formOpen}
         onOpenChange={setFormOpen}
         serviceType={editTarget}
-        storeId={storeId}
+        storeId={currentStoreId}
         onSuccess={() => void fetchServiceTypes()}
       />
 
@@ -133,7 +131,7 @@ export default function ServiceTypesPage() {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         serviceType={deleteTarget}
-        storeId={storeId}
+        storeId={currentStoreId}
         onSuccess={() => void fetchServiceTypes()}
       />
     </div>

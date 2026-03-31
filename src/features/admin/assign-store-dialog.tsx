@@ -2,7 +2,8 @@
 
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -77,7 +78,8 @@ export function AssignStoreDialog({
 
     try {
       await updateAdminStore(admin.id, storeId);
-      const storeName = stores.find((s) => s.id === storeId)?.name ?? tCommon("unknown");
+      const storeName =
+        stores.find((s) => s.id === storeId)?.name ?? tCommon("unknown");
       toast.success(
         tAdmins("assignedToast", {
           username: admin.username,
@@ -125,7 +127,8 @@ export function AssignStoreDialog({
               >
                 <span>
                   {storeId
-                    ? (stores.find((s) => s.id === storeId)?.name ?? tCommon("unknown"))
+                    ? (stores.find((s) => s.id === storeId)?.name ??
+                      tCommon("unknown"))
                     : tAdmins("storePlaceholder")}
                 </span>
               </SelectTrigger>

@@ -94,12 +94,12 @@ function SuperAdminDashboardCharts() {
 
   return (
     <>
-      <OverviewThroughputChart
-        stores={overview?.stores ?? []}
-        period="WEEK"
-      />
+      <OverviewThroughputChart stores={overview?.stores ?? []} period="WEEK" />
       <div className="grid gap-4 l:grid-cols-2 l:gap-6">
-        <StoreComparisonChart stores={overview?.stores ?? []} loading={loading} />
+        <StoreComparisonChart
+          stores={overview?.stores ?? []}
+          loading={loading}
+        />
         <StoreWaitChart stores={overview?.stores ?? []} loading={loading} />
       </div>
       <StoreRankingTable stores={overview?.stores ?? []} loading={loading} />

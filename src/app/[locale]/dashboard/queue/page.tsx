@@ -10,8 +10,8 @@ import { Kbd } from "@/components/ui/kbd";
 import { Label } from "@/components/ui/label";
 import { callNext, getPublicStoreInfo } from "@/features/queue/api";
 import { CleanupButton } from "@/features/queue/cleanup-button";
-import { QueueStats } from "@/features/queue/queue-stats";
 import { QueueStateToggle } from "@/features/queue/queue-state-toggle";
+import { QueueStats } from "@/features/queue/queue-stats";
 import { ServingDisplay } from "@/features/queue/serving-display";
 import { useStoreName } from "@/features/queue/store-selector";
 import { TicketLookup } from "@/features/queue/ticket-lookup";
@@ -184,7 +184,10 @@ export default function QueuePage() {
         {/* Paused Banner */}
         {queueState === "PAUSED" && (
           <div className="flex items-center gap-2.5 rounded-xl border border-warning/40 bg-warning/15 px-3.5 py-3 text-sm text-warning dark:border-warning/50 dark:bg-warning/20">
-            <PauseCircle aria-hidden="true" className="size-4 shrink-0 text-warning" />
+            <PauseCircle
+              aria-hidden="true"
+              className="size-4 shrink-0 text-warning"
+            />
             <div>
               <p className="font-medium">{tQueue("queuePaused")}</p>
               <p className="text-xs text-warning/80">

@@ -42,8 +42,22 @@ import {
 } from "@/lib/api-error";
 import { parseUserAgent } from "@/lib/user-agent";
 import { useAuthStore } from "@/store/auth";
-import type { ApiError } from "@/types/api";
 import type { AdminSessionDto, LoginHistoryDto } from "@/types/admin";
+import type { ApiError } from "@/types/api";
+
+const HISTORY_PAGE_SIZE = 20;
+const SESSION_SKELETON_KEYS = [
+  "session-skeleton-1",
+  "session-skeleton-2",
+  "session-skeleton-3",
+] as const;
+const HISTORY_SKELETON_KEYS = [
+  "history-skeleton-1",
+  "history-skeleton-2",
+  "history-skeleton-3",
+  "history-skeleton-4",
+  "history-skeleton-5",
+] as const;
 
 export default function SecuritySettingsPage() {
   const tSettings = useTranslations("settings");
@@ -56,7 +70,7 @@ export default function SecuritySettingsPage() {
   const [hasMore, setHasMore] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [limit, setLimit] = useState(20);
+  const [limit, setLimit] = useState(HISTORY_PAGE_SIZE);
 
   // Sessions state
   const [sessions, setSessions] = useState<AdminSessionDto[]>([]);
@@ -97,23 +111,34 @@ export default function SecuritySettingsPage() {
     }
   }, [admin?.id, tErrors]);
 
-  useEffect(() => {
-    void (async () => {
-      setHistoryLoading(true);
-      setSessionsLoading(true);
-      await Promise.all([fetchHistory(limit), fetchSessions()]);
+  const loadSecurityData = useCallback(async () => {
+    if (!admin?.id) return;
+
+    setLimit(HISTORY_PAGE_SIZE);
+    setHistoryLoading(true);
+    setSessionsLoading(true);
+
+    try {
+      await Promise.all([fetchHistory(HISTORY_PAGE_SIZE), fetchSessions()]);
+    } finally {
       setHistoryLoading(false);
       setSessionsLoading(false);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- limit changes are handled by handleLoadMore
-  }, [fetchHistory, fetchSessions]);
+    }
+  }, [admin?.id, fetchHistory, fetchSessions]);
+
+  useEffect(() => {
+    void loadSecurityData();
+  }, [loadSecurityData]);
 
   async function handleLoadMore() {
-    const newLimit = limit + 20;
+    const newLimit = limit + HISTORY_PAGE_SIZE;
     setLoadingMore(true);
-    setLimit(newLimit);
-    await fetchHistory(newLimit);
-    setLoadingMore(false);
+    try {
+      setLimit(newLimit);
+      await fetchHistory(newLimit);
+    } finally {
+      setLoadingMore(false);
+    }
   }
 
   async function handleRevoke(sessionId: string) {
@@ -173,8 +198,8 @@ export default function SecuritySettingsPage() {
         <CardContent>
           {sessionsLoading ? (
             <div className="space-y-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={`sess-skeleton-${i}`} className="h-16 w-full" />
+              {SESSION_SKELETON_KEYS.map((key) => (
+                <Skeleton key={key} className="h-16 w-full" />
               ))}
             </div>
           ) : sessions.length === 0 ? (
@@ -278,8 +303,8 @@ export default function SecuritySettingsPage() {
         <CardContent>
           {historyLoading ? (
             <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={`skeleton-${i}`} className="h-12 w-full" />
+              {HISTORY_SKELETON_KEYS.map((key) => (
+                <Skeleton key={key} className="h-12 w-full" />
               ))}
             </div>
           ) : history.length === 0 ? (

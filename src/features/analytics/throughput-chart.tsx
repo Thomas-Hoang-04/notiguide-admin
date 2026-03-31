@@ -38,7 +38,11 @@ export function ThroughputChart({ data, loading }: ThroughputChartProps) {
         </p>
       ) : (
         <div className="h-56 min-w-0 font-mono l:h-64">
-          <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 1, height: 1 }}>
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            initialDimension={{ width: 1, height: 1 }}
+          >
             <LineChart
               data={data.days}
               margin={{ top: 4, right: 4, bottom: 0, left: -16 }}

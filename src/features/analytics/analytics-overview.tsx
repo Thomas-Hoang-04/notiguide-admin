@@ -52,7 +52,10 @@ export function AnalyticsOverview() {
       />
 
       <div className="grid gap-4 l:grid-cols-2 l:gap-6">
-        <StoreComparisonChart stores={overview?.stores ?? []} loading={loading} />
+        <StoreComparisonChart
+          stores={overview?.stores ?? []}
+          loading={loading}
+        />
         <StoreWaitChart stores={overview?.stores ?? []} loading={loading} />
       </div>
 

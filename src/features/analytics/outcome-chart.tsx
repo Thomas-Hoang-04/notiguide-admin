@@ -2,14 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import {
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
+import { Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import type { ValueType } from "recharts/types/component/DefaultTooltipContent";
 import type { StoreSummaryResponse } from "./types";
-import { ValueType } from "recharts/types/component/DefaultTooltipContent";
 
 interface OutcomeChartProps {
   summary: StoreSummaryResponse | null;
@@ -76,7 +71,7 @@ export function OutcomeChart({ summary, loading }: OutcomeChartProps) {
                   }}
                   formatter={(value: ValueType | undefined) => {
                     if (!value) return undefined;
-                    const pct = ((value as number / total) * 100).toFixed(1);
+                    const pct = (((value as number) / total) * 100).toFixed(1);
                     return `${value} (${pct}%)`;
                   }}
                 />

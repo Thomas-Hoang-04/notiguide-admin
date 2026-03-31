@@ -26,6 +26,9 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
   const t = useTranslations("analytics.period");
   const tCommon = useTranslations("analytics.dateRange");
   const [open, setOpen] = useState(false);
+  const selectedRange = isDateRange(value) ? value : null;
+  const selectedRangeFrom = selectedRange?.from;
+  const selectedRangeTo = selectedRange?.to;
 
   // Draft state tracks in-progress range selection inside the calendar.
   const [draft, setDraft] = useState<RDPDateRange | undefined>(undefined);
@@ -34,19 +37,22 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
 
   // Reset draft and displayed month when popover opens
   useEffect(() => {
-    if (open) {
-      if (isDateRange(value)) {
-        const to = new Date(value.to);
-        setDraft({ from: new Date(value.from), to });
-        // Show `to`'s month on the right panel → left panel is one month before
-        setMonth(addMonths(to, -1));
-      } else {
-        setDraft(undefined);
-        // Default: current month on the right → left is previous month
-        setMonth(addMonths(new Date(), -1));
-      }
+    if (!open) {
+      return;
     }
-  }, [open]);
+
+    if (selectedRangeFrom && selectedRangeTo) {
+      const to = new Date(selectedRangeTo);
+      setDraft({ from: new Date(selectedRangeFrom), to });
+      // Show `to`'s month on the right panel → left panel is one month before
+      setMonth(addMonths(to, -1));
+      return;
+    }
+
+    setDraft(undefined);
+    // Default: current month on the right → left is previous month
+    setMonth(addMonths(new Date(), -1));
+  }, [open, selectedRangeFrom, selectedRangeTo]);
 
   const presetLabels: Record<AnalyticsPeriod, string> = {
     TODAY: t("today"),
@@ -55,7 +61,7 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
     QUARTER: t("quarter"),
   };
 
-  const isCustom = isDateRange(value);
+  const isCustom = selectedRange !== null;
 
   function handleCalendarSelect(range: RDPDateRange | undefined) {
     setDraft(range);

@@ -24,7 +24,7 @@ export function WaitDistributionChart({
   const t = useTranslations("analytics.waitDistribution");
   const tAnalytics = useTranslations("analytics");
 
-  const hasData = data && data.buckets.some((b) => b.count > 0);
+  const hasData = data?.buckets.some((b) => b.count > 0) ?? false;
 
   return (
     <div className="glass-card min-w-0 overflow-hidden rounded-xl p-4 l:p-5">
@@ -71,7 +71,7 @@ export function WaitDistributionChart({
                   fontSize: "0.8125rem",
                 }}
                 labelFormatter={(label) => `${label} ${t("minutes")}`}
-                formatter={(value: number) => [value, t("tickets")]}
+                formatter={(value) => [value ?? 0, t("tickets")]}
               />
               <Bar
                 dataKey="count"

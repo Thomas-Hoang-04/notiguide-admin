@@ -83,8 +83,7 @@ export function HourlyHeatmap({ data, loading }: HourlyHeatmapProps) {
                     <div className="grid flex-1 grid-cols-24 gap-px">
                       {HOURS.map((h) => {
                         const value = cellMap.get(`${dow}-${h}`) ?? 0;
-                        const opacity =
-                          maxTickets > 0 ? value / maxTickets : 0;
+                        const opacity = maxTickets > 0 ? value / maxTickets : 0;
                         return (
                           <Tooltip key={h}>
                             <TooltipTrigger
@@ -94,7 +93,11 @@ export function HourlyHeatmap({ data, loading }: HourlyHeatmapProps) {
                                 backgroundColor: `color-mix(in srgb, var(--chart-accent) ${Math.round(opacity * 100)}%, transparent)`,
                               }}
                             />
-                            <TooltipContent side="top" sideOffset={4} className="*:last:hidden">
+                            <TooltipContent
+                              side="top"
+                              sideOffset={4}
+                              className="*:last:hidden"
+                            >
                               {t("tooltip", {
                                 day: t(dayKey),
                                 hourRange: `${formatHour(h)}–${formatHour((h + 1) % 24)}`,

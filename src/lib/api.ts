@@ -1,8 +1,8 @@
 "use client";
 
-import {clearStoredAuthAndRedirect} from "@/lib/auth-session";
-import {ApiError, type ErrorResponse, NetworkError} from "@/types/api";
-import {API_BASE_URL, API_ROUTES} from "./constants";
+import { clearStoredAuthAndRedirect } from "@/lib/auth-session";
+import { ApiError, type ErrorResponse, NetworkError } from "@/types/api";
+import { API_BASE_URL, API_ROUTES } from "./constants";
 
 type RequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
@@ -116,8 +116,8 @@ export async function api<T>(
         const resetEpoch = Number.parseInt(resetHeader, 10);
         if (!Number.isNaN(resetEpoch) && resetEpoch > 0) {
           apiError.rateLimitSeconds = Math.max(
-              1,
-              Math.ceil(resetEpoch - Date.now() / 1000),
+            1,
+            Math.ceil(resetEpoch - Date.now() / 1000),
           );
         }
       }

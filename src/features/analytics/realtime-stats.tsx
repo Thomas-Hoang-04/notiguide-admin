@@ -90,10 +90,7 @@ export function RealtimeStats({ storeId, isSuperAdmin }: RealtimeStatsProps) {
 
   return (
     <div className="analytics-stats-grid">
-      <StatCard
-        label={t("queueNow")}
-        value={storeStats?.currentQueueSize}
-      />
+      <StatCard label={t("queueNow")} value={storeStats?.currentQueueSize} />
       <StatCard
         label={t("servingNow")}
         value={storeStats?.currentServingCount}
@@ -124,7 +121,8 @@ function StatCard({
   value: number | string | null | undefined;
   isText?: boolean;
 }) {
-  const display = value != null ? (isText ? value : value.toLocaleString()) : "—";
+  const display =
+    value != null ? (isText ? value : value.toLocaleString()) : "—";
   return (
     <div className="analytics-stat-card glass-card rounded-xl">
       <span className="analytics-stat-value text-foreground">{display}</span>

@@ -17,7 +17,6 @@ import { PeakHoursChart } from "./peak-hours-chart";
 import { StorePeriodStats } from "./period-stats";
 import { SummaryCards } from "./summary-cards";
 import { ThroughputChart } from "./throughput-chart";
-import { WaitDistributionChart } from "./wait-distribution-chart";
 import type {
   DailyThroughputResponse,
   HourlyHeatmapResponse,
@@ -26,6 +25,7 @@ import type {
   StoreSummaryResponse,
   WaitDistributionResponse,
 } from "./types";
+import { WaitDistributionChart } from "./wait-distribution-chart";
 
 interface StoreAnalyticsProps {
   storeId: string;

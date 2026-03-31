@@ -7,7 +7,10 @@ import type {
   TicketDto,
   TicketStatusResponse,
 } from "@/types/queue";
-import type { StoreSettingsDto, UpdateStoreSettingsRequest } from "@/types/store";
+import type {
+  StoreSettingsDto,
+  UpdateStoreSettingsRequest,
+} from "@/types/store";
 
 export function getQueueSize(storeId: string) {
   return get<QueueSizeResponse>(API_ROUTES.QUEUE.SIZE(storeId));

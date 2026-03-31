@@ -139,7 +139,13 @@ function StatCard({
   loadingText: string;
   isText?: boolean;
 }) {
-  const display = loading ? loadingText : value != null ? (isText ? value : value.toLocaleString()) : "—";
+  const display = loading
+    ? loadingText
+    : value != null
+      ? isText
+        ? value
+        : value.toLocaleString()
+      : "—";
   return (
     <div className="analytics-stat-card glass-card rounded-xl">
       <span className="analytics-stat-value text-foreground">{display}</span>

@@ -78,7 +78,10 @@ export function StoreRankingTable({ stores, loading }: StoreRankingTableProps) {
       <div className="mb-3 flex items-center justify-between gap-2 l:mb-4">
         <h3 className="text-sm font-semibold text-foreground">{t("title")}</h3>
         {stores.length > 0 && (
-          <Select value={sortKey} onValueChange={(v) => v && setSortKey(v as SortKey)}>
+          <Select
+            value={sortKey}
+            onValueChange={(v) => v && setSortKey(v as SortKey)}
+          >
             <SelectTrigger className="h-7 w-auto min-w-32 gap-1.5 px-2.5 text-xs">
               <span className="truncate">{sortLabels[sortKey]}</span>
             </SelectTrigger>
@@ -129,9 +132,7 @@ export function StoreRankingTable({ stores, loading }: StoreRankingTableProps) {
                   key={store.storeId}
                   className="border-b border-border/30 last:border-0"
                 >
-                  <td className="py-2.5 pr-4 font-medium">
-                    {store.storeName}
-                  </td>
+                  <td className="py-2.5 pr-4 font-medium">{store.storeName}</td>
                   <td className="py-2.5 pr-4 text-right font-mono">
                     {store.issued.toLocaleString()}
                   </td>

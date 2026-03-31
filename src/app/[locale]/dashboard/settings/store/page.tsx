@@ -30,7 +30,8 @@ import {
 } from "@/lib/api-error";
 import { useAuthStore } from "@/store/auth";
 import type { ApiError } from "@/types/api";
-import type { StoreSettingsDto } from "@/types/store";
+
+type NoShowAction = "SKIP" | "REQUEUE";
 
 export default function StoreSettingsPage() {
   const tSettings = useTranslations("settings");
@@ -47,13 +48,12 @@ export default function StoreSettingsPage() {
   const [noShowToggleLoading, setNoShowToggleLoading] = useState(false);
 
   // Queue limits
-  const [settings, setSettings] = useState<StoreSettingsDto | null>(null);
   const [maxQueueSize, setMaxQueueSize] = useState("0");
   const [limitsLoading, setLimitsLoading] = useState(false);
 
   // No-show handling
   const [gracePeriodSec, setGracePeriodSec] = useState("0");
-  const [noShowAction, setNoShowAction] = useState("SKIP");
+  const [noShowAction, setNoShowAction] = useState<NoShowAction>("SKIP");
   const [maxRequeues, setMaxRequeues] = useState("1");
   const [requeueOffset, setRequeueOffset] = useState("3");
   const [alertThreshold, setAlertThreshold] = useState("2");
@@ -77,10 +77,9 @@ export default function StoreSettingsPage() {
       }
       try {
         const s = await getStoreSettings(storeId);
-        setSettings(s);
         setMaxQueueSize(String(s.maxQueueSize));
         setGracePeriodSec(String(s.gracePeriodSec));
-        setNoShowAction(s.noShowAction);
+        setNoShowAction(s.noShowAction === "REQUEUE" ? "REQUEUE" : "SKIP");
         setMaxRequeues(String(s.maxRequeues));
         setRequeueOffset(String(s.requeueOffset));
         setAlertThreshold(String(s.alertThreshold));
@@ -144,11 +143,10 @@ export default function StoreSettingsPage() {
     if (!storeId) return;
     setLimitsLoading(true);
     try {
-      const s = await updateStoreSettings(storeId, {
+      await updateStoreSettings(storeId, {
         maxQueueSize: Number(maxQueueSize) || 0,
         alertThreshold: Number(alertThreshold) || 2,
       });
-      setSettings(s);
       toast.success(tSettings("store.saved"));
     } catch (err) {
       const apiErr = err as ApiError;
@@ -166,13 +164,12 @@ export default function StoreSettingsPage() {
     if (!storeId) return;
     setNoShowLoading(true);
     try {
-      const s = await updateStoreSettings(storeId, {
+      await updateStoreSettings(storeId, {
         gracePeriodSec: Number(gracePeriodSec) || 0,
         noShowAction,
         maxRequeues: Number(maxRequeues) || 1,
         requeueOffset: Number(requeueOffset) || 3,
       });
-      setSettings(s);
       toast.success(tSettings("store.saved"));
     } catch (err) {
       const apiErr = err as ApiError;
@@ -296,115 +293,119 @@ export default function StoreSettingsPage() {
               {tSettings("store.alertThresholdCaption")}
             </p>
           </div>
-          <Button
-            onClick={handleSaveLimits}
-            disabled={limitsLoading}
-            size="sm"
-          >
-            {limitsLoading && (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            )}
+          <Button onClick={handleSaveLimits} disabled={limitsLoading} size="sm">
+            {limitsLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
             {tSettings("store.saveButton")}
           </Button>
         </CardContent>
       </Card>
 
       {/* No-Show Handling — only shown when allowNoShow is enabled */}
-      {allowNoShow && <Card className="glass-card glass-context-primary">
-        <CardHeader>
-          <CardTitle>{tSettings("store.noShowHandling")}</CardTitle>
-          <CardDescription>
-            {tSettings("store.noShowHandlingDescription")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="gracePeriodSec">
-              {tSettings("store.gracePeriodLabel")}
-            </Label>
-            <Input
-              id="gracePeriodSec"
-              type="number"
-              min={0}
-              max={600}
-              value={gracePeriodSec}
-              onChange={(e) => setGracePeriodSec(e.target.value)}
-              className="max-w-xs"
-            />
-            <p className="text-xs text-muted-foreground">
-              {tSettings("store.gracePeriodCaption")}
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label>{tSettings("store.noShowActionLabel")}</Label>
-            <Select value={noShowAction} onValueChange={setNoShowAction}>
-              <SelectTrigger className="w-full max-w-xs">
-                <SelectValue>
-                  {(value: string | null) => {
-                    if (value === "SKIP") return tSettings("store.noShowSkip");
-                    if (value === "REQUEUE")
-                      return tSettings("store.noShowRequeue");
-                    return value;
-                  }}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="SKIP">
-                  {tSettings("store.noShowSkip")}
-                </SelectItem>
-                <SelectItem value="REQUEUE">
-                  {tSettings("store.noShowRequeue")}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {noShowAction === "REQUEUE" && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="maxRequeues">
-                  {tSettings("store.maxRequeuesLabel")}
-                </Label>
-                <Input
-                  id="maxRequeues"
-                  type="number"
-                  min={1}
-                  max={5}
-                  value={maxRequeues}
-                  onChange={(e) => setMaxRequeues(e.target.value)}
-                  className="max-w-xs"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="requeueOffset">
-                  {tSettings("store.requeueOffsetLabel")}
-                </Label>
-                <Input
-                  id="requeueOffset"
-                  type="number"
-                  min={1}
-                  max={20}
-                  value={requeueOffset}
-                  onChange={(e) => setRequeueOffset(e.target.value)}
-                  className="max-w-xs"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {tSettings("store.requeueOffsetCaption")}
-                </p>
-              </div>
-            </>
-          )}
-          <Button
-            onClick={handleSaveNoShow}
-            disabled={noShowLoading}
-            size="sm"
-          >
-            {noShowLoading && (
-              <Loader2 className="mr-2 size-4 animate-spin" />
+      {allowNoShow && (
+        <Card className="glass-card glass-context-primary">
+          <CardHeader>
+            <CardTitle>{tSettings("store.noShowHandling")}</CardTitle>
+            <CardDescription>
+              {tSettings("store.noShowHandlingDescription")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="gracePeriodSec">
+                {tSettings("store.gracePeriodLabel")}
+              </Label>
+              <Input
+                id="gracePeriodSec"
+                type="number"
+                min={0}
+                max={600}
+                value={gracePeriodSec}
+                onChange={(e) => setGracePeriodSec(e.target.value)}
+                className="max-w-xs"
+              />
+              <p className="text-xs text-muted-foreground">
+                {tSettings("store.gracePeriodCaption")}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>{tSettings("store.noShowActionLabel")}</Label>
+              <Select
+                value={noShowAction}
+                onValueChange={(value) => {
+                  if (value) {
+                    setNoShowAction(value === "REQUEUE" ? "REQUEUE" : "SKIP");
+                  }
+                }}
+              >
+                <SelectTrigger className="w-full max-w-xs">
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (value === "SKIP")
+                        return tSettings("store.noShowSkip");
+                      if (value === "REQUEUE")
+                        return tSettings("store.noShowRequeue");
+                      return value;
+                    }}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SKIP">
+                    {tSettings("store.noShowSkip")}
+                  </SelectItem>
+                  <SelectItem value="REQUEUE">
+                    {tSettings("store.noShowRequeue")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {noShowAction === "REQUEUE" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="maxRequeues">
+                    {tSettings("store.maxRequeuesLabel")}
+                  </Label>
+                  <Input
+                    id="maxRequeues"
+                    type="number"
+                    min={1}
+                    max={5}
+                    value={maxRequeues}
+                    onChange={(e) => setMaxRequeues(e.target.value)}
+                    className="max-w-xs"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="requeueOffset">
+                    {tSettings("store.requeueOffsetLabel")}
+                  </Label>
+                  <Input
+                    id="requeueOffset"
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={requeueOffset}
+                    onChange={(e) => setRequeueOffset(e.target.value)}
+                    className="max-w-xs"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {tSettings("store.requeueOffsetCaption")}
+                  </p>
+                </div>
+              </>
             )}
-            {tSettings("store.saveButton")}
-          </Button>
-        </CardContent>
-      </Card>}
+            <Button
+              onClick={handleSaveNoShow}
+              disabled={noShowLoading}
+              size="sm"
+            >
+              {noShowLoading && (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              )}
+              {tSettings("store.saveButton")}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

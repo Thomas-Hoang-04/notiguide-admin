@@ -156,7 +156,12 @@ function ServingTicketCard({
   const anyLoading = serveLoading || cancelLoading || noShowLoading;
 
   const handleServe = useCallback(async () => {
-    if (serveLoadingRef.current || cancelLoadingRef.current || noShowLoadingRef.current) return;
+    if (
+      serveLoadingRef.current ||
+      cancelLoadingRef.current ||
+      noShowLoadingRef.current
+    )
+      return;
     setServeLoading(true);
     try {
       await serveTicket(storeId, ticket.id);
@@ -174,7 +179,12 @@ function ServingTicketCard({
   }, [removeServingTicket, ticket, storeId, tErrors, tQueue]);
 
   const handleNoShow = useCallback(async () => {
-    if (serveLoadingRef.current || cancelLoadingRef.current || noShowLoadingRef.current) return;
+    if (
+      serveLoadingRef.current ||
+      cancelLoadingRef.current ||
+      noShowLoadingRef.current
+    )
+      return;
     setNoShowLoading(true);
     try {
       await triggerNoShow(storeId, ticket.id);
@@ -192,7 +202,12 @@ function ServingTicketCard({
   }, [removeServingTicket, ticket, storeId, tErrors, tQueue]);
 
   const openCancelDialog = useCallback(() => {
-    if (serveLoadingRef.current || cancelLoadingRef.current || noShowLoadingRef.current) return;
+    if (
+      serveLoadingRef.current ||
+      cancelLoadingRef.current ||
+      noShowLoadingRef.current
+    )
+      return;
     setCancelDialogOpen(true);
   }, []);
 

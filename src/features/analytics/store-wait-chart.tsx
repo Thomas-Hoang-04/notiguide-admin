@@ -24,11 +24,18 @@ export function StoreWaitChart({ stores, loading }: StoreWaitChartProps) {
 
   const chartData = useMemo(() => {
     return stores
-      .filter((s) => s.avgWaitSeconds != null)
-      .map((s) => ({
-        name: s.storeName,
-        avgWait: Number((s.avgWaitSeconds! / 60).toFixed(1)),
-      }))
+      .flatMap((s) => {
+        if (s.avgWaitSeconds == null) {
+          return [];
+        }
+
+        return [
+          {
+            name: s.storeName,
+            avgWait: Number((s.avgWaitSeconds / 60).toFixed(1)),
+          },
+        ];
+      })
       .sort((a, b) => b.avgWait - a.avgWait)
       .slice(0, 10);
   }, [stores]);
@@ -84,8 +91,8 @@ export function StoreWaitChart({ stores, loading }: StoreWaitChartProps) {
                   borderRadius: "var(--radius-lg)",
                   fontSize: "0.8125rem",
                 }}
-                formatter={(value: number) =>
-                  t("minutes", { value: String(value) })
+                formatter={(value) =>
+                  t("minutes", { value: String(value ?? 0) })
                 }
               />
               <Bar
