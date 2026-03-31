@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyRound, Shield, Store, User } from "lucide-react";
+import { KeyRound, ListOrdered, Shield, Store, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -29,6 +29,11 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
             href: "/dashboard/settings/store",
             label: "storeTab" as const,
             icon: Store,
+          },
+          {
+            href: "/dashboard/settings/service-types",
+            label: "serviceTypesTab" as const,
+            icon: ListOrdered,
           },
         ]
       : []),

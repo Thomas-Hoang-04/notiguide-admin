@@ -49,6 +49,7 @@ export default function QueuePage() {
   const [statsRefreshSignal, setStatsRefreshSignal] = useState(0);
   const [ticketSearchQuery, setTicketSearchQuery] = useState("");
   const [allowJumpCall, setAllowJumpCall] = useState(false);
+  const [allowNoShow, setAllowNoShow] = useState(false);
   const [queueState, setQueueState] = useState("ACTIVE");
 
   // Refs for keyboard shortcut checks
@@ -77,7 +78,8 @@ export default function QueuePage() {
           getStore(storeId),
           getPublicStoreInfo(storeId),
         ]);
-        setAllowJumpCall(store.allowJumpCall);
+        setAllowJumpCall(store.allowJumpCall ?? false);
+        setAllowNoShow(store.allowNoShow ?? false);
         setQueueState(publicInfo.queueState);
       } catch {
         // Default to false / ACTIVE if fetch fails
@@ -181,11 +183,11 @@ export default function QueuePage() {
 
         {/* Paused Banner */}
         {queueState === "PAUSED" && (
-          <div className="flex items-center gap-2.5 rounded-xl border border-warning/20 bg-warning/10 px-3.5 py-3 text-sm text-warning-foreground dark:border-warning/15 dark:bg-warning/5">
+          <div className="flex items-center gap-2.5 rounded-xl border border-warning/40 bg-warning/15 px-3.5 py-3 text-sm text-warning dark:border-warning/50 dark:bg-warning/20">
             <PauseCircle aria-hidden="true" className="size-4 shrink-0 text-warning" />
             <div>
               <p className="font-medium">{tQueue("queuePaused")}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-warning/80">
                 {tQueue("queuePausedDescription")}
               </p>
             </div>
@@ -247,7 +249,7 @@ export default function QueuePage() {
             )}
 
             {/* Currently Serving */}
-            <ServingDisplay storeId={storeId} />
+            <ServingDisplay storeId={storeId} allowNoShow={allowNoShow} />
           </div>
 
           {/* Right column — ticket lookup + waiting list */}

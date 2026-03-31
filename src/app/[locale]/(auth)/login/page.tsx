@@ -105,7 +105,7 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent className="px-6 pb-4">
           {unverifiedBanner && (
-            <div className="mb-5 rounded-lg border border-warning/40 bg-warning/15 p-4 text-sm font-medium text-warning-foreground dark:border-warning/50 dark:bg-warning/20 dark:text-warning">
+            <div className="mb-5 rounded-lg border border-warning/40 bg-warning/15 p-4 text-sm font-medium text-warning dark:border-warning/50 dark:bg-warning/20">
               {tAuth("notVerified")}
             </div>
           )}

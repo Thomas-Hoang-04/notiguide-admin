@@ -1,9 +1,11 @@
 export interface StoreDto {
   id: string;
+  publicId: string;
   name: string;
   address: string | null;
   isActive: boolean;
   allowJumpCall: boolean;
+  allowNoShow: boolean;
   createdAt: string | null;
   updatedAt: string | null;
 }
@@ -11,6 +13,14 @@ export interface StoreDto {
 export interface CreateStoreRequest {
   name: string;
   address?: string;
+  allowJumpCall?: boolean;
+  allowNoShow?: boolean;
+  maxQueueSize?: number;
+  gracePeriodSec?: number;
+  noShowAction?: string;
+  maxRequeues?: number;
+  requeueOffset?: number;
+  alertThreshold?: number;
 }
 
 export interface UpdateStoreRequest {
@@ -18,6 +28,7 @@ export interface UpdateStoreRequest {
   address?: string | null;
   isActive?: boolean;
   allowJumpCall?: boolean;
+  allowNoShow?: boolean;
 }
 
 export interface StorePageResponse {

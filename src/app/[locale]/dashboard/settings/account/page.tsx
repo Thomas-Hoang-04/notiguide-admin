@@ -74,7 +74,7 @@ export default function AccountPage() {
   }
 
   async function handleSave() {
-    const trimmed = newUsername.trim().toLowerCase();
+    const trimmed = newUsername.trim();
 
     if (trimmed.length < USERNAME_RULES.MIN_LENGTH) {
       setError(tValidation("usernameMin", { min: USERNAME_RULES.MIN_LENGTH }));
@@ -88,7 +88,7 @@ export default function AccountPage() {
       setError(tValidation("usernamePattern"));
       return;
     }
-    if (trimmed === admin?.username) {
+    if (newUsername.trim() === admin?.username) {
       setEditing(false);
       return;
     }
@@ -215,7 +215,7 @@ export default function AccountPage() {
               className={
                 admin.isVerified
                   ? "border-success/30 bg-success/10 text-success"
-                  : "border-warning/30 bg-warning/10 text-warning"
+                  : "border-warning/40 bg-warning/15 text-warning dark:border-warning/50 dark:bg-warning/20"
               }
             >
               {tSettings(getVerificationTranslationKey(admin.isVerified))}

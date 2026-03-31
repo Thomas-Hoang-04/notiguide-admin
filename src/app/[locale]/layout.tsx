@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
-import { MockInit } from "@/__mocks__/mock-init"; // MOCK: remove for production
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { routing } from "@/i18n/routing";
@@ -74,7 +73,6 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <MockInit /> {/* MOCK: remove for production */}
             <TooltipProvider>
               {children}
               <Toaster position="top-right" richColors />

@@ -43,6 +43,8 @@ export default function StoreSettingsPage() {
   // Store-level settings
   const [allowJumpCall, setAllowJumpCall] = useState(false);
   const [jumpCallLoading, setJumpCallLoading] = useState(false);
+  const [allowNoShow, setAllowNoShow] = useState(false);
+  const [noShowToggleLoading, setNoShowToggleLoading] = useState(false);
 
   // Queue limits
   const [settings, setSettings] = useState<StoreSettingsDto | null>(null);
@@ -68,7 +70,8 @@ export default function StoreSettingsPage() {
     void (async () => {
       try {
         const store = await getStore(storeId);
-        setAllowJumpCall(store.allowJumpCall);
+        setAllowJumpCall(store.allowJumpCall ?? false);
+        setAllowNoShow(store.allowNoShow ?? false);
       } catch {
         // ignore
       }
@@ -115,6 +118,25 @@ export default function StoreSettingsPage() {
       );
     } finally {
       setJumpCallLoading(false);
+    }
+  }
+
+  async function handleNoShowToggle(checked: boolean) {
+    if (!storeId) return;
+    setNoShowToggleLoading(true);
+    try {
+      await updateStore(storeId, { allowNoShow: checked });
+      setAllowNoShow(checked);
+      toast.success(tSettings("store.saved"));
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(
+        apiErr?.code
+          ? translateCommonApiError(apiErr, tErrors)
+          : translateNetworkError(tErrors),
+      );
+    } finally {
+      setNoShowToggleLoading(false);
     }
   }
 
@@ -202,7 +224,7 @@ export default function StoreSettingsPage() {
             {tSettings("store.queueBehaviorDescription")}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label>{tSettings("store.allowJumpCallLabel")}</Label>
@@ -214,6 +236,19 @@ export default function StoreSettingsPage() {
               checked={allowJumpCall}
               onCheckedChange={handleJumpCallToggle}
               disabled={jumpCallLoading}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label>{tSettings("store.allowNoShowLabel")}</Label>
+              <p className="text-xs text-muted-foreground">
+                {tSettings("store.allowNoShowCaption")}
+              </p>
+            </div>
+            <Switch
+              checked={allowNoShow}
+              onCheckedChange={handleNoShowToggle}
+              disabled={noShowToggleLoading}
             />
           </div>
         </CardContent>
@@ -274,8 +309,8 @@ export default function StoreSettingsPage() {
         </CardContent>
       </Card>
 
-      {/* No-Show Handling */}
-      <Card className="glass-card glass-context-primary">
+      {/* No-Show Handling — only shown when allowNoShow is enabled */}
+      {allowNoShow && <Card className="glass-card glass-context-primary">
         <CardHeader>
           <CardTitle>{tSettings("store.noShowHandling")}</CardTitle>
           <CardDescription>
@@ -369,7 +404,7 @@ export default function StoreSettingsPage() {
             {tSettings("store.saveButton")}
           </Button>
         </CardContent>
-      </Card>
+      </Card>}
     </div>
   );
 }
