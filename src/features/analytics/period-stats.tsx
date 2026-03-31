@@ -54,29 +54,32 @@ export function OverviewPeriodStats({
   const t = useTranslations("analytics.periodStats");
   const tCommon = useTranslations("common");
   const periodLabel = usePeriodLabel(period);
-  const fallback = tCommon("loading");
 
   return (
     <div className="analytics-stats-grid">
       <StatCard
         label={t("storesActive")}
         value={!loading && data ? data.totalStores : null}
-        fallback={fallback}
+        loading={loading}
+        loadingText={tCommon("loading")}
       />
       <StatCard
         label={t("issued", { period: periodLabel })}
         value={!loading && data ? data.totalIssued : null}
-        fallback={fallback}
+        loading={loading}
+        loadingText={tCommon("loading")}
       />
       <StatCard
         label={t("completed", { period: periodLabel })}
         value={!loading && data ? data.totalCompleted : null}
-        fallback={fallback}
+        loading={loading}
+        loadingText={tCommon("loading")}
       />
       <StatCard
         label={t("avgWait")}
         value={!loading && data ? formatWait(data.avgWaitSeconds) : null}
-        fallback={fallback}
+        loading={loading}
+        loadingText={tCommon("loading")}
         isText
       />
     </div>
@@ -91,29 +94,32 @@ export function StorePeriodStats({
   const t = useTranslations("analytics.periodStats");
   const tCommon = useTranslations("common");
   const periodLabel = usePeriodLabel(period);
-  const fallback = tCommon("loading");
 
   return (
     <div className="analytics-stats-grid">
       <StatCard
         label={t("issued", { period: periodLabel })}
         value={!loading && data ? data.totalIssued : null}
-        fallback={fallback}
+        loading={loading}
+        loadingText={tCommon("loading")}
       />
       <StatCard
         label={t("completed", { period: periodLabel })}
         value={!loading && data ? data.totalCompleted : null}
-        fallback={fallback}
+        loading={loading}
+        loadingText={tCommon("loading")}
       />
       <StatCard
         label={t("cancelled", { period: periodLabel })}
         value={!loading && data ? data.totalCancelled : null}
-        fallback={fallback}
+        loading={loading}
+        loadingText={tCommon("loading")}
       />
       <StatCard
         label={t("avgWait")}
         value={!loading && data ? formatWait(data.avgWaitSeconds) : null}
-        fallback={fallback}
+        loading={loading}
+        loadingText={tCommon("loading")}
         isText
       />
     </div>
@@ -123,19 +129,20 @@ export function StorePeriodStats({
 function StatCard({
   label,
   value,
-  fallback,
+  loading,
+  loadingText,
   isText = false,
 }: {
   label: string;
   value: number | string | null | undefined;
-  fallback: string;
+  loading: boolean;
+  loadingText: string;
   isText?: boolean;
 }) {
+  const display = loading ? loadingText : value != null ? (isText ? value : value.toLocaleString()) : "—";
   return (
     <div className="analytics-stat-card glass-card rounded-xl">
-      <span className="analytics-stat-value text-foreground">
-        {value != null ? (isText ? value : value.toLocaleString()) : fallback}
-      </span>
+      <span className="analytics-stat-value text-foreground">{display}</span>
       <span className="analytics-stat-label">{label}</span>
     </div>
   );

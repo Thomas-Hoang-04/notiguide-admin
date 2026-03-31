@@ -20,7 +20,6 @@ interface RealtimeStatsProps {
 
 export function RealtimeStats({ storeId, isSuperAdmin }: RealtimeStatsProps) {
   const t = useTranslations("analytics.realtime");
-  const tCommon = useTranslations("common");
   const [storeStats, setStoreStats] = useState<RealtimeStatsResponse | null>(
     null,
   );
@@ -61,25 +60,20 @@ export function RealtimeStats({ storeId, isSuperAdmin }: RealtimeStatsProps) {
     };
   }, [fetchStats]);
 
-  const fallback = tCommon("loading");
-
   if (isSuperAdmin) {
     return (
       <div className="analytics-stats-grid">
         <StatCard
           label={t("activeStores")}
           value={overviewStats?.activeStores}
-          fallback={fallback}
         />
         <StatCard
           label={t("issuedToday")}
           value={overviewStats?.totalIssuedToday}
-          fallback={fallback}
         />
         <StatCard
           label={t("totalServing")}
           value={overviewStats?.totalServingCount}
-          fallback={fallback}
         />
         <StatCard
           label={t("avgWait")}
@@ -88,7 +82,6 @@ export function RealtimeStats({ storeId, isSuperAdmin }: RealtimeStatsProps) {
               ? `~${Math.round(overviewStats.estimatedAvgWaitMinutes)} min`
               : null
           }
-          fallback={fallback}
           isText
         />
       </div>
@@ -100,17 +93,14 @@ export function RealtimeStats({ storeId, isSuperAdmin }: RealtimeStatsProps) {
       <StatCard
         label={t("queueNow")}
         value={storeStats?.currentQueueSize}
-        fallback={fallback}
       />
       <StatCard
         label={t("servingNow")}
         value={storeStats?.currentServingCount}
-        fallback={fallback}
       />
       <StatCard
         label={t("issuedToday")}
         value={storeStats?.ticketsIssuedToday}
-        fallback={fallback}
       />
       <StatCard
         label={t("avgWait")}
@@ -119,7 +109,6 @@ export function RealtimeStats({ storeId, isSuperAdmin }: RealtimeStatsProps) {
             ? `~${Math.round(storeStats.estimatedAvgWaitMinutes)} min`
             : null
         }
-        fallback={fallback}
         isText
       />
     </div>
@@ -129,19 +118,16 @@ export function RealtimeStats({ storeId, isSuperAdmin }: RealtimeStatsProps) {
 function StatCard({
   label,
   value,
-  fallback,
   isText = false,
 }: {
   label: string;
   value: number | string | null | undefined;
-  fallback: string;
   isText?: boolean;
 }) {
+  const display = value != null ? (isText ? value : value.toLocaleString()) : "—";
   return (
     <div className="analytics-stat-card glass-card rounded-xl">
-      <span className="analytics-stat-value text-foreground">
-        {value != null ? (isText ? value : value.toLocaleString()) : fallback}
-      </span>
+      <span className="analytics-stat-value text-foreground">{display}</span>
       <span className="analytics-stat-label">{label}</span>
     </div>
   );

@@ -31,7 +31,9 @@ export function SummaryCards({ summary, loading }: SummaryCardsProps) {
   const t = useTranslations("analytics.summary");
   const tAnalytics = useTranslations("analytics");
 
-  if (loading || !summary) {
+  if (loading) return null;
+
+  if (!summary) {
     return (
       <div className="glass-card rounded-xl p-4 l:p-5">
         <p className="text-sm text-muted-foreground">{tAnalytics("noData")}</p>
