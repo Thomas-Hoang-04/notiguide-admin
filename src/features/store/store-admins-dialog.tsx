@@ -158,7 +158,7 @@ export function StoreAdminsDialog({
                       className={
                         admin.isVerified
                           ? "mt-1 border-success/30 bg-success/10 text-success text-xs"
-                          : "mt-1 border-warning/30 bg-warning/10 text-warning text-xs"
+                          : "mt-1 border-warning/40 bg-warning/15 text-warning text-xs dark:border-warning/50 dark:bg-warning/20"
                       }
                     >
                       {tAdmins(getVerificationTranslationKey(admin.isVerified))}

@@ -43,6 +43,12 @@ export function StoreManagementTable({
               </th>
               <th
                 scope="col"
+                className="hidden px-4 py-3 font-medium text-muted-foreground l:table-cell"
+              >
+                {tStores("columnId")}
+              </th>
+              <th
+                scope="col"
                 className="hidden px-4 py-3 font-medium text-muted-foreground xl:table-cell"
               >
                 {tStores("columnAddress")}
@@ -75,6 +81,9 @@ export function StoreManagementTable({
                   <td className="px-4 py-3">
                     <Skeleton className="h-4 w-32" />
                   </td>
+                  <td className="hidden px-4 py-3 l:table-cell">
+                    <Skeleton className="h-5 w-20 rounded-md" />
+                  </td>
                   <td className="hidden px-4 py-3 xl:table-cell">
                     <Skeleton className="h-4 w-48" />
                   </td>
@@ -93,7 +102,7 @@ export function StoreManagementTable({
             {!loading && data && data.items.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-4 py-12 text-center text-muted-foreground"
                 >
                   {tStores("emptyState")}
@@ -115,6 +124,11 @@ export function StoreManagementTable({
                 className="border-b border-border last:border-0"
               >
                 <td className="px-4 py-3 font-medium">{store.name}</td>
+                <td className="hidden px-4 py-3 l:table-cell">
+                  <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-xs tracking-wide text-muted-foreground">
+                    {store.publicId}
+                  </span>
+                </td>
                 <td className="hidden px-4 py-3 text-muted-foreground xl:table-cell">
                   {store.address || tCommon("none")}
                 </td>
