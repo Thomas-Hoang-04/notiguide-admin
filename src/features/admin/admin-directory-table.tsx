@@ -166,7 +166,7 @@ export function AdminDirectoryTable({
                     {admin.role === "ROLE_ADMIN" && !admin.storeId ? (
                       <Badge
                         variant="outline"
-                        className="border-warning/30 bg-warning/10 text-warning"
+                        className="border-warning/40 bg-warning/15 text-warning dark:border-warning/50 dark:bg-warning/20"
                       >
                         {tAdmins("statusUnassigned")}
                       </Badge>
@@ -180,7 +180,7 @@ export function AdminDirectoryTable({
                       className={
                         admin.isVerified
                           ? "border-success/30 bg-success/10 text-success"
-                          : "border-warning/30 bg-warning/10 text-warning"
+                          : "border-warning/40 bg-warning/15 text-warning dark:border-warning/50 dark:bg-warning/20"
                       }
                     >
                       {admin.isVerified ? (
