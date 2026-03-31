@@ -14,12 +14,13 @@ import {
 import { getRoleTranslationKey } from "@/lib/i18n-keys";
 import { useAuthStore } from "@/store/auth";
 import { LanguageSwitcher } from "./language-switcher";
+import { LogoutConfirmDialog } from "./logout-confirm-dialog";
 import { Sidebar } from "./sidebar";
 import { ThemeToggle } from "./theme-toggle";
 
 export function Topbar() {
   const tNavigation = useTranslations("navigation");
-  const { admin, isSuperAdmin, logout } = useAuthStore();
+  const { admin, isSuperAdmin } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
@@ -79,15 +80,18 @@ export function Topbar() {
         )}
         <LanguageSwitcher />
         <ThemeToggle />
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={logout}
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-          aria-label={tNavigation("logout")}
+        <LogoutConfirmDialog
+          trigger={
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              aria-label={tNavigation("logout")}
+            />
+          }
         >
           <LogOut aria-hidden="true" className="size-4" />
-        </Button>
+        </LogoutConfirmDialog>
       </div>
     </header>
   );

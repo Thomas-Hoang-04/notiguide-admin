@@ -11,12 +11,13 @@ import {
   X,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type React from "react";
 import { Button } from "@/components/ui/button";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
+import { LogoutConfirmDialog } from "./logout-confirm-dialog";
 import "@/styles/sidebar.css";
-import type React from "react";
 
 interface NavItem {
   href: string;
@@ -69,7 +70,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const tNavigation = useTranslations("navigation");
   const tCommon = useTranslations("common");
-  const { isSuperAdmin, logout } = useAuthStore();
+  const { isSuperAdmin } = useAuthStore();
 
   const translatedNavItems = navItems.map((item) => ({
     ...item,
@@ -135,14 +136,17 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       </nav>
 
       <div className="border-t border-white/20 p-3">
-        <button
-          type="button"
-          onClick={logout}
-          className="sidebar-link sidebar-logout w-full text-left"
+        <LogoutConfirmDialog
+          trigger={
+            <button
+              type="button"
+              className="sidebar-link sidebar-logout w-full text-left"
+            />
+          }
         >
           <LogOut aria-hidden="true" className="size-5" />
           {tNavigation("logout")}
-        </button>
+        </LogoutConfirmDialog>
       </div>
     </aside>
   );
