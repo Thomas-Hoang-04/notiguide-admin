@@ -84,7 +84,7 @@ export function StoreSelector({ value, onChange }: StoreSelectorProps) {
       )}
 
       {selectedStore && !selectedStore.isActive && (
-        <div className="mt-6 rounded-lg border border-warning/40 bg-warning/15 p-3 text-sm font-medium text-warning-foreground dark:border-warning/50 dark:bg-warning/20 dark:text-warning">
+        <div className="mt-6 rounded-lg border border-warning/40 bg-warning/15 p-3 text-sm font-medium text-warning dark:border-warning/50 dark:bg-warning/20">
           {tQueue("storeInactiveWarning")}
         </div>
       )}

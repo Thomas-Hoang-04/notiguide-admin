@@ -36,6 +36,7 @@ import "@/styles/queue.css";
 
 interface ServingDisplayProps {
   storeId: string;
+  allowNoShow: boolean;
 }
 
 const ticketTimeFormatter = new Intl.DateTimeFormat("en-US", {
@@ -44,7 +45,7 @@ const ticketTimeFormatter = new Intl.DateTimeFormat("en-US", {
   hour12: true,
 });
 
-export function ServingDisplay({ storeId }: ServingDisplayProps) {
+export function ServingDisplay({ storeId, allowNoShow }: ServingDisplayProps) {
   const { servingTickets } = useQueueStore();
   const tQueue = useTranslations("queue");
   const [settings, setSettings] = useState<StoreSettingsDto | null>(null);
@@ -79,6 +80,7 @@ export function ServingDisplay({ storeId }: ServingDisplayProps) {
           ticket={ticket}
           isPrimary={index === 0}
           settings={settings}
+          allowNoShow={allowNoShow}
         />
       ))}
     </div>
@@ -90,6 +92,7 @@ interface ServingTicketCardProps {
   ticket: TicketDto;
   isPrimary: boolean;
   settings: StoreSettingsDto | null;
+  allowNoShow: boolean;
 }
 
 function useGraceCountdown(
@@ -108,8 +111,10 @@ function useGraceCountdown(
       return;
     }
 
+    const calledAtTime = new Date(calledAt).getTime();
+
     function tick() {
-      const elapsed = (Date.now() - new Date(calledAt).getTime()) / 1000;
+      const elapsed = (Date.now() - calledAtTime) / 1000;
       const left = Math.max(0, Math.ceil(gracePeriodSec - elapsed));
       setRemaining(left);
     }
@@ -127,6 +132,7 @@ function ServingTicketCard({
   ticket,
   isPrimary,
   settings,
+  allowNoShow,
 }: ServingTicketCardProps) {
   const { removeServingTicket } = useQueueStore();
   const tErrors = useTranslations("errors");
@@ -138,7 +144,7 @@ function ServingTicketCard({
 
   const gracePeriodSec = settings?.gracePeriodSec ?? 0;
   const graceRemaining = useGraceCountdown(ticket.calledAt, gracePeriodSec);
-  const hasGracePeriod = gracePeriodSec > 0;
+  const hasGracePeriod = allowNoShow && gracePeriodSec > 0;
 
   const serveLoadingRef = useRef(false);
   const cancelLoadingRef = useRef(false);
@@ -264,8 +270,11 @@ function ServingTicketCard({
       </div>
 
       {hasGracePeriod && graceRemaining > 0 && (
-        <div className="flex items-center gap-2 text-sm text-warning">
-          <span className="tabular-nums font-medium">
+        <div className="ticket-time-block">
+          <span className="ticket-time-label text-warning">
+            {tQueue("graceTimerLabel")}
+          </span>
+          <span className="tabular-nums text-lg font-semibold text-warning">
             {tQueue("graceTimer", { seconds: graceRemaining })}
           </span>
         </div>
