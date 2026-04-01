@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import type { ValueType } from "recharts/types/component/DefaultTooltipContent";
 import type { StoreAnalyticsSummary } from "./types";
 
 interface StoreComparisonChartProps {
@@ -89,7 +90,9 @@ export function StoreComparisonChart({
                   borderRadius: "var(--radius-lg)",
                   fontSize: "0.8125rem",
                 }}
-                formatter={(value: number) => `${value}%`}
+                formatter={(value: ValueType | undefined) =>
+                  `${value ?? 0}%`
+                }
               />
               <Legend
                 wrapperStyle={{ fontSize: "0.75rem" }}

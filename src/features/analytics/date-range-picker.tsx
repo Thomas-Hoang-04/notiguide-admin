@@ -82,7 +82,7 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
   }
 
   const customLabel = isCustom
-    ? `${format(new Date(value.from), "dd/MM")} – ${format(new Date(value.to), "dd/MM")}`
+    ? `${format(new Date(selectedRange.from), "dd/MM")} – ${format(new Date(selectedRange.to), "dd/MM")}`
     : tCommon("custom");
 
   return (

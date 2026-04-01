@@ -43,7 +43,7 @@ export function WaitDistributionChart({
             initialDimension={{ width: 1, height: 1 }}
           >
             <BarChart
-              data={data.buckets}
+              data={data?.buckets}
               margin={{ top: 4, right: 4, bottom: 0, left: -16 }}
             >
               <CartesianGrid
