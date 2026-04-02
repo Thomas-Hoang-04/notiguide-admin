@@ -2,8 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type React from "react";
-import { useEffect, useState } from "react";
+import { type SyntheticEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -82,7 +81,7 @@ export function ServiceTypeFormDialog({
     return Object.keys(next).length === 0;
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: SyntheticEvent<HTMLFormElement, SubmitEvent>) {
     e.preventDefault();
     if (loading) return;
     if (!validate()) return;
@@ -168,7 +167,6 @@ export function ServiceTypeFormDialog({
               maxLength={PREFIX_MAX}
               aria-invalid={!!errors.prefix}
               disabled={loading}
-              className="max-w-xs"
             />
             {errors.prefix && <InlineError message={errors.prefix} />}
           </div>

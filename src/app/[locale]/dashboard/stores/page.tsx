@@ -4,7 +4,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { listStores } from "@/features/store/api";
 import { DeleteStoreDialog } from "@/features/store/delete-store-dialog";
-import { StoreAdminsDialog } from "@/features/store/store-admins-dialog";
 import { StoreFormDialog } from "@/features/store/store-form-dialog";
 import { StoreManagementErrorBanner } from "@/features/store/store-management-error-banner";
 import { StoreManagementHeader } from "@/features/store/store-management-header";
@@ -32,11 +31,8 @@ export default function StoresPage() {
 
   // Dialogs
   const [formOpen, setFormOpen] = useState(false);
-  const [editStore, setEditStore] = useState<StoreDto | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<StoreDto | null>(null);
-  const [adminsOpen, setAdminsOpen] = useState(false);
-  const [adminsTarget, setAdminsTarget] = useState<StoreDto | null>(null);
 
   const fetchStores = useCallback(
     async (p: number) => {
@@ -67,21 +63,23 @@ export default function StoresPage() {
     void fetchStores(page);
   }, [fetchStores, isHydrated, isSuperAdmin, locale, page, router]);
 
+  const handleStoreUpdated = useCallback((updatedStore: StoreDto) => {
+    setData((current) => {
+      if (!current) return current;
+
+      return {
+        ...current,
+        items: current.items.map((item) =>
+          item.id === updatedStore.id ? updatedStore : item,
+        ),
+      };
+    });
+  }, []);
+
   if (!isSuperAdmin) return null;
 
-  function openEdit(store: StoreDto) {
-    setEditStore(store);
-    setFormOpen(true);
-  }
-
   function openCreate() {
-    setEditStore(null);
     setFormOpen(true);
-  }
-
-  function openAdmins(store: StoreDto) {
-    setAdminsTarget(store);
-    setAdminsOpen(true);
   }
 
   function openDelete(store: StoreDto) {
@@ -105,8 +103,7 @@ export default function StoresPage() {
         loading={loading}
         onCreate={openCreate}
         onDelete={openDelete}
-        onEdit={openEdit}
-        onViewAdmins={openAdmins}
+        onStoreUpdated={handleStoreUpdated}
       />
 
       {/* Pagination */}
@@ -122,15 +119,7 @@ export default function StoresPage() {
       <StoreFormDialog
         open={formOpen}
         onOpenChange={setFormOpen}
-        store={editStore}
         onSuccess={() => void fetchStores(page)}
-      />
-
-      <StoreAdminsDialog
-        open={adminsOpen}
-        onOpenChange={setAdminsOpen}
-        store={adminsTarget}
-        onAdminRemoved={() => void fetchStores(page)}
       />
 
       <DeleteStoreDialog

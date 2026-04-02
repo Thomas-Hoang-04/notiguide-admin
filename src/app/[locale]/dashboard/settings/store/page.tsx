@@ -1,10 +1,7 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -21,165 +17,78 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { getStoreSettings, updateStoreSettings } from "@/features/queue/api";
-import { getStore, updateStore } from "@/features/store/api";
-import {
-  translateCommonApiError,
-  translateNetworkError,
-} from "@/lib/api-error";
+import { listServiceTypes } from "@/features/store/api";
+import { StoreQueueSettingsContent } from "@/features/store/store-queue-settings-content";
+import { useStoreQueueSettings } from "@/features/store/use-store-queue-settings";
 import { useAuthStore } from "@/store/auth";
-import type { ApiError } from "@/types/api";
-
-type NoShowAction = "SKIP" | "REQUEUE";
+import type { ServiceTypeDto } from "@/types/store";
 
 export default function StoreSettingsPage() {
   const tSettings = useTranslations("settings");
-  const tErrors = useTranslations("errors");
   const { storeId } = useAuthStore();
 
-  // Default counter ID (localStorage)
-  const [counterId, setCounterId] = useState("");
+  // Default service type (localStorage)
+  const [serviceTypes, setServiceTypes] = useState<ServiceTypeDto[]>([]);
+  const [defaultServiceTypeId, setDefaultServiceTypeId] = useState("");
 
-  // Store-level settings
-  const [allowJumpCall, setAllowJumpCall] = useState(false);
-  const [jumpCallLoading, setJumpCallLoading] = useState(false);
-  const [allowNoShow, setAllowNoShow] = useState(false);
-  const [noShowToggleLoading, setNoShowToggleLoading] = useState(false);
-
-  // Queue limits
-  const [maxQueueSize, setMaxQueueSize] = useState("0");
-  const [limitsLoading, setLimitsLoading] = useState(false);
-
-  // No-show handling
-  const [gracePeriodSec, setGracePeriodSec] = useState("0");
-  const [noShowAction, setNoShowAction] = useState<NoShowAction>("SKIP");
-  const [maxRequeues, setMaxRequeues] = useState("1");
-  const [requeueOffset, setRequeueOffset] = useState("3");
-  const [alertThreshold, setAlertThreshold] = useState("2");
-  const [noShowLoading, setNoShowLoading] = useState(false);
+  const {
+    alertThreshold,
+    allowJumpCall,
+    allowNoShow,
+    gracePeriodSec,
+    handleSaveLimits,
+    handleSaveNoShow,
+    handleToggle,
+    maxQueueSize,
+    maxRequeues,
+    noShowAction,
+    requeueOffset,
+    savingLimits,
+    savingNoShow,
+    setAlertThreshold,
+    setGracePeriodSec,
+    setMaxQueueSize,
+    setMaxRequeues,
+    setNoShowAction,
+    setRequeueOffset,
+    toggleLoading,
+  } = useStoreQueueSettings({
+    loadStoreToggles: true,
+    storeId,
+  });
 
   useEffect(() => {
     if (!storeId) return;
-    const stored = localStorage.getItem(`store:${storeId}:defaultCounterId`);
-    if (stored) setCounterId(stored);
+    const stored = localStorage.getItem(
+      `store:${storeId}:defaultServiceTypeId`,
+    );
+    if (stored) setDefaultServiceTypeId(stored);
   }, [storeId]);
 
   useEffect(() => {
     if (!storeId) return;
     void (async () => {
       try {
-        const store = await getStore(storeId);
-        setAllowJumpCall(store.allowJumpCall ?? false);
-        setAllowNoShow(store.allowNoShow ?? false);
-      } catch {
-        // ignore
-      }
-      try {
-        const s = await getStoreSettings(storeId);
-        setMaxQueueSize(String(s.maxQueueSize));
-        setGracePeriodSec(String(s.gracePeriodSec));
-        setNoShowAction(s.noShowAction === "REQUEUE" ? "REQUEUE" : "SKIP");
-        setMaxRequeues(String(s.maxRequeues));
-        setRequeueOffset(String(s.requeueOffset));
-        setAlertThreshold(String(s.alertThreshold));
+        const types = await listServiceTypes(storeId);
+        setServiceTypes(types);
       } catch {
         // ignore
       }
     })();
   }, [storeId]);
 
-  function handleCounterIdChange(value: string) {
-    const trimmed = value.slice(0, 100);
-    setCounterId(trimmed);
+  function handleDefaultServiceTypeChange(value: string | null) {
+    const nextValue = value ?? "";
+    setDefaultServiceTypeId(nextValue);
     if (storeId) {
-      if (trimmed) {
-        localStorage.setItem(`store:${storeId}:defaultCounterId`, trimmed);
+      if (nextValue) {
+        localStorage.setItem(
+          `store:${storeId}:defaultServiceTypeId`,
+          nextValue,
+        );
       } else {
-        localStorage.removeItem(`store:${storeId}:defaultCounterId`);
+        localStorage.removeItem(`store:${storeId}:defaultServiceTypeId`);
       }
-    }
-  }
-
-  async function handleJumpCallToggle(checked: boolean) {
-    if (!storeId) return;
-    setJumpCallLoading(true);
-    try {
-      await updateStore(storeId, { allowJumpCall: checked });
-      setAllowJumpCall(checked);
-      toast.success(tSettings("store.saved"));
-    } catch (err) {
-      const apiErr = err as ApiError;
-      toast.error(
-        apiErr?.code
-          ? translateCommonApiError(apiErr, tErrors)
-          : translateNetworkError(tErrors),
-      );
-    } finally {
-      setJumpCallLoading(false);
-    }
-  }
-
-  async function handleNoShowToggle(checked: boolean) {
-    if (!storeId) return;
-    setNoShowToggleLoading(true);
-    try {
-      await updateStore(storeId, { allowNoShow: checked });
-      setAllowNoShow(checked);
-      toast.success(tSettings("store.saved"));
-    } catch (err) {
-      const apiErr = err as ApiError;
-      toast.error(
-        apiErr?.code
-          ? translateCommonApiError(apiErr, tErrors)
-          : translateNetworkError(tErrors),
-      );
-    } finally {
-      setNoShowToggleLoading(false);
-    }
-  }
-
-  async function handleSaveLimits() {
-    if (!storeId) return;
-    setLimitsLoading(true);
-    try {
-      await updateStoreSettings(storeId, {
-        maxQueueSize: Number(maxQueueSize) || 0,
-        alertThreshold: Number(alertThreshold) || 2,
-      });
-      toast.success(tSettings("store.saved"));
-    } catch (err) {
-      const apiErr = err as ApiError;
-      toast.error(
-        apiErr?.code
-          ? translateCommonApiError(apiErr, tErrors)
-          : translateNetworkError(tErrors),
-      );
-    } finally {
-      setLimitsLoading(false);
-    }
-  }
-
-  async function handleSaveNoShow() {
-    if (!storeId) return;
-    setNoShowLoading(true);
-    try {
-      await updateStoreSettings(storeId, {
-        gracePeriodSec: Number(gracePeriodSec) || 0,
-        noShowAction,
-        maxRequeues: Number(maxRequeues) || 1,
-        requeueOffset: Number(requeueOffset) || 3,
-      });
-      toast.success(tSettings("store.saved"));
-    } catch (err) {
-      const apiErr = err as ApiError;
-      toast.error(
-        apiErr?.code
-          ? translateCommonApiError(apiErr, tErrors)
-          : translateNetworkError(tErrors),
-      );
-    } finally {
-      setNoShowLoading(false);
     }
   }
 
@@ -195,217 +104,67 @@ export default function StoreSettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <Label htmlFor="defaultCounterId">
-              {tSettings("store.defaultCounterIdLabel")}
-            </Label>
-            <Input
-              id="defaultCounterId"
-              value={counterId}
-              onChange={(e) => handleCounterIdChange(e.target.value)}
-              placeholder={tSettings("store.defaultCounterIdPlaceholder")}
-              maxLength={100}
-              className="max-w-xs"
-            />
-            <p className="text-xs text-muted-foreground">
-              {tSettings("store.defaultCounterIdCaption")}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Queue Behavior */}
-      <Card className="glass-card glass-context-primary">
-        <CardHeader>
-          <CardTitle>{tSettings("store.queueBehavior")}</CardTitle>
-          <CardDescription>
-            {tSettings("store.queueBehaviorDescription")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label>{tSettings("store.allowJumpCallLabel")}</Label>
-              <p className="text-xs text-muted-foreground">
-                {tSettings("store.allowJumpCallCaption")}
-              </p>
-            </div>
-            <Switch
-              checked={allowJumpCall}
-              onCheckedChange={handleJumpCallToggle}
-              disabled={jumpCallLoading}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label>{tSettings("store.allowNoShowLabel")}</Label>
-              <p className="text-xs text-muted-foreground">
-                {tSettings("store.allowNoShowCaption")}
-              </p>
-            </div>
-            <Switch
-              checked={allowNoShow}
-              onCheckedChange={handleNoShowToggle}
-              disabled={noShowToggleLoading}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Queue Limits */}
-      <Card className="glass-card glass-context-primary">
-        <CardHeader>
-          <CardTitle>{tSettings("store.queueLimits")}</CardTitle>
-          <CardDescription>
-            {tSettings("store.queueLimitsDescription")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="maxQueueSize">
-              {tSettings("store.maxQueueSizeLabel")}
-            </Label>
-            <Input
-              id="maxQueueSize"
-              type="number"
-              min={0}
-              value={maxQueueSize}
-              onChange={(e) => setMaxQueueSize(e.target.value)}
-              className="max-w-xs"
-            />
-            <p className="text-xs text-muted-foreground">
-              {tSettings("store.maxQueueSizeCaption")}
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="alertThreshold">
-              {tSettings("store.alertThresholdLabel")}
-            </Label>
-            <Input
-              id="alertThreshold"
-              type="number"
-              min={1}
-              max={10}
-              value={alertThreshold}
-              onChange={(e) => setAlertThreshold(e.target.value)}
-              className="max-w-xs"
-            />
-            <p className="text-xs text-muted-foreground">
-              {tSettings("store.alertThresholdCaption")}
-            </p>
-          </div>
-          <Button onClick={handleSaveLimits} disabled={limitsLoading} size="sm">
-            {limitsLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
-            {tSettings("store.saveButton")}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* No-Show Handling — only shown when allowNoShow is enabled */}
-      {allowNoShow && (
-        <Card className="glass-card glass-context-primary">
-          <CardHeader>
-            <CardTitle>{tSettings("store.noShowHandling")}</CardTitle>
-            <CardDescription>
-              {tSettings("store.noShowHandlingDescription")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="gracePeriodSec">
-                {tSettings("store.gracePeriodLabel")}
-              </Label>
-              <Input
-                id="gracePeriodSec"
-                type="number"
-                min={0}
-                max={600}
-                value={gracePeriodSec}
-                onChange={(e) => setGracePeriodSec(e.target.value)}
-                className="max-w-xs"
-              />
-              <p className="text-xs text-muted-foreground">
-                {tSettings("store.gracePeriodCaption")}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label>{tSettings("store.noShowActionLabel")}</Label>
-              <Select
-                value={noShowAction}
-                onValueChange={(value) => {
-                  if (value) {
-                    setNoShowAction(value === "REQUEUE" ? "REQUEUE" : "SKIP");
-                  }
-                }}
-              >
-                <SelectTrigger className="w-full max-w-xs">
-                  <SelectValue>
-                    {(value: string | null) => {
-                      if (value === "SKIP")
-                        return tSettings("store.noShowSkip");
-                      if (value === "REQUEUE")
-                        return tSettings("store.noShowRequeue");
-                      return value;
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="SKIP">
-                    {tSettings("store.noShowSkip")}
-                  </SelectItem>
-                  <SelectItem value="REQUEUE">
-                    {tSettings("store.noShowRequeue")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {noShowAction === "REQUEUE" && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="maxRequeues">
-                    {tSettings("store.maxRequeuesLabel")}
-                  </Label>
-                  <Input
-                    id="maxRequeues"
-                    type="number"
-                    min={1}
-                    max={5}
-                    value={maxRequeues}
-                    onChange={(e) => setMaxRequeues(e.target.value)}
-                    className="max-w-xs"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="requeueOffset">
-                    {tSettings("store.requeueOffsetLabel")}
-                  </Label>
-                  <Input
-                    id="requeueOffset"
-                    type="number"
-                    min={1}
-                    max={20}
-                    value={requeueOffset}
-                    onChange={(e) => setRequeueOffset(e.target.value)}
-                    className="max-w-xs"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {tSettings("store.requeueOffsetCaption")}
-                  </p>
-                </div>
-              </>
-            )}
-            <Button
-              onClick={handleSaveNoShow}
-              disabled={noShowLoading}
-              size="sm"
+            <Label>{tSettings("store.defaultServiceTypeLabel")}</Label>
+            <Select
+              value={defaultServiceTypeId}
+              onValueChange={handleDefaultServiceTypeChange}
             >
-              {noShowLoading && (
-                <Loader2 className="mr-2 size-4 animate-spin" />
-              )}
-              {tSettings("store.saveButton")}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+              <SelectTrigger className="w-full max-w-xs">
+                <SelectValue
+                  placeholder={tSettings("store.defaultServiceTypePlaceholder")}
+                >
+                  {(value: string | null) => {
+                    const match = serviceTypes.find((st) => st.id === value);
+                    return match ? match.name : null;
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="p-1.5">
+                {serviceTypes
+                  .filter((st) => st.isActive)
+                  .map((st) => (
+                    <SelectItem key={st.id} value={st.id} className="py-2">
+                      {st.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {tSettings("store.defaultServiceTypeCaption")}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <StoreQueueSettingsContent
+        alertThreshold={alertThreshold}
+        allowJumpCall={allowJumpCall}
+        allowNoShow={allowNoShow}
+        gracePeriodId="gracePeriodSec"
+        gracePeriodSec={gracePeriodSec}
+        handleSaveLimits={handleSaveLimits}
+        handleSaveNoShow={handleSaveNoShow}
+        handleToggle={handleToggle}
+        ids={{
+          alertThreshold: "alertThreshold",
+          maxQueueSize: "maxQueueSize",
+          maxRequeues: "maxRequeues",
+          requeueOffset: "requeueOffset",
+        }}
+        maxQueueSize={maxQueueSize}
+        maxRequeues={maxRequeues}
+        noShowAction={noShowAction}
+        requeueOffset={requeueOffset}
+        savingLimits={savingLimits}
+        savingNoShow={savingNoShow}
+        setAlertThreshold={setAlertThreshold}
+        setGracePeriodSec={setGracePeriodSec}
+        setMaxQueueSize={setMaxQueueSize}
+        setMaxRequeues={setMaxRequeues}
+        setNoShowAction={setNoShowAction}
+        setRequeueOffset={setRequeueOffset}
+        toggleLoading={toggleLoading}
+      />
     </div>
   );
 }

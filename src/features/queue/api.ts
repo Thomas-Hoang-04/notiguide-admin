@@ -25,9 +25,18 @@ export function getPublicStoreInfo(storeId: string) {
   }>(API_ROUTES.QUEUE.PUBLIC_INFO(storeId));
 }
 
-export function callNext(storeId: string, counterId?: string) {
-  const params = counterId ? `?counterId=${encodeURIComponent(counterId)}` : "";
-  return post<NextTicketResponse>(`${API_ROUTES.QUEUE.NEXT(storeId)}${params}`);
+export function callNext(
+  storeId: string,
+  serviceTypeId?: string,
+  counterId?: string,
+) {
+  const query = new URLSearchParams();
+  if (serviceTypeId) query.set("serviceTypeId", serviceTypeId);
+  if (counterId) query.set("counterId", counterId);
+  const qs = query.toString();
+  return post<NextTicketResponse>(
+    `${API_ROUTES.QUEUE.NEXT(storeId)}${qs ? `?${qs}` : ""}`,
+  );
 }
 
 export function listWaitingTickets(storeId: string) {
@@ -38,14 +47,9 @@ export function getTicketStatus(storeId: string, ticketId: string) {
   return get<TicketStatusResponse>(API_ROUTES.QUEUE.TICKET(storeId, ticketId));
 }
 
-export function callSpecificTicket(
-  storeId: string,
-  ticketId: string,
-  counterId?: string,
-) {
-  const params = counterId ? `?counterId=${encodeURIComponent(counterId)}` : "";
+export function callSpecificTicket(storeId: string, ticketId: string) {
   return post<NextTicketResponse>(
-    `${API_ROUTES.QUEUE.CALL_TICKET(storeId, ticketId)}${params}`,
+    API_ROUTES.QUEUE.CALL_TICKET(storeId, ticketId),
   );
 }
 

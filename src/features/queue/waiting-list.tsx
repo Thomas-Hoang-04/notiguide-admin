@@ -20,7 +20,6 @@ interface WaitingListProps {
   refreshSignal: number;
   searchQuery: string;
   allowJumpCall: boolean;
-  counterId: string;
 }
 
 const ticketTimeFormatter = new Intl.DateTimeFormat("en-US", {
@@ -34,7 +33,6 @@ export function WaitingList({
   refreshSignal,
   searchQuery,
   allowJumpCall,
-  counterId,
 }: WaitingListProps) {
   const tErrors = useTranslations("errors");
   const tQueue = useTranslations("queue");
@@ -66,11 +64,7 @@ export function WaitingList({
   async function handleCall(ticket: TicketDto) {
     setCallingId(ticket.id);
     try {
-      const result = await callSpecificTicket(
-        storeId,
-        ticket.id,
-        counterId.trim() || undefined,
-      );
+      const result = await callSpecificTicket(storeId, ticket.id);
       if (result.ticket) {
         addServingTicket(result.ticket);
         toast.success(

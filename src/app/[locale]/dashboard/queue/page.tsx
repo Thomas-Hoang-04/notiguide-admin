@@ -5,9 +5,15 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Kbd } from "@/components/ui/kbd";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { callNext, getPublicStoreInfo } from "@/features/queue/api";
 import { CleanupButton } from "@/features/queue/cleanup-button";
 import { QueueStateToggle } from "@/features/queue/queue-state-toggle";
@@ -16,7 +22,7 @@ import { ServingDisplay } from "@/features/queue/serving-display";
 import { useStoreName } from "@/features/queue/store-selector";
 import { TicketLookup } from "@/features/queue/ticket-lookup";
 import { WaitingList } from "@/features/queue/waiting-list";
-import { getStore } from "@/features/store/api";
+import { getStore, listServiceTypes } from "@/features/store/api";
 import { useQueueEvents } from "@/hooks/use-queue-events";
 import {
   translateCommonApiError,
@@ -26,6 +32,7 @@ import { useAuthStore } from "@/store/auth";
 import { useLayoutStore } from "@/store/layout";
 import { useQueueStore } from "@/store/queue";
 import { ApiError } from "@/types/api";
+import type { ServiceTypeDto } from "@/types/store";
 import "@/styles/queue.css";
 
 export default function QueuePage() {
@@ -40,9 +47,10 @@ export default function QueuePage() {
     hydrateQueue,
   } = useQueueStore();
 
-  const [counterId, setCounterId] = useState(() => {
+  const [serviceTypes, setServiceTypes] = useState<ServiceTypeDto[]>([]);
+  const [selectedServiceTypeId, setSelectedServiceTypeId] = useState(() => {
     if (typeof window === "undefined" || !storeId) return "";
-    return localStorage.getItem(`store:${storeId}:defaultCounterId`) ?? "";
+    return localStorage.getItem(`store:${storeId}:defaultServiceTypeId`) ?? "";
   });
   const [callLoading, setCallLoading] = useState(false);
   const [emptyMessage, setEmptyMessage] = useState(false);
@@ -69,18 +77,26 @@ export default function QueuePage() {
     void hydrateQueue(storeId);
   }, [hydrateQueue, storeId]);
 
-  // Fetch store settings for allowJumpCall and queue state
+  // Fetch store settings, service types, and queue state
   useEffect(() => {
     if (!storeId) return;
     void (async () => {
       try {
-        const [store, publicInfo] = await Promise.all([
+        const [store, publicInfo, types] = await Promise.all([
           getStore(storeId),
           getPublicStoreInfo(storeId),
+          listServiceTypes(storeId),
         ]);
         setAllowJumpCall(store.allowJumpCall ?? false);
         setAllowNoShow(store.allowNoShow ?? false);
         setQueueState(publicInfo.queueState);
+        const activeTypes = types.filter((t) => t.isActive);
+        setServiceTypes(activeTypes);
+        // Auto-select first active type if no stored default or stored default is no longer active
+        setSelectedServiceTypeId((prev) => {
+          if (prev && activeTypes.some((t) => t.id === prev)) return prev;
+          return activeTypes[0]?.id ?? "";
+        });
       } catch {
         // Default to false / ACTIVE if fetch fails
       }
@@ -110,7 +126,10 @@ export default function QueuePage() {
     setEmptyMessage(false);
 
     try {
-      const result = await callNext(storeId, counterId.trim() || undefined);
+      const result = await callNext(
+        storeId,
+        selectedServiceTypeId || undefined,
+      );
       if (result.ticket) {
         addServingTicket(result.ticket);
         setStatsRefreshSignal((s) => s + 1);
@@ -126,7 +145,7 @@ export default function QueuePage() {
     } finally {
       setCallLoading(false);
     }
-  }, [storeId, counterId, addServingTicket, tErrors]);
+  }, [storeId, selectedServiceTypeId, addServingTicket, tErrors]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -210,22 +229,57 @@ export default function QueuePage() {
               <div className="queue-divider max-xs:hidden" />
 
               <div className="flex flex-1 items-center gap-3">
-                <div className="w-36 shrink-0 l:w-40">
-                  <Label
-                    htmlFor="counterId"
-                    className="text-xs text-muted-foreground"
-                  >
-                    {tQueue("counterIdLabel")}
-                  </Label>
-                  <Input
-                    id="counterId"
-                    value={counterId}
-                    onChange={(e) => setCounterId(e.target.value)}
-                    placeholder={tQueue("counterIdPlaceholder")}
-                    maxLength={100}
-                    className="mt-1"
-                  />
-                </div>
+                {serviceTypes.length > 0 && (
+                  <div className="w-44 shrink-0 l:w-52">
+                    <Label className="text-xs text-muted-foreground">
+                      {tQueue("serviceQueueLabel")}
+                    </Label>
+                    <Select
+                      value={selectedServiceTypeId}
+                      onValueChange={(v) => {
+                        const nextServiceTypeId = v ?? "";
+                        setSelectedServiceTypeId(nextServiceTypeId);
+                        if (storeId) {
+                          if (nextServiceTypeId) {
+                            localStorage.setItem(
+                              `store:${storeId}:defaultServiceTypeId`,
+                              nextServiceTypeId,
+                            );
+                          } else {
+                            localStorage.removeItem(
+                              `store:${storeId}:defaultServiceTypeId`,
+                            );
+                          }
+                        }
+                        setStatsRefreshSignal((s) => s + 1);
+                      }}
+                    >
+                      <SelectTrigger className="mt-1 h-9 gap-2 px-3">
+                        <SelectValue
+                          placeholder={tQueue("serviceQueuePlaceholder")}
+                        >
+                          {(value: string | null) => {
+                            const match = serviceTypes.find(
+                              (st) => st.id === value,
+                            );
+                            return match ? match.name : null;
+                          }}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="p-1.5">
+                        {serviceTypes.map((st) => (
+                          <SelectItem
+                            key={st.id}
+                            value={st.id}
+                            className="py-2"
+                          >
+                            {st.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 <Button
                   onClick={handleCallNext}
                   disabled={callLoading}
@@ -266,7 +320,6 @@ export default function QueuePage() {
               refreshSignal={statsRefreshSignal}
               searchQuery={ticketSearchQuery}
               allowJumpCall={allowJumpCall}
-              counterId={counterId}
             />
           </div>
         </div>

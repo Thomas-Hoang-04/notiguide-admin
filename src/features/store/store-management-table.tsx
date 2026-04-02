@@ -1,10 +1,12 @@
 "use client";
 
-import { Pencil, Trash2, Users } from "lucide-react";
+import { ChevronDown, Settings, Trash2 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StoreSettingsPanel } from "@/features/store/store-settings-panel";
 import { getStoreStatusTranslationKey } from "@/lib/i18n-keys";
 import type { StoreDto, StorePageResponse } from "@/types/store";
 
@@ -13,8 +15,7 @@ type StoreManagementTableProps = {
   loading: boolean;
   onCreate: () => void;
   onDelete: (store: StoreDto) => void;
-  onEdit: (store: StoreDto) => void;
-  onViewAdmins: (store: StoreDto) => void;
+  onStoreUpdated: (store: StoreDto) => void;
 };
 
 export function StoreManagementTable({
@@ -22,12 +23,17 @@ export function StoreManagementTable({
   loading,
   onCreate,
   onDelete,
-  onEdit,
-  onViewAdmins,
+  onStoreUpdated,
 }: StoreManagementTableProps) {
   const format = useFormatter();
   const tCommon = useTranslations("common");
   const tStores = useTranslations("stores");
+
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  function toggleExpanded(storeId: string) {
+    setExpandedId((prev) => (prev === storeId ? null : storeId));
+  }
 
   return (
     <div className="glass-card glass-card-hover glass-context-primary rounded-xl">
@@ -118,76 +124,179 @@ export function StoreManagementTable({
               </tr>
             )}
 
-            {data?.items.map((store) => (
-              <tr
-                key={store.id}
-                className="border-b border-border last:border-0"
-              >
-                <td className="px-4 py-3 font-medium">{store.name}</td>
-                <td className="hidden px-4 py-3 l:table-cell">
-                  <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-xs tracking-wide text-muted-foreground">
-                    {store.publicId}
-                  </span>
-                </td>
-                <td className="hidden px-4 py-3 text-muted-foreground xl:table-cell">
-                  {store.address || tCommon("none")}
-                </td>
-                <td className="px-4 py-3">
-                  <Badge
-                    variant="outline"
-                    className={
-                      store.isActive
-                        ? "border-success/30 bg-success/10 text-success"
-                        : "border-destructive/30 bg-destructive/10 text-destructive"
-                    }
-                  >
-                    {tStores(getStoreStatusTranslationKey(store.isActive))}
-                  </Badge>
-                </td>
-                <td className="hidden px-4 py-3 text-muted-foreground xl:table-cell">
-                  {store.createdAt
-                    ? format.dateTime(new Date(store.createdAt), {
-                        year: "numeric",
-                        month: "numeric",
-                        day: "numeric",
-                      })
-                    : tCommon("unknown")}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => onViewAdmins(store)}
-                      className="text-primary hover:text-primary"
-                      aria-label={tStores("viewAdminsButton")}
-                    >
-                      <Users aria-hidden="true" className="size-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => onEdit(store)}
-                      aria-label={tStores("editButton")}
-                    >
-                      <Pencil aria-hidden="true" className="size-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => onDelete(store)}
-                      className="text-destructive hover:text-destructive"
-                      aria-label={tStores("deleteButton")}
-                    >
-                      <Trash2 aria-hidden="true" className="size-4" />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {data?.items.map((store) => {
+              const isExpanded = expandedId === store.id;
+
+              return (
+                <StoreRow
+                  key={store.id}
+                  store={store}
+                  isExpanded={isExpanded}
+                  onToggle={() => toggleExpanded(store.id)}
+                  onDelete={() => onDelete(store)}
+                  onStoreUpdated={onStoreUpdated}
+                  format={format}
+                  tCommon={tCommon}
+                  tStores={tStores}
+                />
+              );
+            })}
           </tbody>
         </table>
       </div>
     </div>
+  );
+}
+
+function StoreRow({
+  store,
+  isExpanded,
+  onToggle,
+  onDelete,
+  onStoreUpdated,
+  format,
+  tCommon,
+  tStores,
+}: {
+  store: StoreDto;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onDelete: () => void;
+  onStoreUpdated: (store: StoreDto) => void;
+  format: ReturnType<typeof useFormatter>;
+  tCommon: ReturnType<typeof useTranslations>;
+  tStores: ReturnType<typeof useTranslations>;
+}) {
+  const [isPanelMounted, setIsPanelMounted] = useState(isExpanded);
+  const [isPanelVisible, setIsPanelVisible] = useState(isExpanded);
+
+  useEffect(() => {
+    if (!isExpanded) {
+      setIsPanelVisible(false);
+      return;
+    }
+
+    setIsPanelMounted(true);
+  }, [isExpanded]);
+
+  useEffect(() => {
+    if (!isExpanded || !isPanelMounted || isPanelVisible) {
+      return;
+    }
+
+    let firstFrameId = 0;
+    let secondFrameId = 0;
+
+    firstFrameId = window.requestAnimationFrame(() => {
+      secondFrameId = window.requestAnimationFrame(() => {
+        setIsPanelVisible(true);
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrameId);
+      window.cancelAnimationFrame(secondFrameId);
+    };
+  }, [isExpanded, isPanelMounted, isPanelVisible]);
+
+  return (
+    <>
+      <tr
+        className={`border-b border-border ${isExpanded ? "bg-muted/30" : ""}`}
+      >
+        <td className="px-4 py-3 font-medium">{store.name}</td>
+        <td className="hidden px-4 py-3 l:table-cell">
+          <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-xs tracking-wide text-muted-foreground">
+            {store.publicId}
+          </span>
+        </td>
+        <td className="hidden px-4 py-3 text-muted-foreground xl:table-cell">
+          {store.address || tCommon("none")}
+        </td>
+        <td className="px-4 py-3">
+          <Badge
+            variant="outline"
+            className={
+              store.isActive
+                ? "border-success/30 bg-success/10 text-success"
+                : "border-destructive/30 bg-destructive/10 text-destructive"
+            }
+          >
+            {tStores(getStoreStatusTranslationKey(store.isActive))}
+          </Badge>
+        </td>
+        <td className="hidden px-4 py-3 text-muted-foreground xl:table-cell">
+          {store.createdAt
+            ? format.dateTime(new Date(store.createdAt), {
+                year: "numeric",
+                month: "numeric",
+                day: "numeric",
+              })
+            : tCommon("unknown")}
+        </td>
+        <td className="px-4 py-3">
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={onToggle}
+              aria-label={
+                isExpanded
+                  ? tStores("collapseSettings")
+                  : tStores("expandSettings")
+              }
+              aria-expanded={isExpanded}
+              className={`transition-colors ${isExpanded ? "text-primary" : ""}`}
+            >
+              {isExpanded ? (
+                <ChevronDown aria-hidden="true" className="size-4" />
+              ) : (
+                <Settings aria-hidden="true" className="size-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={onDelete}
+              className="text-destructive hover:text-destructive"
+              aria-label={tStores("deleteButton")}
+            >
+              <Trash2 aria-hidden="true" className="size-4" />
+            </Button>
+          </div>
+        </td>
+      </tr>
+      {isPanelMounted && (
+        <tr>
+          <td colSpan={6} className="p-0">
+            <div
+              aria-hidden={!isPanelVisible}
+              data-expanded={isPanelVisible ? "true" : "false"}
+              className="store-settings-panel-shell"
+              onTransitionEnd={(event) => {
+                if (
+                  event.target !== event.currentTarget ||
+                  event.propertyName !== "grid-template-rows" ||
+                  isExpanded
+                ) {
+                  return;
+                }
+
+                setIsPanelMounted(false);
+              }}
+            >
+              <div className="store-settings-panel-clip">
+                <div className="store-settings-panel-content px-3 pb-4 pt-4 s:px-4">
+                  <StoreSettingsPanel
+                    store={store}
+                    onStoreUpdated={onStoreUpdated}
+                  />
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
   );
 }

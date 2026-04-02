@@ -90,9 +90,7 @@ export function StoreComparisonChart({
                   borderRadius: "var(--radius-lg)",
                   fontSize: "0.8125rem",
                 }}
-                formatter={(value: ValueType | undefined) =>
-                  `${value ?? 0}%`
-                }
+                formatter={(value: ValueType | undefined) => `${value ?? 0}%`}
               />
               <Legend
                 wrapperStyle={{ fontSize: "0.75rem" }}
