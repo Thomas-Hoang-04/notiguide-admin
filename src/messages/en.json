@@ -132,6 +132,12 @@
       "revoke": "Revoke",
       "revokeConfirm": "Revoke this session? The device will be logged out.",
       "revokeSuccess": "Session revoked",
+      "revokeAll": "Revoke all others",
+      "revokeAllConfirm": "Revoke all {count} other sessions? All other devices will be logged out immediately.",
+      "revokeAllSuccess": "Revoked {count} other sessions",
+      "deleteAll": "Delete all",
+      "deleteAllConfirm": "Delete all {count} sessions, including this one? You will be signed out from every device.",
+      "deleteAllSuccess": "Deleted {count} sessions. Signing you out…",
       "lastActive": "Last active {time}",
       "unknownDevice": "Unknown device",
       "unknownBrowser": "Unknown browser"

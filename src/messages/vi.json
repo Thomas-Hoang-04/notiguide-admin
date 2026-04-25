@@ -132,6 +132,12 @@
       "revoke": "Thu hồi",
       "revokeConfirm": "Thu hồi phiên này? Thiết bị sẽ bị đăng xuất.",
       "revokeSuccess": "Đã thu hồi phiên",
+      "revokeAll": "Thu hồi tất cả",
+      "revokeAllConfirm": "Thu hồi tất cả {count} phiên khác? Các thiết bị khác sẽ bị đăng xuất ngay lập tức",
+      "revokeAllSuccess": "Đã thu hồi {count} phiên khác",
+      "deleteAll": "Xoá tất cả",
+      "deleteAllConfirm": "Xoá toàn bộ {count} phiên, bao gồm phiên này? Bạn sẽ bị đăng xuất khỏi mọi thiết bị",
+      "deleteAllSuccess": "Đã xoá {count} phiên. Đang đăng xuất…",
       "lastActive": "Hoạt động {time}",
       "unknownDevice": "Thiết bị không xác định",
       "unknownBrowser": "Trình duyệt không xác định"

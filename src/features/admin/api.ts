@@ -53,6 +53,7 @@ export function updatePassword(id: string, request: UpdatePasswordRequest) {
   return patch<AdminDto>(API_ROUTES.ADMINS.PASSWORD(id), request);
 }
 
+// noinspection JSUnusedGlobalSymbols
 export function getMe() {
   return get<AdminDto>(API_ROUTES.ADMINS.ME);
 }
@@ -69,4 +70,12 @@ export function listSessions(adminId: string) {
 
 export function revokeSession(adminId: string, sessionId: string) {
   return del<void>(API_ROUTES.ADMINS.SESSION(adminId, sessionId));
+}
+
+export function revokeAllOtherSessions(adminId: string) {
+  return del<{ revoked: number }>(API_ROUTES.ADMINS.SESSIONS(adminId));
+}
+
+export function deleteAllSessions(adminId: string) {
+  return del<{ revoked: number }>(API_ROUTES.ADMINS.SESSIONS_ALL(adminId));
 }

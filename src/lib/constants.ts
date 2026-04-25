@@ -18,6 +18,7 @@ export const API_ROUTES = {
     LOGIN_HISTORY: (id: string, limit = 20) =>
       `/api/admins/${id}/login-history?limit=${limit}`,
     SESSIONS: (id: string) => `/api/admins/${id}/sessions`,
+    SESSIONS_ALL: (id: string) => `/api/admins/${id}/sessions/all`,
     SESSION: (id: string, sessionId: string) =>
       `/api/admins/${id}/sessions/${sessionId}`,
   },

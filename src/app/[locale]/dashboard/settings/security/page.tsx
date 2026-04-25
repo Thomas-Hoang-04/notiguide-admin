@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -32,8 +33,10 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  deleteAllSessions,
   getLoginHistory,
   listSessions,
+  revokeAllOtherSessions,
   revokeSession,
 } from "@/features/admin/api";
 import {
@@ -63,7 +66,7 @@ export default function SecuritySettingsPage() {
   const tSettings = useTranslations("settings");
   const tErrors = useTranslations("errors");
   const tCommon = useTranslations("common");
-  const { admin } = useAuthStore();
+  const { admin, logout } = useAuthStore();
 
   // Login history state
   const [history, setHistory] = useState<LoginHistoryDto[]>([]);
@@ -76,6 +79,8 @@ export default function SecuritySettingsPage() {
   const [sessions, setSessions] = useState<AdminSessionDto[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
   const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [revokingAll, setRevokingAll] = useState(false);
+  const [deletingAll, setDeletingAll] = useState(false);
 
   const fetchHistory = useCallback(
     async (fetchLimit: number) => {
@@ -160,6 +165,51 @@ export default function SecuritySettingsPage() {
     }
   }
 
+  async function handleRevokeAll() {
+    if (!admin?.id) return;
+    setRevokingAll(true);
+    try {
+      const result = await revokeAllOtherSessions(admin.id);
+      setSessions((prev) => prev.filter((s) => s.isCurrent));
+      toast.success(
+        tSettings("security.revokeAllSuccess", { count: result.revoked }),
+      );
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(
+        apiErr?.code
+          ? translateCommonApiError(apiErr, tErrors)
+          : translateNetworkError(tErrors),
+      );
+    } finally {
+      setRevokingAll(false);
+    }
+  }
+
+  async function handleDeleteAll() {
+    if (!admin?.id) return;
+    setDeletingAll(true);
+    try {
+      const result = await deleteAllSessions(admin.id);
+      toast.success(
+        tSettings("security.deleteAllSuccess", { count: result.revoked }),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await logout();
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(
+        apiErr?.code
+          ? translateCommonApiError(apiErr, tErrors)
+          : translateNetworkError(tErrors),
+      );
+      setDeletingAll(false);
+    }
+  }
+
+  const otherSessionsCount = sessions.filter((s) => !s.isCurrent).length;
+  const totalSessionsCount = sessions.length;
+
   function formatDate(dateStr: string | null) {
     if (!dateStr) return "—";
     return new Date(dateStr).toLocaleString(undefined, {
@@ -194,6 +244,93 @@ export default function SecuritySettingsPage() {
           <CardDescription>
             {tSettings("security.activeSessionsDescription")}
           </CardDescription>
+          {!sessionsLoading && totalSessionsCount > 0 && (
+            <CardAction className="flex flex-wrap gap-2">
+              {otherSessionsCount > 0 && (
+                <AlertDialog>
+                  <AlertDialogTrigger
+                    disabled={revokingAll || deletingAll}
+                    render={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-destructive text-destructive hover:bg-destructive/10"
+                      />
+                    }
+                  >
+                    {revokingAll && (
+                      <Loader2 className="mr-1 size-3 animate-spin" />
+                    )}
+                    {tSettings("security.revokeAll")}
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {tSettings("security.revokeAll")}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {tSettings("security.revokeAllConfirm", {
+                          count: otherSessionsCount,
+                        })}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={(e) => {
+                          e.preventDefault();
+                          void handleRevokeAll();
+                        }}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {tSettings("security.revokeAll")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+              <AlertDialog>
+                <AlertDialogTrigger
+                  disabled={deletingAll || revokingAll}
+                  render={
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                    />
+                  }
+                >
+                  {deletingAll && (
+                    <Loader2 className="mr-1 size-3 animate-spin" />
+                  )}
+                  {tSettings("security.deleteAll")}
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {tSettings("security.deleteAll")}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {tSettings("security.deleteAllConfirm", {
+                        count: totalSessionsCount,
+                      })}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={(e) => {
+                        e.preventDefault();
+                        void handleDeleteAll();
+                      }}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {tSettings("security.deleteAll")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </CardAction>
+          )}
         </CardHeader>
         <CardContent>
           {sessionsLoading ? (
