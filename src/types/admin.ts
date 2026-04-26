@@ -22,6 +22,11 @@ export interface LoginRequest {
 export interface LoginResponse {
   admin: AdminDto;
   sessionId?: string;
+  // One-shot, short-lived (~60s) token that lets the client roll back the
+  // server-side session/refresh-token/login-history artifacts when the
+  // Set-Cookie response did not actually reach this browser. The backend no
+  // longer returns a successful login response unless this token was minted.
+  abortToken: string;
 }
 
 export interface CreateAdminRequest {

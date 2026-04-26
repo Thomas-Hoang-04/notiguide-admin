@@ -454,5 +454,43 @@
     "forbidden": "Bạn không có quyền thực hiện hành động này.",
     "notFound": "Không tìm thấy tài nguyên.",
     "serverError": "Đã xảy ra lỗi. Vui lòng thử lại."
+  },
+  "consent": {
+    "autoTitle": "Cho phép cookie liên trang",
+    "autoDescription": "NotiGuide Admin cần đặt cookie phiên bảo mật từ {origin} để bạn đăng nhập. Bấm Cho phép để thử mở hộp xác nhận một lần của trình duyệt. Nếu trình duyệt không hiện hộp đó, bạn sẽ thấy hướng dẫn thủ công ngay sau. Chỉ dùng cho đăng nhập và quản lý phiên. Không theo dõi, không phân tích.",
+    "manualTitle": "Bật cookie cho trang này",
+    "manualDescription": "Trình duyệt đang chặn cookie phiên bảo mật từ {origin} nên không thể đăng nhập. Làm theo các bước bên dưới cho trình duyệt của bạn, sau đó bấm \"Đã bật xong\" rồi đăng nhập lại.",
+    "allow": "Cho phép",
+    "decline": "Để sau",
+    "manualAcknowledge": "Đã bật xong",
+    "declinedBanner": "Cần cấp quyền cookie để đăng nhập.",
+    "declinedBannerAction": "Bật cookie",
+    "loginCookieMissing": "Đăng nhập đã thành công nhưng cookie phiên không đến được trình duyệt. Hãy làm theo hướng dẫn bật cookie và thử lại.",
+    "learnMoreShow": "Tại sao cần?",
+    "learnMoreHide": "Ẩn chi tiết",
+    "learnMoreBody": "Trang quản trị và API chạy trên hai tên miền khác nhau. Trình duyệt hiện đại chặn cookie liên trang để chống theo dõi, và cùng cơ chế đó chặn luôn cookie phiên của chúng tôi. Các bước bên dưới chỉ thay đổi trên trình duyệt của chính bạn — không có gì thay đổi ở phía máy chủ, và bạn có thể quay lại trạng thái cũ bất cứ lúc nào.",
+    "manualSteps": {
+      "safari": {
+        "0": "Safari không có tuỳ chọn riêng cho từng trang. Công tắc bạn cần chỉnh là toàn trình duyệt.",
+        "1": "Vào Safari → Settings (⌘ + ,) → Privacy và bỏ chọn \"Prevent cross-site tracking\" trong lúc đăng nhập.",
+        "2": "Tải lại trang này và đăng nhập. Sau khi vào được, bạn có thể bật lại tuỳ chọn đó — phiên đăng nhập vẫn giữ nguyên.",
+        "3": "Nếu không muốn đổi cài đặt Safari, hãy đăng nhập một lần bằng Chrome, Edge hoặc Firefox."
+      },
+      "firefox": {
+        "0": "Bấm biểu tượng khiên trên thanh địa chỉ Firefox khi đang ở trang này.",
+        "1": "Tắt Enhanced Tracking Protection chỉ cho trang này (đừng đổi cài đặt toàn trình duyệt).",
+        "2": "Tải lại trang và đăng nhập. Sau đó có thể bật lại bằng cùng biểu tượng khiên."
+      },
+      "chromium": {
+        "0": "Bấm biểu tượng con mắt hoặc cookie ở bên phải thanh địa chỉ khi đang ở trang này.",
+        "1": "Chọn \"Allow cookies\" (hoặc \"Allow third-party cookies\") chỉ cho trang này.",
+        "2": "Tải lại trang và đăng nhập."
+      },
+      "generic": {
+        "0": "Mở bảng cài đặt riêng cho trang này (thường ở biểu tượng bên phải thanh địa chỉ).",
+        "1": "Thêm ngoại lệ cho phép cookie từ {origin} chỉ trên trang này — tránh tắt cài đặt riêng tư của toàn trình duyệt.",
+        "2": "Tải lại trang và đăng nhập."
+      }
+    }
   }
 }

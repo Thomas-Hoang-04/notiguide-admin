@@ -6,6 +6,7 @@ export const API_ROUTES = {
     LOGIN: "/api/auth/login",
     LOGOUT: "/api/auth/logout",
     REFRESH: "/api/auth/refresh",
+    ABORT: "/api/auth/abort",
   },
   ADMINS: {
     BASE: "/api/admins",
