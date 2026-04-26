@@ -9,6 +9,7 @@ import { API_BASE_URL } from "@/lib/constants";
 import { parseUserAgent } from "@/lib/user-agent";
 
 const CONSENT_DECLINED_KEY = "notiguide.cookieConsent.declined";
+const CONSENT_VERIFIED_KEY = "notiguide.cookieConsent.verified";
 
 export type ConsentBrowserKind =
   | "chromium"
@@ -120,6 +121,39 @@ export function wasDeclinedThisSession(): boolean {
 export function clearDeclinedThisSession(): void {
   try {
     sessionStorage.removeItem(CONSENT_DECLINED_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+// Persistent "we've already seen cookies actually work in this browser" flag.
+// The Permissions API for `top-level-storage-access` only flips to "granted"
+// after a per-origin grant via requestStorageAccessFor (which itself is gated
+// by Related Website Sets in Chrome). Users who have globally enabled
+// third-party cookies can sign in successfully even though that permission
+// stays at "prompt" forever — without this flag, the resolver would route
+// them back to the dialog on every page load. Persisted in localStorage so
+// the evidence outlives a tab close; cleared by `reportFailure` once a real
+// post-login cookie-missing signal proves the previous evidence is stale.
+export function rememberCookieAccessVerified(): void {
+  try {
+    localStorage.setItem(CONSENT_VERIFIED_KEY, "1");
+  } catch {
+    // localStorage may be unavailable (privacy mode) — degrade silently.
+  }
+}
+
+export function wasCookieAccessVerified(): boolean {
+  try {
+    return localStorage.getItem(CONSENT_VERIFIED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function clearCookieAccessVerified(): void {
+  try {
+    localStorage.removeItem(CONSENT_VERIFIED_KEY);
   } catch {
     // ignore
   }

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
+  clearCookieAccessVerified,
   clearDeclinedThisSession,
   type ConsentBrowserKind,
   detectBrowserKind,
@@ -9,8 +10,10 @@ import {
   isRequestStorageAccessForSupported,
   isSameOriginApi,
   queryTopLevelStorageAccess,
+  rememberCookieAccessVerified,
   rememberDeclined,
   requestStorageAccessForOrigin,
+  wasCookieAccessVerified,
   wasDeclinedThisSession,
 } from "@/lib/storage-access";
 
@@ -50,6 +53,12 @@ interface CookieConsentState {
   // so a user already known to be `denied` stays in manual mode rather than
   // bouncing back to the auto path that already failed.
   reportFailure: () => Promise<void>;
+  // Called when we have evidence that cookies *did* stick (e.g., the post-login
+  // session-verification ping returned 200). Persists that evidence so the
+  // dialog doesn't reappear on subsequent visits — see
+  // `rememberCookieAccessVerified` for why the Permissions API alone isn't
+  // sufficient on Chromium.
+  markVerified: () => void;
 }
 
 // Pure resolver — single source of truth for status from environment + flags.
@@ -59,9 +68,20 @@ async function resolveStatusFor(
   origin: string,
   options: { honorDeclinedFlag: boolean; biasTowardDialog: boolean },
 ): Promise<ConsentStatus> {
+  // Short-circuit on persisted evidence that cookies actually flow in this
+  // browser. Chromium's `top-level-storage-access` permission stays at
+  // "prompt" even when the user has globally enabled third-party cookies, so
+  // without this guard the dialog would reappear on every login. The flag is
+  // cleared by `reportFailure` if a real cookie-missing signal later proves
+  // the previous evidence stale.
+  if (wasCookieAccessVerified()) return "granted";
+
   const permissionState = await queryTopLevelStorageAccess(origin);
 
-  if (permissionState === "granted") return "granted";
+  if (permissionState === "granted") {
+    rememberCookieAccessVerified();
+    return "granted";
+  }
 
   if (options.honorDeclinedFlag && wasDeclinedThisSession()) return "declined";
 
@@ -107,7 +127,7 @@ export function useCookieConsent(): CookieConsentState {
       if (!cancelled) setStatus(next);
     }
 
-    run();
+    void run();
     return () => {
       cancelled = true;
     };
@@ -123,6 +143,7 @@ export function useCookieConsent(): CookieConsentState {
     // On failure (user denied the browser-native prompt, or the (admin, api)
     // pair isn't in a Related Website Set so Chrome rejects without UI),
     // fall through to manual instructions instead of looping.
+    if (ok) rememberCookieAccessVerified();
     setStatus(ok ? "granted" : "manual");
     return ok;
   }, [apiOrigin]);
@@ -134,7 +155,7 @@ export function useCookieConsent(): CookieConsentState {
 
   const acknowledge = useCallback(() => {
     // User claimed they applied the manual fix. Don't mark as declined —
-    // hide the banner and let the next login attempt prove whether cookies
+    // hide the banner and let the next login attempt proves whether cookies
     // now flow. If they don't, `reportFailure` re-opens the dialog.
     clearDeclinedThisSession();
     setStatus("acknowledged");
@@ -152,6 +173,9 @@ export function useCookieConsent(): CookieConsentState {
 
   const reportFailure = useCallback(async () => {
     if (!apiOrigin) return;
+    // Hard evidence cookies didn't reach the browser — invalidate any prior
+    // "verified" flag so the resolver below routes back to needed/manual.
+    clearCookieAccessVerified();
     clearDeclinedThisSession();
     const next = await resolveStatusFor(apiOrigin, {
       honorDeclinedFlag: false,
@@ -159,6 +183,10 @@ export function useCookieConsent(): CookieConsentState {
     });
     setStatus(next);
   }, [apiOrigin]);
+
+  const markVerified = useCallback(() => {
+    rememberCookieAccessVerified();
+  }, []);
 
   return {
     status,
@@ -169,5 +197,6 @@ export function useCookieConsent(): CookieConsentState {
     acknowledge,
     reopen,
     reportFailure,
+    markVerified,
   };
 }

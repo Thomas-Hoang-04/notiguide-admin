@@ -1,6 +1,13 @@
 "use client";
 
-import { ChevronDown, Cookie, Loader2, ShieldCheck } from "lucide-react";
+import {
+  ChevronDown,
+  Cookie,
+  Lightbulb,
+  Loader2,
+  Shield,
+  ShieldCheck,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
@@ -67,7 +74,7 @@ export function CookieConsentDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className="data-[size=default]:max-w-md data-[size=default]:xs:max-w-lg">
         <AlertDialogHeader>
           <AlertDialogMedia className="bg-primary/10 text-primary">
             {isManual ? (
@@ -79,10 +86,19 @@ export function CookieConsentDialog({
           <AlertDialogTitle>
             {isManual ? t("manualTitle") : t("autoTitle")}
           </AlertDialogTitle>
-          <AlertDialogDescription>
-            {isManual
-              ? t("manualDescription", { origin: apiOrigin ?? "" })
-              : t("autoDescription", { origin: apiOrigin ?? "" })}
+          <AlertDialogDescription
+            render={<div />}
+            className="space-y-2 [&>p]:text-balance [&>p]:xl:text-pretty"
+          >
+            {t.rich(isManual ? "manualDescription" : "autoDescription", {
+              origin: apiOrigin ?? "",
+              bold: (chunks) => (
+                <strong className="font-semibold text-foreground">
+                  {chunks}
+                </strong>
+              ),
+              p: (chunks) => <p>{chunks}</p>,
+            })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -90,9 +106,7 @@ export function CookieConsentDialog({
           <ol className="m-0 list-decimal space-y-1.5 pl-5 text-sm text-foreground/85">
             {stepKeys.map((key) => (
               <li key={key} className="leading-relaxed">
-                {t(key as Parameters<typeof t>[0], {
-                  origin: apiOrigin ?? "",
-                })}
+                {renderManualStep(key, t, apiOrigin)}
               </li>
             ))}
           </ol>
@@ -116,8 +130,16 @@ export function CookieConsentDialog({
             />
             {showLearnMore ? t("learnMoreHide") : t("learnMoreShow")}
           </CollapsibleTrigger>
-          <CollapsibleContent className="rounded-md bg-muted/60 p-3 text-xs leading-relaxed text-muted-foreground">
-            {t("learnMoreBody")}
+          <CollapsibleContent className="flex gap-3 rounded-md bg-muted/60 p-3 text-xs leading-relaxed text-muted-foreground">
+            <Lightbulb
+              aria-hidden="true"
+              className="mt-0.5 size-4 shrink-0 text-primary"
+            />
+            <div className="space-y-1.5">
+              {t.rich("learnMoreBody", {
+                p: (chunks) => <p>{chunks}</p>,
+              })}
+            </div>
           </CollapsibleContent>
         </Collapsible>
 
@@ -148,6 +170,32 @@ export function CookieConsentDialog({
       </AlertDialogContent>
     </AlertDialog>
   );
+}
+
+type ConsentTranslator = ReturnType<typeof useTranslations<"consent">>;
+
+const renderShieldIcon = () => (
+  <Shield
+    aria-hidden="true"
+    className="-translate-y-px inline-block size-3.5 text-primary"
+  />
+);
+
+function renderManualStep(
+  key: string,
+  t: ConsentTranslator,
+  apiOrigin: string | null,
+) {
+  if (key.startsWith("manualSteps.firefox.")) {
+    const richValues = {
+      origin: apiOrigin ?? "",
+      shield: renderShieldIcon,
+    };
+    return t.rich(key as Parameters<typeof t.rich>[0], richValues);
+  }
+  return t(key as Parameters<typeof t>[0], {
+    origin: apiOrigin ?? "",
+  });
 }
 
 function manualStepKeys(browser: ConsentBrowserKind): string[] {

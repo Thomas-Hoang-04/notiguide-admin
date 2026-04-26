@@ -92,6 +92,7 @@ export default function LoginPage() {
         }
         return;
       }
+      consent.markVerified();
       setAuth(response);
       router.push("/dashboard", { locale });
     } catch (err) {

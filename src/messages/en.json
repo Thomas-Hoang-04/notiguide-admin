@@ -457,9 +457,9 @@
   },
   "consent": {
     "autoTitle": "Allow cross-site cookies",
-    "autoDescription": "NotiGuide Admin needs to set a secure session cookie from {origin} so you can sign in. Click Allow to attempt a browser-native one-tap permission prompt. If your browser doesn't show one, you'll see manual steps next. Used for sign-in and session management only. No tracking, no analytics.",
+    "autoDescription": "<p>Sign-in needs a session cookie from <bold>{origin}</bold>.</p><p>Click Allow for a one-tap browser prompt — manual steps follow if it doesn't appear.</p><p><bold>Used only for sign-in and sessions.</bold> No tracking, no analytics.</p>",
     "manualTitle": "Enable cookies for this site",
-    "manualDescription": "Your browser is blocking the secure session cookie from {origin}, so sign-in cannot complete. Follow the steps below for your browser, then click \"I've enabled it\" and try signing in again.",
+    "manualDescription": "<p>Your browser is blocking the session cookie from <bold>{origin}</bold>.</p><p>Follow the steps below, then click \"I've enabled it\" and sign in again.</p>",
     "allow": "Allow",
     "decline": "Not now",
     "manualAcknowledge": "I've enabled it",
@@ -468,7 +468,7 @@
     "loginCookieMissing": "Sign-in succeeded but the session cookie did not reach this browser. Follow the cookie-access steps and try again.",
     "learnMoreShow": "Why is this needed?",
     "learnMoreHide": "Hide details",
-    "learnMoreBody": "The admin dashboard and the API run on separate domains. Modern browsers block cross-site cookies by default to prevent tracking, and the same protection blocks our session cookie. The steps below only change settings in your own browser — nothing is modified on the server, and you can revert them at any time.",
+    "learnMoreBody": "<p>Browsers block cross-site cookies by default to prevent tracking, which also blocks our session cookie.</p><p>You can allow it just for this site, and revert it anytime from your browser settings.</p>",
     "manualSteps": {
       "safari": {
         "0": "Safari does not provide a per-site cookie exception. The available toggle is browser-wide.",
@@ -477,9 +477,9 @@
         "3": "If you prefer not to change Safari's setting, sign in once using Chrome, Edge, or Firefox instead."
       },
       "firefox": {
-        "0": "Click the shield icon in Firefox's address bar on this page.",
+        "0": "Click the <shield></shield> in Firefox's address bar on this page.",
         "1": "Turn off Enhanced Tracking Protection for this site only (do not change global settings).",
-        "2": "Reload this page and sign in. You can re-enable protection from the same shield icon afterward."
+        "2": "Reload this page and sign in. You can re-enable protection from the same <shield></shield> afterward."
       },
       "chromium": {
         "0": "Click the eye or cookie icon at the right side of the address bar on this page.",
