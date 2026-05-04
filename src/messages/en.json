@@ -24,6 +24,7 @@
     "admins": "Admins",
     "settings": "Settings",
     "analytics": "Analytics",
+    "devices": "Devices",
     "logout": "Logout",
     "logoutConfirmTitle": "Log out?",
     "logoutConfirmDescription": "You will need to sign in again to access the dashboard.",
@@ -423,6 +424,120 @@
       "tooltip": "{day} {hourRange}: {value} tickets"
     }
   },
+  "devices": {
+    "title": "Devices",
+    "pendingTab": "Pending Review",
+    "tokensTab": "Enrollment Tokens",
+    "listTitle": "All Devices",
+    "emptyState": "No devices registered yet.",
+    "pendingTitle": "Pending Devices",
+    "pendingEmpty": "No devices pending review.",
+    "columnName": "Name",
+    "columnKind": "Type",
+    "columnHardware": "Hardware",
+    "columnStatus": "Status",
+    "columnStore": "Store",
+    "columnCreated": "Created",
+    "groupByStore": "Group by store",
+    "filterStatus": "All Statuses",
+    "filterKind": "All Types",
+    "filterHardware": "All Hardware",
+    "filterStore": "All Stores",
+    "status": {
+      "PENDING": "Pending",
+      "PENDING_RF_CODE": "Awaiting RF Code",
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "DECOMMISSIONED": "Decommissioned",
+      "REJECTED": "Rejected"
+    },
+    "kind": {
+      "RECEIVER_433M": "433 MHz Receiver",
+      "RECEIVER_433M_PASSIVE": "433 MHz Receiver",
+      "RECEIVER_2_4G": "2.4 GHz Receiver",
+      "TRANSMITTER_HUB": "Transmitter Hub"
+    },
+    "tokens": {
+      "issueAction": "Issue Token",
+      "issueTitle": "Issue Enrollment Token",
+      "issueButton": "Issue",
+      "storeLabel": "Store",
+      "storePlaceholder": "Select a store (optional)",
+      "storeHelp": "Leave empty to create an unscoped token. The device's store will be assigned at approval.",
+      "tokenLabel": "Enrollment Token",
+      "oneTimeWarning": "Copy this token now. It will not be shown again.",
+      "copy": "Copy token",
+      "copyFailed": "Could not copy to clipboard",
+      "columnHash": "Token Hash",
+      "columnStore": "Store",
+      "columnIssued": "Issued",
+      "columnExpires": "Expires",
+      "columnActions": "Actions",
+      "emptyState": "No active enrollment tokens.",
+      "expired": "Expired",
+      "revokeButton": "Revoke token",
+      "revokeTitle": "Revoke Token",
+      "revokeConfirmation": "Revoke this enrollment token? Any device using it will not be able to register.",
+      "revokedToast": "Token revoked"
+    },
+    "passive": {
+      "registerAction": "Register Passive Device",
+      "disabledNoStore": "You must be assigned to a store to register a device.",
+      "dialogTitle": "Register Passive Device",
+      "dialogDescription": "Register a PT2272-class decoder that has no firmware. Enter the chip's preset address code.",
+      "kindLabel": "Type",
+      "hardwareLabel": "Hardware",
+      "storeLabel": "Store",
+      "storeRequired": "Store is required",
+      "nameLabel": "Assigned Name",
+      "nameRequired": "Name is required",
+      "bitsLabel": "Bit Width",
+      "bitsHelp": "PT2272 address is 8 trits (16 bits). The channel ID is patched by the backend at dispatch time.",
+      "hexLabel": "RF Code (hex)",
+      "hexHelp": "4-character hex value (e.g. 0A1B) matching the chip's DIP switch address.",
+      "hexErrorFormat": "Must be a valid hex value",
+      "hexErrorLength": "Must be exactly 4 hex characters (16 bits)",
+      "submit": "Register",
+      "successToast": "Device registered ({publicId})",
+      "errorConflict": "This RF code is already in use by another device.",
+      "errorForbidden": "You don't have permission to register a device for this store.",
+      "errors": {
+        "pt2272_address_width_mismatch": "PT2272 address must be exactly 16 bits.",
+        "forbidden_pattern": "This RF code pattern is not allowed.",
+        "width_out_of_range": "RF code bit width is out of the allowed range."
+      }
+    },
+    "rfCode": {
+      "maskedValue": "••  ••",
+      "lockedNote": "This is the PT2272 address (16-bit). The value is hardware-fixed and cannot be rotated. The channel ID is patched by the backend at dispatch time.",
+      "ack": {
+        "PENDING": "Pending",
+        "APPLIED": "Applied",
+        "UNCHANGED": "Unchanged",
+        "REJECTED": "Rejected"
+      }
+    },
+    "lifecycle": {
+      "passiveSubtitle": "Passive devices have no firmware — lifecycle actions only affect backend state. The physical chip continues listening regardless."
+    },
+    "detail": {
+      "identity": "Identity",
+      "publicId": "Public ID",
+      "assignedName": "Assigned Name",
+      "kind": "Type",
+      "hardware": "Hardware",
+      "status": "Status",
+      "store": "Store",
+      "firmware": "Firmware",
+      "activatedAt": "Activated",
+      "createdAt": "Created",
+      "rfCode": "RF Code",
+      "rfBits": "Bit Width",
+      "rfVersion": "Version",
+      "rfAck": "Acknowledgment",
+      "rfValue": "Value"
+    }
+  },
   "validation": {
     "nameRequired": "Name is required",
     "nameMax": "Max 255 characters",
@@ -449,6 +564,7 @@
     "reqSpecial": "At least one special character (!@#$%^&*)"
   },
   "errors": {
+    "badRequest": "Invalid request. Please check your input and try again.",
     "connectionLost": "Connection lost. Please check your internet.",
     "tooManyRequests": "Too many requests. Please wait {seconds} seconds.",
     "forbidden": "You don't have permission to perform this action.",

@@ -1,6 +1,7 @@
 import type { ApiError } from "@/types/api";
 
 type ErrorKey =
+  | "badRequest"
   | "connectionLost"
   | "forbidden"
   | "notFound"
@@ -29,7 +30,11 @@ export function translateCommonApiError(error: ApiError, tErrors: Translator) {
     return tErrors("serverError");
   }
 
-  return error.message;
+  if (error.code === 400) {
+    return tErrors("badRequest");
+  }
+
+  return tErrors("serverError");
 }
 
 export function translateNetworkError(tErrors: Translator) {

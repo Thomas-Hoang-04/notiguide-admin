@@ -24,6 +24,7 @@
     "admins": "Quản trị viên",
     "settings": "Cài đặt",
     "analytics": "Phân tích",
+    "devices": "Thiết bị",
     "logout": "Đăng xuất",
     "logoutConfirmTitle": "Đăng xuất?",
     "logoutConfirmDescription": "Bạn sẽ cần đăng nhập lại để truy cập bảng điều khiển.",
@@ -423,6 +424,120 @@
       "tooltip": "{day} {hourRange}: {value} vé"
     }
   },
+  "devices": {
+    "title": "Thiết bị",
+    "pendingTab": "Chờ duyệt",
+    "tokensTab": "Mã đăng ký",
+    "listTitle": "Tất cả thiết bị",
+    "emptyState": "Chưa có thiết bị nào.",
+    "pendingTitle": "Thiết bị chờ duyệt",
+    "pendingEmpty": "Không có thiết bị nào chờ duyệt.",
+    "columnName": "Tên",
+    "columnKind": "Loại",
+    "columnHardware": "Phần cứng",
+    "columnStatus": "Trạng thái",
+    "columnStore": "Cửa hàng",
+    "columnCreated": "Ngày tạo",
+    "groupByStore": "Nhóm theo cửa hàng",
+    "filterStatus": "Tất cả trạng thái",
+    "filterKind": "Tất cả loại",
+    "filterHardware": "Tất cả phần cứng",
+    "filterStore": "Tất cả cửa hàng",
+    "status": {
+      "PENDING": "Chờ duyệt",
+      "PENDING_RF_CODE": "Chờ mã RF",
+      "ACTIVE": "Hoạt động",
+      "SUSPENDED": "Tạm ngưng",
+      "DECOMMISSIONED": "Đã thu hồi",
+      "REJECTED": "Đã từ chối"
+    },
+    "kind": {
+      "RECEIVER_433M": "Bộ thu 433 MHz",
+      "RECEIVER_433M_PASSIVE": "Bộ thu 433 MHz",
+      "RECEIVER_2_4G": "Bộ thu 2.4 GHz",
+      "TRANSMITTER_HUB": "Bộ phát tín hiệu"
+    },
+    "tokens": {
+      "issueAction": "Cấp mã",
+      "issueTitle": "Cấp mã đăng ký thiết bị",
+      "issueButton": "Cấp",
+      "storeLabel": "Cửa hàng",
+      "storePlaceholder": "Chọn cửa hàng (không bắt buộc)",
+      "storeHelp": "Bỏ trống để tạo mã không chỉ định cửa hàng. Cửa hàng sẽ được gán khi duyệt thiết bị.",
+      "tokenLabel": "Mã đăng ký",
+      "oneTimeWarning": "Sao chép mã này ngay. Mã sẽ không hiển thị lại.",
+      "copy": "Sao chép",
+      "copyFailed": "Không thể sao chép",
+      "columnHash": "Mã băm",
+      "columnStore": "Cửa hàng",
+      "columnIssued": "Ngày cấp",
+      "columnExpires": "Hết hạn",
+      "columnActions": "Thao tác",
+      "emptyState": "Chưa có mã đăng ký nào.",
+      "expired": "Đã hết hạn",
+      "revokeButton": "Thu hồi mã",
+      "revokeTitle": "Thu hồi mã đăng ký",
+      "revokeConfirmation": "Thu hồi mã đăng ký này? Thiết bị đang sử dụng mã sẽ không thể đăng ký.",
+      "revokedToast": "Đã thu hồi mã"
+    },
+    "passive": {
+      "registerAction": "Đăng ký thiết bị thu tĩnh",
+      "disabledNoStore": "Bạn cần được phân công cửa hàng để đăng ký thiết bị.",
+      "dialogTitle": "Đăng ký thiết bị thu tĩnh",
+      "dialogDescription": "Đăng ký bộ giải mã PT2272 không có firmware. Nhập mã địa chỉ cài sẵn trên chip.",
+      "kindLabel": "Loại",
+      "hardwareLabel": "Phần cứng",
+      "storeLabel": "Cửa hàng",
+      "storeRequired": "Cửa hàng là bắt buộc",
+      "nameLabel": "Tên gán",
+      "nameRequired": "Tên là bắt buộc",
+      "bitsLabel": "Độ rộng bit",
+      "bitsHelp": "Địa chỉ PT2272 gồm 8 trit (16 bit). Mã kênh được backend gắn thêm khi phát tín hiệu.",
+      "hexLabel": "Mã RF (hex)",
+      "hexHelp": "4 ký tự hex (ví dụ: 0A1B) khớp với công tắc DIP trên chip.",
+      "hexErrorFormat": "Phải là giá trị hex hợp lệ",
+      "hexErrorLength": "Phải đúng 4 ký tự hex (16 bit)",
+      "submit": "Đăng ký",
+      "successToast": "Đã đăng ký thiết bị ({publicId})",
+      "errorConflict": "Mã RF này đã được thiết bị khác sử dụng.",
+      "errorForbidden": "Bạn không có quyền đăng ký thiết bị cho cửa hàng này.",
+      "errors": {
+        "pt2272_address_width_mismatch": "Địa chỉ PT2272 phải đúng 16 bit.",
+        "forbidden_pattern": "Mã RF này không được phép sử dụng.",
+        "width_out_of_range": "Độ rộng bit mã RF ngoài phạm vi cho phép."
+      }
+    },
+    "rfCode": {
+      "maskedValue": "••  ••",
+      "lockedNote": "Đây là địa chỉ PT2272 (16 bit). Giá trị cố định trên phần cứng, không thể xoay. Mã kênh được backend gắn thêm khi phát tín hiệu.",
+      "ack": {
+        "PENDING": "Đang chờ",
+        "APPLIED": "Đã áp dụng",
+        "UNCHANGED": "Không đổi",
+        "REJECTED": "Bị từ chối"
+      }
+    },
+    "lifecycle": {
+      "passiveSubtitle": "Thiết bị thu tĩnh không có firmware — thao tác chỉ ảnh hưởng trạng thái trên hệ thống. Thiết bị vẫn tiếp tục hoạt động."
+    },
+    "detail": {
+      "identity": "Thông tin",
+      "publicId": "ID công khai",
+      "assignedName": "Tên gán",
+      "kind": "Loại",
+      "hardware": "Phần cứng",
+      "status": "Trạng thái",
+      "store": "Cửa hàng",
+      "firmware": "Firmware",
+      "activatedAt": "Kích hoạt lúc",
+      "createdAt": "Ngày tạo",
+      "rfCode": "Mã RF",
+      "rfBits": "Độ rộng bit",
+      "rfVersion": "Phiên bản",
+      "rfAck": "Xác nhận",
+      "rfValue": "Giá trị"
+    }
+  },
   "validation": {
     "nameRequired": "Tên là bắt buộc",
     "nameMax": "Tối đa 255 ký tự",
@@ -449,6 +564,7 @@
     "reqSpecial": "Ít nhất một ký tự đặc biệt (!@#$%^&*)"
   },
   "errors": {
+    "badRequest": "Yêu cầu không hợp lệ. Vui lòng kiểm tra và thử lại.",
     "connectionLost": "Mất kết nối. Vui lòng kiểm tra kết nối mạng.",
     "tooManyRequests": "Quá nhiều yêu cầu. Vui lòng đợi {seconds} giây.",
     "forbidden": "Bạn không có quyền thực hiện hành động này.",

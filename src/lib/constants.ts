@@ -70,6 +70,18 @@ export const API_ROUTES = {
     OVERVIEW_THROUGHPUT: (range: string) =>
       `/api/analytics/overview/throughput?range=${range}`,
   },
+  DEVICES: {
+    BASE: "/api/devices",
+    BY_ID: (id: string) => `/api/devices/${id}`,
+    PASSIVE: "/api/devices/passive",
+    APPROVE: (id: string) => `/api/devices/${id}/approve`,
+    REJECT: (id: string) => `/api/devices/${id}/reject`,
+    RF_CODE: (id: string) => `/api/devices/${id}/rf-code`,
+    LIFECYCLE: (id: string) => `/api/devices/${id}/lifecycle`,
+    REPROVISION: (id: string) => `/api/devices/${id}/reprovision`,
+    TOKENS: "/api/devices/enrollment-tokens",
+    TOKEN_BY_HASH: (hash: string) => `/api/devices/enrollment-tokens/${hash}`,
+  },
 } as const;
 
 export const ROLES = {

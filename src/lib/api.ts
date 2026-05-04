@@ -107,6 +107,18 @@ export async function api<T>(
       });
     }
 
+    if (!errorBody.code) {
+      errorBody.code = response.status;
+    }
+    if (!errorBody.message) {
+      errorBody.message = errorBody.error || response.statusText;
+    }
+    if (!errorBody.path) {
+      errorBody.path = path;
+    }
+    if (!errorBody.method) {
+      errorBody.method = options.method || "GET";
+    }
     const apiError = new ApiError(errorBody);
 
     // 429 rate limit — compute seconds remaining from epoch timestamp

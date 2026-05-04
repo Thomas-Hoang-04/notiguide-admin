@@ -292,12 +292,7 @@ export default function SecuritySettingsPage() {
               <AlertDialog>
                 <AlertDialogTrigger
                   disabled={deletingAll || revokingAll}
-                  render={
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                    />
-                  }
+                  render={<Button variant="destructive" size="sm" />}
                 >
                   {deletingAll && (
                     <Loader2 className="mr-1 size-3 animate-spin" />

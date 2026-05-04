@@ -4,6 +4,7 @@ import {
   BarChart3,
   LayoutDashboard,
   LogOut,
+  Radio,
   Settings,
   ShieldCheck,
   Store,
@@ -21,7 +22,14 @@ import "@/styles/sidebar.css";
 
 interface NavItem {
   href: string;
-  label: "overview" | "queue" | "analytics" | "stores" | "admins" | "settings";
+  label:
+    | "overview"
+    | "queue"
+    | "analytics"
+    | "stores"
+    | "admins"
+    | "devices"
+    | "settings";
   icon: React.ReactNode;
   superAdminOnly?: boolean;
   adminOnly?: boolean;
@@ -54,6 +62,11 @@ const navItems: NavItem[] = [
     href: "/dashboard/admins",
     label: "admins",
     icon: <ShieldCheck aria-hidden="true" className="size-5" />,
+  },
+  {
+    href: "/dashboard/devices",
+    label: "devices",
+    icon: <Radio aria-hidden="true" className="size-5" />,
   },
   {
     href: "/dashboard/settings",

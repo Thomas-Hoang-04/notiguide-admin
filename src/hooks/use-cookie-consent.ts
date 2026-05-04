@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
+  type ConsentBrowserKind,
   clearCookieAccessVerified,
   clearDeclinedThisSession,
-  type ConsentBrowserKind,
   detectBrowserKind,
   getApiOrigin,
   isRequestStorageAccessForSupported,
