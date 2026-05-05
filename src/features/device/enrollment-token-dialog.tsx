@@ -145,7 +145,10 @@ export function EnrollmentTokenDialog({
             {isSuperAdmin && (
               <div className="space-y-2">
                 <Label>{tDevices("tokens.storeLabel")}</Label>
-                <Select value={storeId} onValueChange={(v) => v && setStoreId(v)}>
+                <Select
+                  value={storeId}
+                  onValueChange={(v) => v && setStoreId(v)}
+                >
                   <SelectTrigger className="h-10 w-full gap-2 px-3">
                     <span>
                       {storeId

@@ -507,9 +507,33 @@
         "width_out_of_range": "Độ rộng bit mã RF ngoài phạm vi cho phép."
       }
     },
+    "pending": {
+      "approveButton": "Duyệt",
+      "rejectButton": "Từ chối",
+      "approveTitle": "Duyệt thiết bị",
+      "approveDescription": "Duyệt thiết bị và gán cho cửa hàng. Thiết bị sẽ nhận thử thách kích hoạt.",
+      "approveNameLabel": "Tên thiết bị",
+      "approveNameRequired": "Tên thiết bị là bắt buộc",
+      "approveStoreLabel": "Cửa hàng",
+      "approveStoreRequired": "Cửa hàng là bắt buộc",
+      "approveStorePlaceholder": "Chọn cửa hàng",
+      "approvedToast": "Đã duyệt thiết bị",
+      "rejectTitle": "Từ chối thiết bị",
+      "rejectDescription": "Từ chối thiết bị này? Thiết bị sẽ không thể kích hoạt. Lựa chọn này không thể hoàn tác.",
+      "rejectedToast": "Đã từ chối thiết bị",
+      "errorHubCapReached": "Cửa hàng đã đạt giới hạn số bộ phát tín hiệu."
+    },
     "rfCode": {
+      "title": "Mã RF",
       "maskedValue": "••  ••",
-      "lockedNote": "Đây là địa chỉ PT2272 (16 bit). Giá trị cố định trên phần cứng, không thể xoay. Mã kênh được backend gắn thêm khi phát tín hiệu.",
+      "lockedNote": "Đây là địa chỉ PT2272 (16 bit). Giá trị cố định trên phần cứng, không thể thay đổi.",
+      "rotateButton": "Đổi mã",
+      "rotateTitle": "Đổi mã RF",
+      "rotateDescription": "Tạo mã RF mới cho thiết bị. Mã hiện tại sẽ được thay thế khi thiết bị xác nhận cập nhật.",
+      "rotatedToast": "Đã đổi mã RF — chờ thiết bị xác nhận",
+      "errorHardwareFixed": "Thiết bị này có mã cố định trên phần cứng, không thể đổi.",
+      "errorHubNoRfCode": "Bộ phát tín hiệu không sử dụng mã RF.",
+      "polling": "Đang chờ thiết bị xác nhận…",
       "ack": {
         "PENDING": "Đang chờ",
         "APPLIED": "Đã áp dụng",
@@ -518,7 +542,57 @@
       }
     },
     "lifecycle": {
-      "passiveSubtitle": "Thiết bị thu tĩnh không có firmware — thao tác chỉ ảnh hưởng trạng thái trên hệ thống. Thiết bị vẫn tiếp tục hoạt động."
+      "title": "Chu kỳ",
+      "suspendButton": "Tạm ngưng",
+      "resumeButton": "Tiếp tục",
+      "decommissionButton": "Thu hồi",
+      "suspendTitle": "Tạm ngưng thiết bị",
+      "suspendDescription": "Tạm ngưng thiết bị? Thiết bị sẽ ngừng nhận tín hiệu cho đến khi được kích hoạt lại.",
+      "resumeTitle": "Tiếp tục thiết bị",
+      "resumeDescription": "Kích hoạt lại thiết bị? Thiết bị sẽ tiếp tục nhận tín hiệu.",
+      "decommissionTitle": "Thu hồi thiết bị",
+      "decommissionDescription": "Thu hồi thiết bị? Thiết bị sẽ bị loại khỏi hệ thống vĩnh viễn. Thao tác không thể hoàn tác.",
+      "suspendedToast": "Đã tạm ngưng thiết bị",
+      "resumedToast": "Đã kích hoạt lại thiết bị",
+      "decommissionedToast": "Đã thu hồi thiết bị",
+      "passiveSubtitle": "Thiết bị thu tĩnh không có firmware — thao tác chỉ ảnh hưởng trạng thái trên hệ thống. Thiết bị vẫn tiếp tục hoạt động.",
+      "hubSubtitle": "Tạm ngưng bộ phát đang hoạt động sẽ buộc hệ thống chọn lại bộ phát khác cho lần phát tiếp theo.",
+      "commandPending": "Lệnh đang chờ — chờ thiết bị xác nhận",
+      "commandAck": {
+        "PENDING": "Đang chờ",
+        "OK": "Đã xác nhận",
+        "IGNORED": "Bỏ qua",
+        "REJECTED": "Bị từ chối"
+      }
+    },
+    "reprovision": {
+      "button": "Cấp phát lại",
+      "title": "Cấp phát lại thiết bị",
+      "description": "Cấp phát lại thiết bị? Thiết bị sẽ trở về trạng thái chờ duyệt và cần cài đặt SoftAP lại.",
+      "hubDescription": "Cấp phát lại bộ phát? Thiết bị sẽ trở về trạng thái chờ duyệt và cần cài đặt SoftAP lại.",
+      "successToast": "Đã đặt lại thiết bị — chờ cấp phát lại"
+    },
+    "dispatch": {
+      "title": "Ticket đang gán",
+      "placeholder": "Chưa có ticket nào gán cho thiết bị này."
+    },
+    "hub": {
+      "approveSubtitle": "Chấp nhận bộ phát này sẽ sử dụng một suất trong giới hạn bộ phát của cửa hàng.",
+      "capBadge": "{registered} / {max} bộ phát đã đăng ký",
+      "capTooltip": "Số bộ phát tín hiệu tối đa mỗi cửa hàng",
+      "liveness": {
+        "alive": "Hoạt động",
+        "stale": "Mất tín hiệu"
+      },
+      "election": {
+        "elected": "Đang phát",
+        "standby": "Dự phòng"
+      },
+      "recentDispatches": {
+        "note": "Bộ phát này đang được chọn làm bộ phát chính cho cửa hàng",
+        "empty": "Chưa có lần phát nào qua bộ phát này."
+      },
+      "reprovisionConfirm": "Thao tác này sẽ đặt lại bộ phát và cần cài đặt lại."
     },
     "detail": {
       "identity": "Thông tin",

@@ -1,30 +1,36 @@
 "use client";
 
+import { Loader2, RotateCcw } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getDevice, reprovisionDevice } from "@/features/device/api";
 import { DeviceStatusBadge } from "@/features/device/device-status-badge";
+import { DispatchedTicketPanel } from "@/features/device/dispatched-ticket-panel";
+import { LifecyclePanel } from "@/features/device/lifecycle-panel";
+import { RfCodeEditor } from "@/features/device/rf-code-editor";
+import { useDeviceAckPoll } from "@/features/device/use-device-ack-poll";
 import { Link } from "@/i18n/navigation";
-import { get } from "@/lib/api";
 import {
   translateCommonApiError,
   translateNetworkError,
 } from "@/lib/api-error";
-import { API_ROUTES } from "@/lib/constants";
 import { ApiError } from "@/types/api";
-import type { DeviceDto } from "@/types/device";
-
-interface DeviceDetailDto extends DeviceDto {
-  lifecycleCommand?: {
-    commandId: string;
-    action: string;
-    ackStatus: string;
-    issuedAt: string;
-  } | null;
-}
+import type { DeviceDetailDto } from "@/types/device";
 
 export default function DeviceDetailPage() {
   const params = useParams<{ id: string }>();
@@ -35,14 +41,14 @@ export default function DeviceDetailPage() {
 
   const [device, setDevice] = useState<DeviceDetailDto | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reprovisionOpen, setReprovisionOpen] = useState(false);
+  const [reprovisionLoading, setReprovisionLoading] = useState(false);
 
   const fetchDevice = useCallback(async () => {
     if (!params.id) return;
     setLoading(true);
     try {
-      const result = await get<DeviceDetailDto>(
-        API_ROUTES.DEVICES.BY_ID(params.id),
-      );
+      const result = await getDevice(params.id);
       setDevice(result);
     } catch (err) {
       if (err instanceof ApiError) {
@@ -58,6 +64,41 @@ export default function DeviceDetailPage() {
   useEffect(() => {
     void fetchDevice();
   }, [fetchDevice]);
+
+  const { polling } = useDeviceAckPoll(device, setDevice);
+
+  const isHub = device?.kind === "TRANSMITTER_HUB";
+  const isPassive = device?.kind === "RECEIVER_433M_PASSIVE";
+  const isReceiver = device !== null && !isHub;
+  const showRfCode = isReceiver && device.rfCode !== null;
+  const showReprovision =
+    device !== null &&
+    !isPassive &&
+    device.status !== "DECOMMISSIONED" &&
+    device.status !== "REJECTED";
+  const showLifecycle =
+    device !== null &&
+    device.status !== "PENDING" &&
+    device.status !== "PENDING_RF_CODE";
+
+  async function handleReprovision() {
+    if (reprovisionLoading || !device) return;
+    setReprovisionLoading(true);
+    try {
+      const updated = await reprovisionDevice(device.id);
+      toast.success(tDevices("reprovision.successToast"));
+      setReprovisionOpen(false);
+      setDevice(updated);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(translateCommonApiError(err, tErrors));
+      } else {
+        toast.error(translateNetworkError(tErrors));
+      }
+    } finally {
+      setReprovisionLoading(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -194,58 +235,70 @@ export default function DeviceDetailPage() {
         </div>
       </div>
 
-      {/* RF Code Panel — read-only for passive devices */}
-      {device.kind !== "TRANSMITTER_HUB" && device.rfCode && (
-        <div className="glass-card rounded-xl p-6">
-          <h2 className="mb-4 text-lg font-semibold">
-            {tDevices("detail.rfCode")}
-          </h2>
-          <div className="grid gap-4 s:grid-cols-2">
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {tDevices("detail.rfBits")}
-              </p>
-              <p className="text-sm">{device.rfCode.bits}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {tDevices("detail.rfVersion")}
-              </p>
-              <p className="text-sm">v{device.rfCode.version}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {tDevices("detail.rfAck")}
-              </p>
-              <Badge
-                variant="outline"
-                className={
-                  device.rfCode.ack === "APPLIED"
-                    ? "border-success/30 bg-success/10 text-success"
-                    : "border-warning/40 bg-warning/15 text-warning dark:border-warning/50 dark:bg-warning/20"
-                }
-              >
-                {tDevices(`rfCode.ack.${device.rfCode.ack}`)}
-              </Badge>
-            </div>
-            {device.kind === "RECEIVER_433M_PASSIVE" && (
-              <div>
-                <p className="text-xs text-muted-foreground">
-                  {tDevices("detail.rfValue")}
-                </p>
-                <Badge variant="outline" className="font-mono border-border">
-                  {tDevices("rfCode.maskedValue")}
-                </Badge>
-              </div>
-            )}
-          </div>
-          {device.kind === "RECEIVER_433M_PASSIVE" && (
-            <p className="mt-3 text-xs text-muted-foreground">
-              {tDevices("rfCode.lockedNote")}
-            </p>
-          )}
+      {/* RF Code Panel — receivers only */}
+      {showRfCode && (
+        <RfCodeEditor device={device} onUpdate={setDevice} polling={polling} />
+      )}
+
+      {/* Lifecycle Panel */}
+      {showLifecycle && <LifecyclePanel device={device} onUpdate={setDevice} />}
+
+      {/* Dispatched Ticket Panel — placeholder */}
+      {isReceiver &&
+        device.status !== "PENDING" &&
+        device.status !== "PENDING_RF_CODE" &&
+        device.status !== "DECOMMISSIONED" &&
+        device.status !== "REJECTED" && <DispatchedTicketPanel />}
+
+      {/* Reprovision Action */}
+      {showReprovision && (
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setReprovisionOpen(true)}
+            className="text-warning hover:text-warning"
+          >
+            <RotateCcw aria-hidden="true" className="mr-1.5 size-4" />
+            {tDevices("reprovision.button")}
+          </Button>
         </div>
       )}
+
+      {/* Reprovision Confirmation */}
+      <AlertDialog open={reprovisionOpen} onOpenChange={setReprovisionOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tDevices("reprovision.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {isHub
+                ? tDevices("reprovision.hubDescription")
+                : tDevices("reprovision.description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={reprovisionLoading}>
+              {tCommon("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleReprovision();
+              }}
+              disabled={reprovisionLoading}
+              className="bg-warning text-warning-foreground hover:bg-warning/90"
+            >
+              {reprovisionLoading && (
+                <Loader2
+                  aria-hidden="true"
+                  className="mr-2 size-4 animate-spin"
+                />
+              )}
+              {tDevices("reprovision.button")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

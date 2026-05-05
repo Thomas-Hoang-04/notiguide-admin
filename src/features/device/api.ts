@@ -1,12 +1,16 @@
 import { del, get, post } from "@/lib/api";
 import { API_ROUTES } from "@/lib/constants";
 import type {
+  ApproveDeviceRequest,
+  DeviceDetailDto,
   DeviceDto,
+  DeviceLifecycleRequest,
   DeviceListResponse,
   EnrollmentTokenIssueResponse,
   EnrollmentTokenMetadataDto,
   IssueEnrollmentTokenRequest,
   PassiveDeviceRegistrationRequest,
+  RotateRfCodeRequest,
 } from "@/types/device";
 
 export function listDevices(kind?: string | null, storeId?: string | null) {
@@ -35,4 +39,28 @@ export function registerPassiveDevice(
   request: PassiveDeviceRegistrationRequest,
 ) {
   return post<DeviceDto>(API_ROUTES.DEVICES.PASSIVE, request);
+}
+
+export function getDevice(id: string) {
+  return get<DeviceDetailDto>(API_ROUTES.DEVICES.BY_ID(id));
+}
+
+export function approveDevice(id: string, request: ApproveDeviceRequest) {
+  return post<DeviceDetailDto>(API_ROUTES.DEVICES.APPROVE(id), request);
+}
+
+export function rejectDevice(id: string) {
+  return post<DeviceDetailDto>(API_ROUTES.DEVICES.REJECT(id));
+}
+
+export function rotateRfCode(id: string, request?: RotateRfCodeRequest) {
+  return post<DeviceDetailDto>(API_ROUTES.DEVICES.RF_CODE(id), request ?? {});
+}
+
+export function lifecycleAction(id: string, request: DeviceLifecycleRequest) {
+  return post<DeviceDetailDto>(API_ROUTES.DEVICES.LIFECYCLE(id), request);
+}
+
+export function reprovisionDevice(id: string) {
+  return post<DeviceDetailDto>(API_ROUTES.DEVICES.REPROVISION(id));
 }

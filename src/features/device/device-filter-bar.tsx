@@ -74,7 +74,10 @@ export function DeviceFilterBar({
 
   return (
     <div className="flex flex-wrap items-center gap-2 s:gap-3">
-      <Select value={statusFilter} onValueChange={(v) => v && onStatusChange(v)}>
+      <Select
+        value={statusFilter}
+        onValueChange={(v) => v && onStatusChange(v)}
+      >
         <SelectTrigger className="h-9 w-full gap-2 px-3 text-sm s:w-36">
           <span className="truncate">{getStatusLabel(statusFilter)}</span>
         </SelectTrigger>
@@ -108,7 +111,10 @@ export function DeviceFilterBar({
         </SelectContent>
       </Select>
 
-      <Select value={hardwareFilter} onValueChange={(v) => v && onHardwareChange(v)}>
+      <Select
+        value={hardwareFilter}
+        onValueChange={(v) => v && onHardwareChange(v)}
+      >
         <SelectTrigger className="h-9 w-full gap-2 px-3 text-sm s:w-36">
           <span className="truncate">{getHardwareLabel(hardwareFilter)}</span>
         </SelectTrigger>
@@ -126,7 +132,10 @@ export function DeviceFilterBar({
       </Select>
 
       {isSuperAdmin && (
-        <Select value={storeFilter} onValueChange={(v) => v && onStoreChange(v)}>
+        <Select
+          value={storeFilter}
+          onValueChange={(v) => v && onStoreChange(v)}
+        >
           <SelectTrigger className="h-9 w-full gap-2 px-3 text-sm s:w-40">
             <span className="truncate">
               {storeFilter === "all"

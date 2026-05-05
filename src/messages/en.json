@@ -507,9 +507,33 @@
         "width_out_of_range": "RF code bit width is out of the allowed range."
       }
     },
+    "pending": {
+      "approveButton": "Approve",
+      "rejectButton": "Reject",
+      "approveTitle": "Approve Device",
+      "approveDescription": "Approve this device and assign it to a store. The device will receive an activation challenge.",
+      "approveNameLabel": "Assigned Name",
+      "approveNameRequired": "Name is required",
+      "approveStoreLabel": "Store",
+      "approveStoreRequired": "Store is required",
+      "approveStorePlaceholder": "Select a store",
+      "approvedToast": "Device approved",
+      "rejectTitle": "Reject Device",
+      "rejectDescription": "Reject this device? It will not be able to activate. This action cannot be undone.",
+      "rejectedToast": "Device rejected",
+      "errorHubCapReached": "This store has reached the maximum number of transmitter hubs."
+    },
     "rfCode": {
+      "title": "RF Code",
       "maskedValue": "••  ••",
       "lockedNote": "This is the PT2272 address (16-bit). The value is hardware-fixed and cannot be rotated. The channel ID is patched by the backend at dispatch time.",
+      "rotateButton": "Rotate Code",
+      "rotateTitle": "Rotate RF Code",
+      "rotateDescription": "Generate a new RF code for this device. The current code will be replaced once the device acknowledges the update.",
+      "rotatedToast": "RF code rotated — awaiting device acknowledgment",
+      "errorHardwareFixed": "This device has a hardware-fixed code that cannot be rotated.",
+      "errorHubNoRfCode": "Transmitter hubs do not have RF codes.",
+      "polling": "Waiting for device acknowledgment…",
       "ack": {
         "PENDING": "Pending",
         "APPLIED": "Applied",
@@ -518,7 +542,57 @@
       }
     },
     "lifecycle": {
-      "passiveSubtitle": "Passive devices have no firmware — lifecycle actions only affect backend state. The physical chip continues listening regardless."
+      "title": "Lifecycle",
+      "suspendButton": "Suspend",
+      "resumeButton": "Resume",
+      "decommissionButton": "Decommission",
+      "suspendTitle": "Suspend Device",
+      "suspendDescription": "Suspend this device? It will stop receiving dispatch signals until resumed.",
+      "resumeTitle": "Resume Device",
+      "resumeDescription": "Resume this device? It will start receiving dispatch signals again.",
+      "decommissionTitle": "Decommission Device",
+      "decommissionDescription": "Decommission this device? It will be permanently taken out of service. This action cannot be undone.",
+      "suspendedToast": "Device suspended",
+      "resumedToast": "Device resumed",
+      "decommissionedToast": "Device decommissioned",
+      "passiveSubtitle": "Passive devices have no firmware — lifecycle actions only affect backend state. The physical chip continues listening regardless.",
+      "hubSubtitle": "Suspending the active hub forces the next dispatch to re-elect from available hubs.",
+      "commandPending": "Command pending — waiting for device acknowledgment",
+      "commandAck": {
+        "PENDING": "Pending",
+        "OK": "Acknowledged",
+        "IGNORED": "Ignored",
+        "REJECTED": "Rejected"
+      }
+    },
+    "reprovision": {
+      "button": "Reprovision",
+      "title": "Reprovision Device",
+      "description": "Reprovision this device? It will be reset to pending status and must go through SoftAP provisioning again.",
+      "hubDescription": "Reprovision this hub? It will be reset to pending status and must go through SoftAP provisioning again.",
+      "successToast": "Device reset to pending — awaiting reprovisioning"
+    },
+    "dispatch": {
+      "title": "Dispatched Ticket",
+      "placeholder": "No ticket currently bound to this device."
+    },
+    "hub": {
+      "approveSubtitle": "Approving this hub consumes a slot in the store's transmitter hub limit.",
+      "capBadge": "{registered} / {max} hubs registered",
+      "capTooltip": "Maximum number of transmitter hubs per store, enforced by the backend.",
+      "liveness": {
+        "alive": "Alive",
+        "stale": "Stale"
+      },
+      "election": {
+        "elected": "Elected",
+        "standby": "Standby"
+      },
+      "recentDispatches": {
+        "note": "This hub is the elected transmitter for this store. Recent dispatches go through it.",
+        "empty": "No recent dispatches through this hub."
+      },
+      "reprovisionConfirm": "This will reset the hub and require SoftAP re-provisioning."
     },
     "detail": {
       "identity": "Identity",

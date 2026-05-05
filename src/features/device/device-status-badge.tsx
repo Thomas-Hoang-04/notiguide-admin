@@ -2,9 +2,9 @@
 
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import type { DeviceStatus } from "@/types/device";
-import React from "react";
 
 const statusStyles: Record<DeviceStatus, string> = {
   PENDING:
@@ -18,7 +18,7 @@ const statusStyles: Record<DeviceStatus, string> = {
   REJECTED: "border-destructive/30 bg-destructive/10 text-destructive",
 };
 
-const statusIcons: Partial<Record<DeviceStatus, React.ReactNode>> = {
+const statusIcons: Partial<Record<DeviceStatus, ReactNode>> = {
   ACTIVE: <CheckCircle aria-hidden="true" className="mr-1 size-3" />,
   PENDING: <Clock aria-hidden="true" className="mr-1 size-3" />,
   PENDING_RF_CODE: <Clock aria-hidden="true" className="mr-1 size-3" />,

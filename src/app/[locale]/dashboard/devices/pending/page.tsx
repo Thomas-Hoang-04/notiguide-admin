@@ -66,7 +66,11 @@ export default function DevicesPendingPage() {
           {tDevices("pendingEmpty")}
         </div>
       ) : (
-        <PendingReviewCard devices={devices} loading={loading} />
+        <PendingReviewCard
+          devices={devices}
+          loading={loading}
+          onActionComplete={() => void fetchDevices()}
+        />
       )}
     </div>
   );

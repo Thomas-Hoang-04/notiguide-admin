@@ -150,7 +150,11 @@ export default function DevicesPage() {
         onStoreChange={setStoreFilter}
       />
 
-      <PendingReviewCard devices={devices} loading={loading} />
+      <PendingReviewCard
+        devices={devices}
+        loading={loading}
+        onActionComplete={() => void fetchDevices()}
+      />
 
       <DeviceListTable devices={filteredDevices ?? null} loading={loading} />
 

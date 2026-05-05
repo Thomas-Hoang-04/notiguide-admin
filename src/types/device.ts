@@ -76,3 +76,31 @@ export interface PassiveDeviceRegistrationRequest {
   rfCodeHex: string;
   rfCodeBits: 16;
 }
+
+export type DeviceLifecycleAckStatus =
+  | "PENDING"
+  | "OK"
+  | "IGNORED"
+  | "REJECTED";
+
+export interface DeviceDetailDto extends DeviceDto {
+  lifecycleCommand?: {
+    commandId: string;
+    action: string;
+    ackStatus: DeviceLifecycleAckStatus;
+    issuedAt: string;
+  } | null;
+}
+
+export interface ApproveDeviceRequest {
+  assignedName: string;
+  storeId: string;
+}
+
+export interface RotateRfCodeRequest {
+  rfCodeBits?: number;
+}
+
+export interface DeviceLifecycleRequest {
+  action: "suspend" | "resume" | "decommission";
+}
