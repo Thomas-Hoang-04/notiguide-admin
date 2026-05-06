@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, PauseCircle } from "lucide-react";
+import { Loader2, PauseCircle, Radio } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -14,8 +14,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { callNext, getPublicStoreInfo } from "@/features/queue/api";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  callNext,
+  getAvailableDevices,
+  getPublicStoreInfo,
+} from "@/features/queue/api";
 import { CleanupButton } from "@/features/queue/cleanup-button";
+import { DeviceDispatchDialog } from "@/features/queue/device-dispatch-dialog";
 import { QueueStateToggle } from "@/features/queue/queue-state-toggle";
 import { QueueStats } from "@/features/queue/queue-stats";
 import { ServingDisplay } from "@/features/queue/serving-display";
@@ -60,6 +70,10 @@ export default function QueuePage() {
   const [allowNoShow, setAllowNoShow] = useState(false);
   const [queueState, setQueueState] = useState("ACTIVE");
 
+  const [dispatchDialogOpen, setDispatchDialogOpen] = useState(false);
+  const [dispatchReady, setDispatchReady] = useState(false);
+  const [hasAvailableDevices, setHasAvailableDevices] = useState(false);
+
   // Refs for keyboard shortcut checks
   const callLoadingRef = useRef(false);
   const servingTicketsRef = useRef(servingTickets);
@@ -76,6 +90,19 @@ export default function QueuePage() {
   useEffect(() => {
     void hydrateQueue(storeId);
   }, [hydrateQueue, storeId]);
+
+  // Fetch dispatch availability
+  const fetchDispatchAvailability = useCallback(async () => {
+    if (!storeId) return;
+    try {
+      const res = await getAvailableDevices(storeId);
+      setDispatchReady(res.dispatchReady);
+      setHasAvailableDevices(res.devices.length > 0);
+    } catch {
+      setDispatchReady(false);
+      setHasAvailableDevices(false);
+    }
+  }, [storeId]);
 
   // Fetch store settings, service types, and queue state
   useEffect(() => {
@@ -101,13 +128,27 @@ export default function QueuePage() {
         // Default to false / ACTIVE if fetch fails
       }
     })();
-  }, [storeId]);
+    void fetchDispatchAvailability();
+  }, [storeId, fetchDispatchAvailability]);
 
   const storeName = useStoreName(storeId);
 
   // SSE: real-time queue events
   useQueueEvents(storeId, (event) => {
     setStatsRefreshSignal((s) => s + 1);
+
+    if (event.type === "DEVICE_DISPATCH_FAILED") {
+      const reason = event.reason;
+      if (reason === "no_active_transmitter") {
+        toast.error(tQueue("dispatch.errorNoActiveTransmitter"));
+      } else if (reason === "device_not_found") {
+        toast.error(tQueue("dispatch.errorDeviceNotFound"));
+      } else {
+        toast.error(tQueue("dispatch.errorInfrastructure"));
+      }
+      void fetchDispatchAvailability();
+      return;
+    }
 
     if (
       (event.type === "TICKET_SERVED" ||
@@ -169,6 +210,13 @@ export default function QueuePage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [storeId, handleCallNext]);
 
+  const dispatchEnabled = dispatchReady && hasAvailableDevices;
+  const dispatchTooltip = !hasAvailableDevices
+    ? tQueue("dispatch.disabledNoDevice")
+    : !dispatchReady
+      ? tQueue("dispatch.disabledNoHub")
+      : null;
+
   if (!storeId) {
     return (
       <div className="queue-page-shell -m-3 p-3 s:-m-4 s:p-4 xl:-m-5 xl:p-5 3xl:-m-6 3xl:p-6 4xl:-m-8 4xl:p-8">
@@ -191,6 +239,33 @@ export default function QueuePage() {
           </h1>
           <p className="sr-only">{tQueue("keyboardShortcutsDescription")}</p>
           <div className="flex items-center gap-2">
+            {dispatchEnabled ? (
+              <Button
+                variant="outline"
+                onClick={() => setDispatchDialogOpen(true)}
+              >
+                <Radio aria-hidden="true" className="mr-2 size-4" />
+                {tQueue("dispatch.action")}
+              </Button>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      disabled
+                      aria-label={tQueue("dispatch.action")}
+                    >
+                      <Radio aria-hidden="true" className="mr-2 size-4" />
+                      {tQueue("dispatch.action")}
+                    </Button>
+                  }
+                />
+                <TooltipContent>
+                  {dispatchTooltip ?? tQueue("dispatch.disabledNoDevice")}
+                </TooltipContent>
+              </Tooltip>
+            )}
             <QueueStateToggle
               storeId={storeId}
               currentState={queueState}
@@ -324,6 +399,16 @@ export default function QueuePage() {
           </div>
         </div>
       </div>
+
+      <DeviceDispatchDialog
+        open={dispatchDialogOpen}
+        onOpenChange={setDispatchDialogOpen}
+        storeId={storeId}
+        onSuccess={() => {
+          setStatsRefreshSignal((s) => s + 1);
+          void fetchDispatchAvailability();
+        }}
+      />
     </div>
   );
 }

@@ -319,7 +319,23 @@
     "statusRequeued": "Re-queued",
     "graceTimer": "{seconds}s",
     "graceTimerLabel": "TIME LEFT",
-    "keyboardShortcutsDescription": "Keyboard shortcuts: N to call next, S to serve, C to cancel, X for no-show"
+    "keyboardShortcutsDescription": "Keyboard shortcuts: N to call next, S to serve, C to cancel, X for no-show",
+    "dispatch": {
+      "action": "Dispatch via device",
+      "disabledNoDevice": "No receivers available for dispatch",
+      "disabledNoHub": "No active transmitter hub for this store",
+      "dialogTitle": "Dispatch to Device",
+      "dialogDescription": "Select a receiver to dispatch a device-bound ticket.",
+      "deviceLabel": "Receiver",
+      "confirm": "Dispatch",
+      "cancel": "Cancel",
+      "successToast": "Device-bound ticket #{number} issued",
+      "badgeLabel": "{deviceName}",
+      "errorNoActiveTransmitter": "No active transmitter hub — the device cannot receive the signal right now.",
+      "errorDeviceBusy": "This device is currently busy with another ticket.",
+      "errorDeviceNotFound": "Target device could not be found or is no longer available.",
+      "errorInfrastructure": "Dispatch failed due to a system issue. Please try again."
+    }
   },
   "analytics": {
     "title": "Analytics",
@@ -574,7 +590,8 @@
     },
     "dispatch": {
       "title": "Dispatched Ticket",
-      "placeholder": "No ticket currently bound to this device."
+      "placeholder": "No ticket currently bound to this device.",
+      "boundTicket": "Ticket #{number}"
     },
     "hub": {
       "approveSubtitle": "Approving this hub consumes a slot in the store's transmitter hub limit.",
@@ -591,8 +608,7 @@
       "recentDispatches": {
         "note": "This hub is the elected transmitter for this store. Recent dispatches go through it.",
         "empty": "No recent dispatches through this hub."
-      },
-      "reprovisionConfirm": "This will reset the hub and require SoftAP re-provisioning."
+      }
     },
     "detail": {
       "identity": "Identity",

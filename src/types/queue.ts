@@ -1,3 +1,5 @@
+import type { DeviceDto } from "@/types/device";
+
 export type TicketStatus =
   | "WAITING"
   | "CALLED"
@@ -14,6 +16,8 @@ export interface TicketDto {
   issuedAt: string | null;
   calledAt: string | null;
   position: number | null;
+  deviceId: string | null;
+  deviceName: string | null;
 }
 
 export interface NextTicketResponse {
@@ -41,7 +45,8 @@ export type QueueEventType =
   | "TICKET_CANCELLED"
   | "TICKET_SKIPPED"
   | "TICKET_REQUEUED"
-  | "TICKET_TRANSFERRED";
+  | "TICKET_TRANSFERRED"
+  | "DEVICE_DISPATCH_FAILED";
 
 export interface QueueSseEvent {
   type: QueueEventType;
@@ -49,5 +54,18 @@ export interface QueueSseEvent {
   ticketId: string;
   ticketNumber: string | null;
   counterId: string | null;
+  reason: string | null;
   timestamp: number;
+}
+
+export interface AvailableDevicesResponse {
+  devices: DeviceDto[];
+  dispatchReady: boolean;
+  error: string | null;
+  maxHubsPerStore: number | null;
+}
+
+export interface IssueDeviceTicketRequest {
+  deviceId: string;
+  serviceTypeId?: string | null;
 }

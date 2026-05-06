@@ -14,8 +14,10 @@ import { listDevices } from "@/features/device/api";
 import { DeviceFilterBar } from "@/features/device/device-filter-bar";
 import { DeviceListTable } from "@/features/device/device-list-table";
 import { EnrollmentTokenDialog } from "@/features/device/enrollment-token-dialog";
+import { HubCapBadge } from "@/features/device/hub-cap-badge";
 import { PassiveDeviceFormDialog } from "@/features/device/passive-device-form-dialog";
 import { PendingReviewCard } from "@/features/device/pending-review-card";
+import { getAvailableDevices } from "@/features/queue/api";
 import { listStores } from "@/features/store/api";
 import { Link } from "@/i18n/navigation";
 import {
@@ -26,6 +28,11 @@ import { useAuthStore } from "@/store/auth";
 import { ApiError } from "@/types/api";
 import type { DeviceDto } from "@/types/device";
 import type { StoreDto } from "@/types/store";
+
+interface HubCapInfo {
+  registered: number;
+  max: number;
+}
 
 export default function DevicesPage() {
   const { isSuperAdmin, storeId: adminStoreId } = useAuthStore();
@@ -44,6 +51,8 @@ export default function DevicesPage() {
 
   const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
   const [passiveDialogOpen, setPassiveDialogOpen] = useState(false);
+
+  const [hubCaps, setHubCaps] = useState<Map<string, HubCapInfo>>(new Map());
 
   const fetchDevices = useCallback(async () => {
     setLoading(true);
@@ -76,6 +85,32 @@ export default function DevicesPage() {
     }
   }, [fetchDevices, isSuperAdmin, tQueue]);
 
+  useEffect(() => {
+    const storeIds = isSuperAdmin
+      ? stores.map((s) => s.id)
+      : adminStoreId
+        ? [adminStoreId]
+        : [];
+    if (storeIds.length === 0) return;
+
+    const promises = storeIds.map(async (sid) => {
+      try {
+        const [devRes, availRes] = await Promise.all([
+          listDevices("TRANSMITTER_HUB", sid),
+          getAvailableDevices(sid),
+        ]);
+        const registered = devRes.registered ?? 0;
+        const max = availRes.maxHubsPerStore ?? 3;
+        return [sid, { registered, max }] as const;
+      } catch {
+        return [sid, { registered: 0, max: 3 }] as const;
+      }
+    });
+    Promise.all(promises).then((entries) => {
+      setHubCaps(new Map(entries.filter(([, info]) => info.registered > 0)));
+    });
+  }, [isSuperAdmin, stores, adminStoreId]);
+
   const filteredDevices = devices?.filter((d) => {
     if (statusFilter !== "all" && d.status !== statusFilter) return false;
     return !(hardwareFilter !== "all" && d.hardwareModel !== hardwareFilter);
@@ -83,10 +118,20 @@ export default function DevicesPage() {
 
   const hasNoStore = !isSuperAdmin && !adminStoreId;
 
+  const adminStoreHubCap = adminStoreId ? hubCaps.get(adminStoreId) : null;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 s:flex-row s:items-center s:justify-between">
-        <h1 className="text-2xl font-bold">{tDevices("title")}</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold">{tDevices("title")}</h1>
+          {!isSuperAdmin && adminStoreHubCap && (
+            <HubCapBadge
+              registered={adminStoreHubCap.registered}
+              max={adminStoreHubCap.max}
+            />
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setTokenDialogOpen(true)}>
             <Radio aria-hidden="true" className="mr-2 size-4" />
@@ -155,6 +200,22 @@ export default function DevicesPage() {
         loading={loading}
         onActionComplete={() => void fetchDevices()}
       />
+
+      {isSuperAdmin && hubCaps.size > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          {[...hubCaps.entries()].map(([sid, info]) => {
+            const store = stores.find((s) => s.id === sid);
+            return (
+              <div key={sid} className="flex items-center gap-1.5">
+                <span className="text-xs text-muted-foreground">
+                  {store?.name ?? sid}:
+                </span>
+                <HubCapBadge registered={info.registered} max={info.max} />
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <DeviceListTable devices={filteredDevices ?? null} loading={loading} />
 

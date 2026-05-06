@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getDevice, reprovisionDevice } from "@/features/device/api";
 import { DeviceStatusBadge } from "@/features/device/device-status-badge";
 import { DispatchedTicketPanel } from "@/features/device/dispatched-ticket-panel";
+import { HubHeartbeatPanel } from "@/features/device/hub-heartbeat-panel";
 import { LifecyclePanel } from "@/features/device/lifecycle-panel";
 import { RfCodeEditor } from "@/features/device/rf-code-editor";
 import { useDeviceAckPoll } from "@/features/device/use-device-ack-poll";
@@ -80,6 +81,12 @@ export default function DeviceDetailPage() {
     device !== null &&
     device.status !== "PENDING" &&
     device.status !== "PENDING_RF_CODE";
+  const showDispatchPanel =
+    device !== null &&
+    device.status !== "PENDING" &&
+    device.status !== "PENDING_RF_CODE" &&
+    device.status !== "DECOMMISSIONED" &&
+    device.status !== "REJECTED";
 
   async function handleReprovision() {
     if (reprovisionLoading || !device) return;
@@ -235,7 +242,12 @@ export default function DeviceDetailPage() {
         </div>
       </div>
 
-      {/* RF Code Panel — receivers only */}
+      {/* Heartbeat Panel — hub only */}
+      {isHub && showDispatchPanel && (
+        <HubHeartbeatPanel device={device} onUpdate={setDevice} />
+      )}
+
+      {/* RF Code Panel — receivers only (not rendered for hubs per §9.9.2) */}
       {showRfCode && (
         <RfCodeEditor device={device} onUpdate={setDevice} polling={polling} />
       )}
@@ -243,12 +255,8 @@ export default function DeviceDetailPage() {
       {/* Lifecycle Panel */}
       {showLifecycle && <LifecyclePanel device={device} onUpdate={setDevice} />}
 
-      {/* Dispatched Ticket Panel — placeholder */}
-      {isReceiver &&
-        device.status !== "PENDING" &&
-        device.status !== "PENDING_RF_CODE" &&
-        device.status !== "DECOMMISSIONED" &&
-        device.status !== "REJECTED" && <DispatchedTicketPanel />}
+      {/* Dispatched Ticket Panel */}
+      {showDispatchPanel && <DispatchedTicketPanel device={device} />}
 
       {/* Reprovision Action */}
       {showReprovision && (

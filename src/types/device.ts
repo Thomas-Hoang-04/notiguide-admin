@@ -83,6 +83,12 @@ export type DeviceLifecycleAckStatus =
   | "IGNORED"
   | "REJECTED";
 
+export interface BoundTicketDto {
+  ticketId: string;
+  ticketNumber: string;
+  status: string;
+}
+
 export interface DeviceDetailDto extends DeviceDto {
   lifecycleCommand?: {
     commandId: string;
@@ -90,6 +96,8 @@ export interface DeviceDetailDto extends DeviceDto {
     ackStatus: DeviceLifecycleAckStatus;
     issuedAt: string;
   } | null;
+  isElected?: boolean | null;
+  boundTicket?: BoundTicketDto | null;
 }
 
 export interface ApproveDeviceRequest {

@@ -32,6 +32,7 @@ export function useQueueEvents(
       "TICKET_SKIPPED",
       "TICKET_REQUEUED",
       "TICKET_TRANSFERRED",
+      "DEVICE_DISPATCH_FAILED",
     ];
 
     function handleEvent(e: MessageEvent) {

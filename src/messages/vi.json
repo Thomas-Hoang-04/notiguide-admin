@@ -319,7 +319,23 @@
     "statusRequeued": "Đã xếp lại",
     "graceTimer": "{seconds}s",
     "graceTimerLabel": "THỜI GIAN CÒN LẠI",
-    "keyboardShortcutsDescription": "Phím tắt: N để gọi tiếp, S để phục vụ, C để hủy, X để đánh dấu vắng mặt"
+    "keyboardShortcutsDescription": "Phím tắt: N để gọi tiếp, S để phục vụ, C để hủy, X để đánh dấu vắng mặt",
+    "dispatch": {
+      "action": "Gửi qua thiết bị",
+      "disabledNoDevice": "Không có bộ thu khả dụng",
+      "disabledNoHub": "Chưa có bộ phát đang hoạt động cho cửa hàng này",
+      "dialogTitle": "Gửi tín hiệu thiết bị",
+      "dialogDescription": "Chọn bộ thu để phát vé gắn thiết bị.",
+      "deviceLabel": "Bộ thu",
+      "confirm": "Gửi",
+      "cancel": "Hủy",
+      "successToast": "Đã phát vé #{number} qua thiết bị",
+      "badgeLabel": "{deviceName}",
+      "errorNoActiveTransmitter": "Chưa có bộ phát hoạt động — thiết bị không thể nhận tín hiệu.",
+      "errorDeviceBusy": "Thiết bị này đang bận xử lý vé khác.",
+      "errorDeviceNotFound": "Không tìm thấy thiết bị hoặc thiết bị không còn khả dụng.",
+      "errorInfrastructure": "Gửi tín hiệu thất bại do lỗi hệ thống. Vui lòng thử lại."
+    }
   },
   "analytics": {
     "title": "Phân tích",
@@ -574,7 +590,8 @@
     },
     "dispatch": {
       "title": "Ticket đang gán",
-      "placeholder": "Chưa có ticket nào gán cho thiết bị này."
+      "placeholder": "Chưa có ticket nào gán cho thiết bị này.",
+      "boundTicket": "Vé #{number}"
     },
     "hub": {
       "approveSubtitle": "Chấp nhận bộ phát này sẽ sử dụng một suất trong giới hạn bộ phát của cửa hàng.",
@@ -591,8 +608,7 @@
       "recentDispatches": {
         "note": "Bộ phát này đang được chọn làm bộ phát chính cho cửa hàng",
         "empty": "Chưa có lần phát nào qua bộ phát này."
-      },
-      "reprovisionConfirm": "Thao tác này sẽ đặt lại bộ phát và cần cài đặt lại."
+      }
     },
     "detail": {
       "identity": "Thông tin",

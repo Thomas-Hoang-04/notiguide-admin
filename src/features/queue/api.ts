@@ -1,7 +1,9 @@
 import { get, post, put } from "@/lib/api";
 import { API_ROUTES } from "@/lib/constants";
 import type {
+  AvailableDevicesResponse,
   CleanupResponse,
+  IssueDeviceTicketRequest,
   NextTicketResponse,
   QueueSizeResponse,
   TicketDto,
@@ -77,16 +79,6 @@ export function triggerNoShow(storeId: string, ticketId: string) {
   return post<void>(API_ROUTES.QUEUE.NO_SHOW(storeId, ticketId));
 }
 
-export function transferTicket(
-  storeId: string,
-  ticketId: string,
-  targetServiceTypeId: string,
-) {
-  return post<void>(
-    `${API_ROUTES.QUEUE.TRANSFER(storeId, ticketId)}?targetServiceTypeId=${targetServiceTypeId}`,
-  );
-}
-
 export function getStoreSettings(storeId: string) {
   return get<StoreSettingsDto>(API_ROUTES.STORES.SETTINGS(storeId));
 }
@@ -96,4 +88,17 @@ export function updateStoreSettings(
   request: UpdateStoreSettingsRequest,
 ) {
   return put<StoreSettingsDto>(API_ROUTES.STORES.SETTINGS(storeId), request);
+}
+
+export function getAvailableDevices(storeId: string) {
+  return get<AvailableDevicesResponse>(
+    API_ROUTES.QUEUE.AVAILABLE_DEVICES(storeId),
+  );
+}
+
+export function issueDeviceTicket(
+  storeId: string,
+  request: IssueDeviceTicketRequest,
+) {
+  return post<TicketDto>(API_ROUTES.QUEUE.DEVICE_TICKETS(storeId), request);
 }

@@ -50,8 +50,10 @@ export const API_ROUTES = {
     RESUME: (storeId: string) => `/api/queue/admin/${storeId}/resume`,
     NO_SHOW: (storeId: string, ticketId: string) =>
       `/api/queue/admin/${storeId}/tickets/${ticketId}/no-show`,
-    TRANSFER: (storeId: string, ticketId: string) =>
-      `/api/queue/admin/${storeId}/tickets/${ticketId}/transfer`,
+    DEVICE_TICKETS: (storeId: string) =>
+      `/api/queue/admin/${storeId}/device-tickets`,
+    AVAILABLE_DEVICES: (storeId: string) =>
+      `/api/queue/admin/${storeId}/available-devices`,
   },
   ANALYTICS: {
     REALTIME: (storeId: string) => `/api/analytics/${storeId}/realtime`,

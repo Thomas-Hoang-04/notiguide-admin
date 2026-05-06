@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, Radio } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ import {
   serveTicket,
   triggerNoShow,
 } from "@/features/queue/api";
+import { Link } from "@/i18n/navigation";
 import {
   translateCommonApiError,
   translateNetworkError,
@@ -264,6 +265,23 @@ function ServingTicketCard({
         {tQueue(getTicketStatusTranslationKey(ticket.status))}
       </Badge>
       <span className="ticket-number text-foreground">#{ticket.number}</span>
+
+      {ticket.deviceId && ticket.deviceName && (
+        <Link
+          href={`/dashboard/devices/${ticket.deviceId}`}
+          className="inline-flex transition-colors hover:text-primary"
+        >
+          <Badge
+            variant="outline"
+            className="gap-1 border-primary/30 bg-primary/5 text-xs text-primary"
+          >
+            <Radio aria-hidden="true" className="size-3" />
+            {tQueue("dispatch.badgeLabel", {
+              deviceName: ticket.deviceName,
+            })}
+          </Badge>
+        </Link>
+      )}
 
       <div className="flex flex-wrap items-center gap-10">
         {ticket.issuedAt && (

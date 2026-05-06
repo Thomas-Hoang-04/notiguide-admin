@@ -1,12 +1,14 @@
 "use client";
 
-import { Loader2, PhoneCall } from "lucide-react";
+import { Loader2, PhoneCall, Radio } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { callSpecificTicket, listWaitingTickets } from "@/features/queue/api";
+import { Link } from "@/i18n/navigation";
 import {
   translateCommonApiError,
   translateNetworkError,
@@ -124,6 +126,22 @@ export function WaitingList({
               <span className="text-lg font-bold tabular-nums">
                 #{ticket.number}
               </span>
+              {ticket.deviceId && ticket.deviceName && (
+                <Link
+                  href={`/dashboard/devices/${ticket.deviceId}`}
+                  className="inline-flex items-center gap-1 transition-colors hover:text-primary"
+                >
+                  <Badge
+                    variant="outline"
+                    className="gap-1 border-primary/30 bg-primary/5 text-xs text-primary"
+                  >
+                    <Radio aria-hidden="true" className="size-3" />
+                    {tQueue("dispatch.badgeLabel", {
+                      deviceName: ticket.deviceName,
+                    })}
+                  </Badge>
+                </Link>
+              )}
               {ticket.issuedAt && (
                 <span className="text-xs text-muted-foreground">
                   {tQueue("waitingListIssuedAt", {
