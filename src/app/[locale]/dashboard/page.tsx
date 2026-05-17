@@ -22,6 +22,7 @@ import type {
   PeakHoursResponse,
   StoreSummaryResponse,
 } from "@/features/analytics/types";
+import { HubHealthCard } from "@/features/device/hub-health-card";
 import { useStoreName } from "@/features/queue/store-selector";
 import { Link } from "@/i18n/navigation";
 import { useAuthStore } from "@/store/auth";
@@ -44,6 +45,7 @@ export default function DashboardPage() {
       <div className="space-y-4 l:space-y-6">
         <h1 className="text-xl font-bold l:text-2xl">{tNav("overview")}</h1>
         <RealtimeStats storeId={storeId} isSuperAdmin />
+        <HubHealthCard />
         <SuperAdminDashboardCharts />
         <Link
           href="/dashboard/analytics"
@@ -61,6 +63,7 @@ export default function DashboardPage() {
         {storeName || tNav("overview")}
       </h1>
       <RealtimeStats storeId={storeId} isSuperAdmin={false} />
+      <HubHealthCard />
       {storeId && <AdminDashboardCharts storeId={storeId} />}
       <Link
         href="/dashboard/analytics"

@@ -33,10 +33,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { UseSerialReturn } from "@/lib/serial/use-serial";
+import { relayDiagnostics } from "./api";
 import "@/styles/usb-console.css";
 
 interface UsbControlPanelProps {
   serial: UseSerialReturn;
+  deviceId: string;
   backendMqttConnected?: boolean;
   expectedPublicId?: string | null;
 }
@@ -63,6 +65,7 @@ function detectLogLevel(line: string): string {
 
 export function UsbControlPanel({
   serial,
+  deviceId,
   backendMqttConnected,
   expectedPublicId,
 }: UsbControlPanelProps) {
@@ -97,6 +100,33 @@ export function UsbControlPanel({
   const [mqttError, setMqttError] = useState("");
 
   const consoleEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isConnected || !deviceState || isMismatched || !expectedPublicId)
+      return;
+    if (deviceState.public_id !== expectedPublicId) return;
+    if (!deviceState.total_heap || deviceState.total_heap <= 0) return;
+
+    const freeHeapPct = Math.max(
+      0,
+      Math.min(
+        100,
+        Math.round((deviceState.free_heap / deviceState.total_heap) * 100),
+      ),
+    );
+
+    relayDiagnostics(deviceId, {
+      publicId: deviceState.public_id,
+      freeHeapPct,
+      rssi: deviceState.wifi_rssi ?? null,
+      uptimeMs: deviceState.uptime_ms,
+      dispatchDaily: deviceState.dispatch_daily ?? 0,
+      dispatchTotal: deviceState.dispatch_total ?? 0,
+      wifiConnected: deviceState.wifi_connected,
+      ip: deviceState.ip ?? null,
+      firmwareVersion: deviceState.firmware_version ?? null,
+    }).catch(() => {});
+  }, [deviceId, deviceState, expectedPublicId, isConnected, isMismatched]);
 
   const addConsoleLog = useCallback(
     (text: string) => {

@@ -89,6 +89,45 @@ export interface BoundTicketDto {
   status: string;
 }
 
+export interface HubDiagnosticsDto {
+  freeHeapPct: number;
+  rssi: number | null;
+  uptimeMs: number;
+  dispatchDaily: number;
+  dispatchTotal: number;
+  wifiConnected: boolean | null;
+  ip: string | null;
+  firmwareVersion: string | null;
+  source: "MQTT" | "USB";
+  updatedAt: string;
+}
+
+export interface HubHealthSummaryResponse {
+  totalHubs: number;
+  onlineHubs: number;
+  offlineHubs: number;
+  warnings: HubWarningDto[];
+}
+
+export interface HubWarningDto {
+  deviceId: string;
+  deviceName: string | null;
+  type: "LOW_MEMORY" | "WEAK_SIGNAL" | "LONG_UPTIME";
+  value: string;
+}
+
+export interface DeviceDiagnosticsRelayRequest {
+  publicId: string;
+  freeHeapPct: number;
+  rssi: number | null;
+  uptimeMs: number;
+  dispatchDaily: number;
+  dispatchTotal: number;
+  wifiConnected: boolean;
+  ip: string | null;
+  firmwareVersion: string | null;
+}
+
 export interface DeviceDetailDto extends DeviceDto {
   lifecycleCommand?: {
     commandId: string;
@@ -98,6 +137,7 @@ export interface DeviceDetailDto extends DeviceDto {
   } | null;
   isElected?: boolean | null;
   boundTicket?: BoundTicketDto | null;
+  diagnostics?: HubDiagnosticsDto | null;
 }
 
 export interface ApproveDeviceRequest {

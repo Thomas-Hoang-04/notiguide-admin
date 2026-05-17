@@ -16,12 +16,6 @@ import {
 import { InlineError } from "@/components/ui/inline-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
 import { listStores } from "@/features/store/api";
 import {
   translateCommonApiError,
@@ -33,6 +27,7 @@ import { useAuthStore } from "@/store/auth";
 import { ApiError } from "@/types/api";
 import type { StoreDto } from "@/types/store";
 import { approveDevice, issueEnrollmentToken, listDevices } from "./api";
+import { StoreSelectField } from "./store-select-field";
 
 type ProvisionStep =
   | "connect"
@@ -151,7 +146,7 @@ export function UsbProvisionDialog({
     try {
       setStep("identify");
       await connect();
-      const id = await sendCommand<IdentifyPayload>("identify");
+      const id = await sendCommand("identify");
       setIdentity(id);
       setStep("form");
     } catch {
@@ -177,7 +172,7 @@ export function UsbProvisionDialog({
     setWifiResult(null);
     setStep("testing_wifi");
     try {
-      const result = await sendCommand<TestWifiResult>("provision.test_wifi", {
+      const result = await sendCommand("provision.test_wifi", {
         wifi_ssid: wifiSsid,
         wifi_pwd: wifiPwd || undefined,
       });
@@ -370,49 +365,17 @@ export function UsbProvisionDialog({
               noValidate
               className="space-y-4"
             >
-              {isSuperAdmin ? (
-                <div className="space-y-2">
-                  <Label>{tUsb("select_store")}</Label>
-                  <Select
-                    value={storeId}
-                    onValueChange={(v) => v && setStoreId(v)}
-                  >
-                    <SelectTrigger
-                      className="h-10 w-full gap-2 px-3"
-                      aria-invalid={!!errors.storeId}
-                    >
-                      <span>
-                        {storeId
-                          ? (stores.find((s) => s.id === storeId)?.name ??
-                            tCommon("unknown"))
-                          : tDevices("pending.approveStorePlaceholder")}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent
-                      align="start"
-                      alignItemWithTrigger={false}
-                      className="p-1.5"
-                    >
-                      {stores.map((s) => (
-                        <SelectItem key={s.id} value={s.id} className="py-2">
-                          {s.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.storeId && (
-                    <InlineError message={errors.storeId} className="mt-1" />
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Label>{tUsb("select_store")}</Label>
-                  <Input
-                    value={admin?.storeName ?? tCommon("unknown")}
-                    disabled
-                  />
-                </div>
-              )}
+              <StoreSelectField
+                label={tUsb("select_store")}
+                storeId={storeId}
+                onStoreIdChange={setStoreId}
+                stores={stores}
+                isSuperAdmin={isSuperAdmin}
+                adminStoreName={admin?.storeName ?? tCommon("unknown")}
+                placeholder={tDevices("pending.approveStorePlaceholder")}
+                unknownLabel={tCommon("unknown")}
+                error={errors.storeId}
+              />
 
               <div className="space-y-2">
                 <Label htmlFor="usb-name">{tUsb("assigned_name")}</Label>

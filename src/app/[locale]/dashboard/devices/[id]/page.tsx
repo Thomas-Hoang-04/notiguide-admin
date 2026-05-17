@@ -21,7 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getDevice, reprovisionDevice } from "@/features/device/api";
 import { DeviceStatusBadge } from "@/features/device/device-status-badge";
 import { DispatchedTicketPanel } from "@/features/device/dispatched-ticket-panel";
-import { HubHeartbeatPanel } from "@/features/device/hub-heartbeat-panel";
+import { HubDiagnosticsPanel } from "@/features/device/hub-diagnostics-panel";
 import { LifecyclePanel } from "@/features/device/lifecycle-panel";
 import { RfCodeEditor } from "@/features/device/rf-code-editor";
 import { UsbControlPanel } from "@/features/device/usb-control-panel";
@@ -273,6 +273,7 @@ export default function DeviceDetailPage() {
             <>
               <UsbControlPanel
                 serial={serial}
+                deviceId={device.id}
                 backendMqttConnected={
                   device.status === "ACTIVE" || device.status === "SUSPENDED"
                 }
@@ -297,9 +298,9 @@ export default function DeviceDetailPage() {
         </>
       )}
 
-      {/* Heartbeat Panel — hub only */}
+      {/* Diagnostics Panel — hub only */}
       {isHub && showDispatchPanel && (
-        <HubHeartbeatPanel device={device} onUpdate={setDevice} />
+        <HubDiagnosticsPanel device={device} onUpdate={setDevice} />
       )}
 
       {/* RF Code Panel — receivers only (not rendered for hubs per §9.9.2) */}

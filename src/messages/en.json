@@ -609,6 +609,39 @@
       "recentDispatches": {
         "note": "This hub is the elected transmitter for this store. Recent dispatches go through it.",
         "empty": "No recent dispatches through this hub."
+      },
+      "diagnostics": {
+        "title": "Diagnostics",
+        "lastHeartbeat": "Last heartbeat",
+        "liveness": "Liveness",
+        "election": "Election",
+        "freeHeap": "Free heap",
+        "signal": "WiFi signal",
+        "signalExcellent": "Excellent",
+        "signalGood": "Good",
+        "signalFair": "Fair",
+        "signalWeak": "Weak",
+        "uptime": "Uptime",
+        "dispatches": "Dispatches",
+        "dispatchToday": "today",
+        "dispatchTotal": "total",
+        "network": "Network",
+        "lastUpdated": "Updated",
+        "source": "Source",
+        "sourceMqtt": "MQTT",
+        "sourceUsb": "USB",
+        "noData": "No diagnostics available",
+        "noDataHint": "Diagnostics appear after the hub runs the enriched firmware or a matching USB session relays status."
+      },
+      "health": {
+        "title": "Hub health",
+        "online": "{count} online",
+        "offline": "{count} offline",
+        "allHealthy": "All active hubs look healthy",
+        "warningLowMemory": "Low memory",
+        "warningWeakSignal": "Weak signal",
+        "warningLongUptime": "Long uptime",
+        "manageDevices": "Manage devices"
       }
     },
     "detail": {

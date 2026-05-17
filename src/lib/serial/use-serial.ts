@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SerialProtocol } from "./serial-protocol";
+import { hasWebSerialSupport } from "./support";
+import type { SerialCommandMap, StatusPayload } from "./types";
 import {
   ESP32_C3_USB_FILTER,
   SERIAL_BAUD_RATE,
   SERIAL_SESSION_POLL_INTERVAL_MS,
-  type StatusPayload,
 } from "./types";
 
 export type PortState = "closed" | "opening" | "open" | "closing";
@@ -18,7 +19,12 @@ export interface UseSerialReturn {
   reconnectKnownPort: () => Promise<void>;
   disconnect: () => Promise<void>;
   refreshStatus: () => Promise<StatusPayload | null>;
-  sendCommand: <T>(type: string, payload?: object) => Promise<T>;
+  sendCommand: <K extends keyof SerialCommandMap>(
+    type: K,
+    ...args: SerialCommandMap[K]["payload"] extends undefined
+      ? []
+      : [payload: SerialCommandMap[K]["payload"]]
+  ) => Promise<SerialCommandMap[K]["response"]>;
   deviceState: StatusPayload | null;
   events: EventTarget;
 }
@@ -34,7 +40,7 @@ export function useSerial(): UseSerialReturn {
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    setCanUseSerial("serial" in navigator);
+    setCanUseSerial(hasWebSerialSupport());
   }, []);
 
   const updatePortState = useCallback((next: PortState) => {
@@ -87,7 +93,7 @@ export function useSerial(): UseSerialReturn {
     stopStatusPoll();
     pollIntervalRef.current = setInterval(async () => {
       try {
-        const status = await protocolRef.current.send<StatusPayload>("status");
+        const status = await protocolRef.current.send("status");
         setDeviceState(status);
       } catch {
         // ignore poll failures — device may be busy or disconnected
@@ -97,7 +103,7 @@ export function useSerial(): UseSerialReturn {
 
   const refreshStatus = useCallback(async (): Promise<StatusPayload | null> => {
     try {
-      const status = await protocolRef.current.send<StatusPayload>("status");
+      const status = await protocolRef.current.send("status");
       setDeviceState(status);
       return status;
     } catch {
@@ -114,7 +120,7 @@ export function useSerial(): UseSerialReturn {
         portRef.current = port;
         updatePortState("open");
 
-        const status = await protocolRef.current.send<StatusPayload>("status");
+        const status = await protocolRef.current.send("status");
         setDeviceState(status);
         startStatusPoll();
       } catch (error) {
@@ -181,8 +187,13 @@ export function useSerial(): UseSerialReturn {
   }, [stopStatusPoll, updatePortState]);
 
   const sendCommand = useCallback(
-    async <T>(type: string, payload?: object): Promise<T> => {
-      return protocolRef.current.send<T>(type, payload);
+    <K extends keyof SerialCommandMap>(
+      type: K,
+      ...args: SerialCommandMap[K]["payload"] extends undefined
+        ? []
+        : [payload: SerialCommandMap[K]["payload"]]
+    ): Promise<SerialCommandMap[K]["response"]> => {
+      return protocolRef.current.send(type, ...args);
     },
     [],
   );
@@ -226,9 +237,48 @@ export function useSerial(): UseSerialReturn {
   }, [mergeEventIntoState, stopStatusPoll, updatePortState]);
 
   useEffect(() => {
+    if (!canUseSerial) return;
+
+    const handleSerialDisconnect = (e: Event) => {
+      if (portRef.current && e.target === portRef.current) {
+        stopStatusPoll();
+        void protocolRef.current.disconnect();
+        setDeviceState(null);
+        portRef.current = null;
+        updatePortState("closed");
+      }
+    };
+
+    const handleSerialConnect = (e: Event) => {
+      if (portStateRef.current !== "closed") return;
+      const port = e.target as SerialPort;
+      const info = port.getInfo();
+      if (
+        info.usbVendorId === ESP32_C3_USB_FILTER.usbVendorId &&
+        info.usbProductId === ESP32_C3_USB_FILTER.usbProductId
+      ) {
+        void openPort(port).catch(() => {
+          portRef.current = null;
+          updatePortState("closed");
+        });
+      }
+    };
+
+    navigator.serial.addEventListener("disconnect", handleSerialDisconnect);
+    navigator.serial.addEventListener("connect", handleSerialConnect);
+    return () => {
+      navigator.serial.removeEventListener(
+        "disconnect",
+        handleSerialDisconnect,
+      );
+      navigator.serial.removeEventListener("connect", handleSerialConnect);
+    };
+  }, [canUseSerial, openPort, stopStatusPoll, updatePortState]);
+
+  useEffect(() => {
     return () => {
       stopStatusPoll();
-      protocolRef.current.disconnect();
+      void protocolRef.current.disconnect();
       if (portRef.current) {
         portRef.current.close().catch(() => {});
         portRef.current = null;

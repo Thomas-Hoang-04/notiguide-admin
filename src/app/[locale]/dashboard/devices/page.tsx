@@ -25,6 +25,7 @@ import {
   translateCommonApiError,
   translateNetworkError,
 } from "@/lib/api-error";
+import { hasWebSerialSupport } from "@/lib/serial/support";
 import { useAuthStore } from "@/store/auth";
 import { ApiError } from "@/types/api";
 import type { DeviceDto } from "@/types/device";
@@ -58,7 +59,7 @@ export default function DevicesPage() {
   const [hubCaps, setHubCaps] = useState<Map<string, HubCapInfo>>(new Map());
 
   useEffect(() => {
-    setCanUseSerial("serial" in navigator);
+    setCanUseSerial(hasWebSerialSupport());
   }, []);
 
   const fetchDevices = useCallback(async () => {

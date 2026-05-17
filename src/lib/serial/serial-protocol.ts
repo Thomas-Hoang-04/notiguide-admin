@@ -1,3 +1,4 @@
+import type { SerialCommandMap, SerialResponse } from "./types";
 import { SERIAL_COMMAND_TIMEOUT_MS } from "./types";
 
 interface PendingRequest {
@@ -25,7 +26,7 @@ export class SerialProtocol {
     this.reader = port.readable.getReader();
     this.lineBuffer = "";
     this.readLoopActive = true;
-    this.runReadLoop();
+    void this.runReadLoop();
   }
 
   async disconnect(): Promise<void> {
@@ -66,22 +67,28 @@ export class SerialProtocol {
     this.lineBuffer = "";
   }
 
-  async send<T>(type: string, payload?: object): Promise<T> {
+  async send<K extends keyof SerialCommandMap>(
+    type: K,
+    ...args: SerialCommandMap[K]["payload"] extends undefined
+      ? []
+      : [payload: SerialCommandMap[K]["payload"]]
+  ): Promise<SerialCommandMap[K]["response"]> {
     if (!this.writer) {
       throw new Error("serial_not_connected");
     }
 
     const id = crypto.randomUUID();
+    const payload = args[0];
     const msg = `${JSON.stringify({ id, type, payload })}\n`;
 
-    return new Promise<T>((resolve, reject) => {
+    return new Promise<SerialCommandMap[K]["response"]>((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.pending.delete(id);
         reject(new Error(`serial_timeout: ${type}`));
       }, SERIAL_COMMAND_TIMEOUT_MS);
 
       this.pending.set(id, {
-        resolve: (value) => resolve(value as T),
+        resolve: (value) => resolve(value as SerialCommandMap[K]["response"]),
         reject,
         timeout,
       });
@@ -146,17 +153,20 @@ export class SerialProtocol {
   }
 
   private handleProtocolMessage(json: string): void {
-    const msg = JSON.parse(json);
+    const msg = JSON.parse(json) as
+      | SerialResponse
+      | { type: string; payload?: unknown };
 
-    if (msg.type === "response" && this.pending.has(msg.id)) {
-      const pending = this.pending.get(msg.id);
+    if (msg.type === "response" && "id" in msg && this.pending.has(msg.id)) {
+      const resp = msg as SerialResponse;
+      const pending = this.pending.get(resp.id);
       if (!pending) return;
       const { resolve, reject, timeout } = pending;
       clearTimeout(timeout);
-      this.pending.delete(msg.id);
-      msg.ok
-        ? resolve(msg.payload)
-        : reject(new Error(msg.error ?? "serial_error"));
+      this.pending.delete(resp.id);
+      resp.ok
+        ? resolve(resp.payload)
+        : reject(new Error(resp.error ?? "serial_error"));
     } else if (typeof msg.type === "string" && msg.type.startsWith("event.")) {
       this.events.dispatchEvent(
         new CustomEvent(msg.type, { detail: msg.payload }),

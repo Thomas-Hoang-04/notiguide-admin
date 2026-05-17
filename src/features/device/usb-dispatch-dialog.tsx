@@ -29,7 +29,7 @@ import {
   translateCommonApiError,
   translateNetworkError,
 } from "@/lib/api-error";
-import type { TransmitPayload, TransmitResult } from "@/lib/serial/types";
+import type { SerialCommandMap } from "@/lib/serial/types";
 import { ApiError } from "@/types/api";
 import type { DeviceDto } from "@/types/device";
 import { getUsbDispatchPayload } from "./api";
@@ -40,7 +40,12 @@ interface UsbDispatchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   storeId: string;
-  sendCommand: <T>(type: string, payload?: object) => Promise<T>;
+  sendCommand: <K extends keyof SerialCommandMap>(
+    type: K,
+    ...args: SerialCommandMap[K]["payload"] extends undefined
+      ? []
+      : [payload: SerialCommandMap[K]["payload"]]
+  ) => Promise<SerialCommandMap[K]["response"]>;
 }
 
 export function UsbDispatchDialog({
@@ -119,13 +124,13 @@ export function UsbDispatchDialog({
         action,
       });
 
-      const result = await sendCommand<TransmitResult>("transmit", {
+      const result = await sendCommand("transmit", {
         receiver_public_id: payload.receiverPublicId,
         band: payload.band,
         rf_code_hex: payload.rfCodeHex,
         rf_code_bits: payload.rfCodeBits,
         proto_any: payload.protoAny,
-      } satisfies TransmitPayload);
+      });
 
       if (result.status === "applied") {
         toast.success(tUsb("test_dispatch"));
@@ -150,12 +155,12 @@ export function UsbDispatchDialog({
     if (!validateManual()) return;
     setLoading(true);
     try {
-      const result = await sendCommand<TransmitResult>("transmit", {
+      const result = await sendCommand("transmit", {
         band,
         rf_code_hex: rfCodeHex.toUpperCase(),
         rf_code_bits: Number.parseInt(rfCodeBits, 10),
         proto_any: protoAny,
-      } satisfies TransmitPayload);
+      });
 
       if (result.status === "applied") {
         toast.success(tUsb("test_dispatch"));

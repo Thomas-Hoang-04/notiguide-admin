@@ -1,23 +1,11 @@
 // --- Message envelope types ---
 
-export interface SerialRequest {
-  id: string;
-  type: string;
-  payload?: Record<string, unknown>;
-}
-
 export interface SerialResponse {
   id: string;
   type: "response";
   ok: boolean;
   payload?: Record<string, unknown>;
   error?: string;
-}
-
-export interface SerialEvent {
-  id: null;
-  type: string;
-  payload: Record<string, unknown>;
 }
 
 // --- Command payload types ---
@@ -71,6 +59,9 @@ export interface StatusPayload {
   ip?: string;
   uptime_ms: number;
   free_heap: number;
+  total_heap?: number;
+  dispatch_daily?: number;
+  dispatch_total?: number;
   firmware_version: string;
   mac: string;
 }
@@ -107,30 +98,19 @@ export interface PingResult {
   uptime_ms: number;
 }
 
-// --- Serial command type union ---
+// --- Command → payload/response type map ---
 
-export type SerialCommandType =
-  | "ping"
-  | "identify"
-  | "status"
-  | "provision"
-  | "provision.test_wifi"
-  | "update_mqtt"
-  | "factory_reset"
-  | "transmit"
-  | "lifecycle";
-
-// --- Serial event type constants ---
-
-export type SerialEventType =
-  | "event.wifi_connected"
-  | "event.wifi_disconnected"
-  | "event.mqtt_connected"
-  | "event.mqtt_disconnected"
-  | "event.activated"
-  | "event.lifecycle_changed"
-  | "event.dispatch_ok"
-  | "event.dispatch_rejected";
+export interface SerialCommandMap {
+  ping: { payload: undefined; response: PingResult };
+  identify: { payload: undefined; response: IdentifyPayload };
+  status: { payload: undefined; response: StatusPayload };
+  provision: { payload: ProvisionPayload; response: RestartResult };
+  "provision.test_wifi": { payload: TestWifiPayload; response: TestWifiResult };
+  update_mqtt: { payload: UpdateMqttPayload; response: RestartResult };
+  factory_reset: { payload: undefined; response: RestartResult };
+  transmit: { payload: TransmitPayload; response: TransmitResult };
+  lifecycle: { payload: LifecyclePayload; response: LifecycleResult };
+}
 
 // --- Hardware constants ---
 

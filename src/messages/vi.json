@@ -609,6 +609,39 @@
       "recentDispatches": {
         "note": "Bộ phát này đang được chọn làm bộ phát chính cho cửa hàng",
         "empty": "Chưa có lần phát nào qua bộ phát này."
+      },
+      "diagnostics": {
+        "title": "Chẩn đoán",
+        "lastHeartbeat": "Tín hiệu gần nhất",
+        "liveness": "Tín hiệu hoạt động",
+        "election": "Vai trò phát",
+        "freeHeap": "Bộ nhớ trống",
+        "signal": "Tín hiệu WiFi",
+        "signalExcellent": "Rất mạnh",
+        "signalGood": "Tốt",
+        "signalFair": "Trung bình",
+        "signalWeak": "Yếu",
+        "uptime": "Thời gian chạy",
+        "dispatches": "Lượt phát",
+        "dispatchToday": "hôm nay",
+        "dispatchTotal": "tổng",
+        "network": "Mạng",
+        "lastUpdated": "Cập nhật",
+        "source": "Nguồn",
+        "sourceMqtt": "MQTT",
+        "sourceUsb": "USB",
+        "noData": "Chưa có dữ liệu chẩn đoán",
+        "noDataHint": "Dữ liệu xuất hiện khi bộ phát chạy firmware mới hoặc phiên USB khớp thiết bị gửi trạng thái về hệ thống."
+      },
+      "health": {
+        "title": "Tình trạng bộ phát",
+        "online": "{count} trực tuyến",
+        "offline": "{count} ngoại tuyến",
+        "allHealthy": "Các bộ phát đang hoạt động ổn định",
+        "warningLowMemory": "Bộ nhớ thấp",
+        "warningWeakSignal": "Tín hiệu mạng yếu",
+        "warningLongUptime": "Đã chạy quá lâu",
+        "manageDevices": "Quản lý thiết bị"
       }
     },
     "detail": {

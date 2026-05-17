@@ -3,11 +3,13 @@ import { API_ROUTES } from "@/lib/constants";
 import type {
   ApproveDeviceRequest,
   DeviceDetailDto,
+  DeviceDiagnosticsRelayRequest,
   DeviceDto,
   DeviceLifecycleRequest,
   DeviceListResponse,
   EnrollmentTokenIssueResponse,
   EnrollmentTokenMetadataDto,
+  HubHealthSummaryResponse,
   IssueEnrollmentTokenRequest,
   PassiveDeviceRegistrationRequest,
   RotateRfCodeRequest,
@@ -72,4 +74,15 @@ export function getUsbDispatchPayload(request: UsbDispatchPayloadRequest) {
     API_ROUTES.DEVICES.USB_DISPATCH_PAYLOAD,
     request,
   );
+}
+
+export function relayDiagnostics(
+  id: string,
+  data: DeviceDiagnosticsRelayRequest,
+) {
+  return post<void>(API_ROUTES.DEVICES.DIAGNOSTICS(id), data);
+}
+
+export function getHubHealth() {
+  return get<HubHealthSummaryResponse>(API_ROUTES.DEVICES.HUB_HEALTH);
 }

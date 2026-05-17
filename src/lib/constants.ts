@@ -84,6 +84,8 @@ export const API_ROUTES = {
     TOKENS: "/api/devices/enrollment-tokens",
     TOKEN_BY_HASH: (hash: string) => `/api/devices/enrollment-tokens/${hash}`,
     USB_DISPATCH_PAYLOAD: "/api/devices/usb-dispatch-payload",
+    DIAGNOSTICS: (id: string) => `/api/devices/${id}/diagnostics`,
+    HUB_HEALTH: "/api/devices/hub-health",
   },
 } as const;
 
