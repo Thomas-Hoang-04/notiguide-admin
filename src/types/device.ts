@@ -112,3 +112,17 @@ export interface RotateRfCodeRequest {
 export interface DeviceLifecycleRequest {
   action: "suspend" | "resume" | "decommission";
 }
+
+export interface UsbDispatchPayloadRequest {
+  storeId: string;
+  deviceId: string;
+  action: "call" | "stop";
+}
+
+export interface UsbDispatchPayloadResponse {
+  receiverPublicId: string;
+  band: "433M" | "2_4G";
+  rfCodeHex: string;
+  rfCodeBits: number;
+  protoAny: boolean;
+}

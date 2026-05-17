@@ -83,6 +83,7 @@ export const API_ROUTES = {
     REPROVISION: (id: string) => `/api/devices/${id}/reprovision`,
     TOKENS: "/api/devices/enrollment-tokens",
     TOKEN_BY_HASH: (hash: string) => `/api/devices/enrollment-tokens/${hash}`,
+    USB_DISPATCH_PAYLOAD: "/api/devices/usb-dispatch-payload",
   },
 } as const;
 

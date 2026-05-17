@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Radio } from "lucide-react";
+import { Plus, Radio, Usb } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import { EnrollmentTokenDialog } from "@/features/device/enrollment-token-dialog
 import { HubCapBadge } from "@/features/device/hub-cap-badge";
 import { PassiveDeviceFormDialog } from "@/features/device/passive-device-form-dialog";
 import { PendingReviewCard } from "@/features/device/pending-review-card";
+import { UsbProvisionDialog } from "@/features/device/usb-provision-dialog";
 import { getAvailableDevices } from "@/features/queue/api";
 import { listStores } from "@/features/store/api";
 import { Link } from "@/i18n/navigation";
@@ -51,8 +52,14 @@ export default function DevicesPage() {
 
   const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
   const [passiveDialogOpen, setPassiveDialogOpen] = useState(false);
+  const [usbDialogOpen, setUsbDialogOpen] = useState(false);
+  const [canUseSerial, setCanUseSerial] = useState(false);
 
   const [hubCaps, setHubCaps] = useState<Map<string, HubCapInfo>>(new Map());
+
+  useEffect(() => {
+    setCanUseSerial("serial" in navigator);
+  }, []);
 
   const fetchDevices = useCallback(async () => {
     setLoading(true);
@@ -133,6 +140,12 @@ export default function DevicesPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
+          {canUseSerial && (
+            <Button variant="outline" onClick={() => setUsbDialogOpen(true)}>
+              <Usb aria-hidden="true" className="mr-2 size-4" />
+              {tDevices("usb.provision_title")}
+            </Button>
+          )}
           <Button variant="outline" onClick={() => setTokenDialogOpen(true)}>
             <Radio aria-hidden="true" className="mr-2 size-4" />
             {tDevices("tokens.issueAction")}
@@ -230,6 +243,14 @@ export default function DevicesPage() {
         onOpenChange={setPassiveDialogOpen}
         onSuccess={() => void fetchDevices()}
       />
+
+      {canUseSerial && (
+        <UsbProvisionDialog
+          open={usbDialogOpen}
+          onOpenChange={setUsbDialogOpen}
+          onSuccess={() => void fetchDevices()}
+        />
+      )}
     </div>
   );
 }

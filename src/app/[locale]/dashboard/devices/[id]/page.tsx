@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, RotateCcw } from "lucide-react";
+import { Loader2, Radio, RotateCcw, Usb } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
@@ -24,12 +24,15 @@ import { DispatchedTicketPanel } from "@/features/device/dispatched-ticket-panel
 import { HubHeartbeatPanel } from "@/features/device/hub-heartbeat-panel";
 import { LifecyclePanel } from "@/features/device/lifecycle-panel";
 import { RfCodeEditor } from "@/features/device/rf-code-editor";
+import { UsbControlPanel } from "@/features/device/usb-control-panel";
+import { UsbDispatchDialog } from "@/features/device/usb-dispatch-dialog";
 import { useDeviceAckPoll } from "@/features/device/use-device-ack-poll";
 import { Link } from "@/i18n/navigation";
 import {
   translateCommonApiError,
   translateNetworkError,
 } from "@/lib/api-error";
+import { useSerial } from "@/lib/serial/use-serial";
 import { ApiError } from "@/types/api";
 import type { DeviceDetailDto } from "@/types/device";
 
@@ -40,10 +43,14 @@ export default function DeviceDetailPage() {
   const tDevices = useTranslations("devices");
   const tErrors = useTranslations("errors");
 
+  const serial = useSerial();
+  const tUsb = useTranslations("devices.usb");
+
   const [device, setDevice] = useState<DeviceDetailDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [reprovisionOpen, setReprovisionOpen] = useState(false);
   const [reprovisionLoading, setReprovisionLoading] = useState(false);
+  const [usbDispatchOpen, setUsbDispatchOpen] = useState(false);
 
   const fetchDevice = useCallback(async () => {
     if (!params.id) return;
@@ -87,6 +94,11 @@ export default function DeviceDetailPage() {
     device.status !== "PENDING_RF_CODE" &&
     device.status !== "DECOMMISSIONED" &&
     device.status !== "REJECTED";
+  const serialPublicId = serial.deviceState?.public_id?.trim();
+  const serialMatchesDevice =
+    !!serialPublicId &&
+    !!device?.publicId &&
+    serialPublicId === device.publicId;
 
   async function handleReprovision() {
     if (reprovisionLoading || !device) return;
@@ -242,6 +254,49 @@ export default function DeviceDetailPage() {
         </div>
       </div>
 
+      {/* USB Connect + Control Panel — hub only */}
+      {isHub && serial.canUseSerial && (
+        <>
+          {serial.portState === "closed" && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void serial.connect()}
+              >
+                <Usb aria-hidden="true" className="mr-1.5 size-4" />
+                {tUsb("connect")}
+              </Button>
+            </div>
+          )}
+          {serial.portState === "open" && (
+            <>
+              <UsbControlPanel
+                serial={serial}
+                backendMqttConnected={
+                  device.status === "ACTIVE" || device.status === "SUSPENDED"
+                }
+                expectedPublicId={device.publicId}
+              />
+              {device.storeId &&
+                serial.deviceState?.op_state === "ACTIVE" &&
+                serialMatchesDevice && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setUsbDispatchOpen(true)}
+                    >
+                      <Radio aria-hidden="true" className="mr-1.5 size-4" />
+                      {tUsb("test_dispatch")}
+                    </Button>
+                  </div>
+                )}
+            </>
+          )}
+        </>
+      )}
+
       {/* Heartbeat Panel — hub only */}
       {isHub && showDispatchPanel && (
         <HubHeartbeatPanel device={device} onUpdate={setDevice} />
@@ -272,6 +327,19 @@ export default function DeviceDetailPage() {
           </Button>
         </div>
       )}
+
+      {/* USB Dispatch Dialog */}
+      {isHub &&
+        device.storeId &&
+        serial.portState === "open" &&
+        serialMatchesDevice && (
+          <UsbDispatchDialog
+            open={usbDispatchOpen}
+            onOpenChange={setUsbDispatchOpen}
+            storeId={device.storeId}
+            sendCommand={serial.sendCommand}
+          />
+        )}
 
       {/* Reprovision Confirmation */}
       <AlertDialog open={reprovisionOpen} onOpenChange={setReprovisionOpen}>

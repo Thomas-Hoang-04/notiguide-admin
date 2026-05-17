@@ -1,0 +1,42 @@
+.usb-console {
+  font-family: "Courier New", Consolas, "Liberation Mono", monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  overflow-y: auto;
+  max-height: 20rem;
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  background: #1e293b;
+  color: #e2e8f0;
+  scroll-behavior: smooth;
+}
+
+.dark .usb-console {
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+.usb-console-line {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.usb-console-line[data-level="W"] {
+  color: var(--warning);
+}
+
+.usb-console-line[data-level="E"] {
+  color: var(--destructive);
+}
+
+.usb-console-line[data-level="I"] {
+  color: #94a3b8;
+}
+
+.dark .usb-console-line[data-level="I"] {
+  color: #cbd5e1;
+}
+
+.usb-console-line[data-level="D"] {
+  color: #64748b;
+}

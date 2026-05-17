@@ -11,6 +11,8 @@ import type {
   IssueEnrollmentTokenRequest,
   PassiveDeviceRegistrationRequest,
   RotateRfCodeRequest,
+  UsbDispatchPayloadRequest,
+  UsbDispatchPayloadResponse,
 } from "@/types/device";
 
 export function listDevices(kind?: string | null, storeId?: string | null) {
@@ -63,4 +65,11 @@ export function lifecycleAction(id: string, request: DeviceLifecycleRequest) {
 
 export function reprovisionDevice(id: string) {
   return post<DeviceDetailDto>(API_ROUTES.DEVICES.REPROVISION(id));
+}
+
+export function getUsbDispatchPayload(request: UsbDispatchPayloadRequest) {
+  return post<UsbDispatchPayloadResponse>(
+    API_ROUTES.DEVICES.USB_DISPATCH_PAYLOAD,
+    request,
+  );
 }
