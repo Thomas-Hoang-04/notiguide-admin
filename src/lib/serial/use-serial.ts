@@ -38,6 +38,7 @@ export function useSerial(): UseSerialReturn {
   const portStateRef = useRef<PortState>("closed");
   const protocolRef = useRef(new SerialProtocol());
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const manualConnectRef = useRef(false);
 
   useEffect(() => {
     setCanUseSerial(hasWebSerialSupport());
@@ -143,10 +144,15 @@ export function useSerial(): UseSerialReturn {
     if (!canUseSerial) throw new Error("serial_not_supported");
     if (portStateRef.current !== "closed") return;
 
-    const port = await navigator.serial.requestPort({
-      filters: [ESP32_C3_USB_FILTER],
-    });
-    await openPort(port);
+    manualConnectRef.current = true;
+    try {
+      const port = await navigator.serial.requestPort({
+        filters: [ESP32_C3_USB_FILTER],
+      });
+      await openPort(port);
+    } finally {
+      manualConnectRef.current = false;
+    }
   }, [canUseSerial, openPort]);
 
   const reconnectKnownPort = useCallback(async () => {
@@ -250,6 +256,7 @@ export function useSerial(): UseSerialReturn {
     };
 
     const handleSerialConnect = (e: Event) => {
+      if (manualConnectRef.current) return;
       if (portStateRef.current !== "closed") return;
       const port = e.target as SerialPort;
       const info = port.getInfo();
