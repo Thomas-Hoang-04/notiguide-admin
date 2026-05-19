@@ -352,7 +352,7 @@ export function UsbProvisionDialog({
             </Card>
 
             {deviceState?.provisioned && (
-              <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-warning-foreground dark:bg-warning/15">
+              <div className="rounded-xl border border-warning/40 bg-warning/15 p-3 text-sm text-warning dark:border-warning/50 dark:bg-warning/20">
                 {tUsb("already_provisioned")}
               </div>
             )}

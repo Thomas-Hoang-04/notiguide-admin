@@ -105,14 +105,12 @@ export function EnrollmentTokenDialog({
 
         {issuedToken ? (
           <div className="space-y-4">
-            <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-warning-foreground dark:bg-warning/15">
-              <div className="flex items-start gap-2">
-                <AlertCircle
-                  aria-hidden="true"
-                  className="mt-0.5 size-4 shrink-0 text-warning"
-                />
-                <span>{tDevices("tokens.oneTimeWarning")}</span>
-              </div>
+            <div className="flex items-start gap-2.5 rounded-xl border border-warning/40 bg-warning/15 p-3 text-sm text-warning dark:border-warning/50 dark:bg-warning/20">
+              <AlertCircle
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0"
+              />
+              <span>{tDevices("tokens.oneTimeWarning")}</span>
             </div>
             <div className="space-y-2">
               <Label>{tDevices("tokens.tokenLabel")}</Label>

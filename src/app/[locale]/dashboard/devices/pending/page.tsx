@@ -1,9 +1,11 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { listDevices } from "@/features/device/api";
+import { DeviceTabNav } from "@/features/device/device-tab-nav";
 import { PendingReviewCard } from "@/features/device/pending-review-card";
 import { Link } from "@/i18n/navigation";
 import {
@@ -53,13 +55,14 @@ export default function DevicesPendingPage() {
       <div className="flex items-center gap-3">
         <Link
           href="/dashboard/devices"
-          className="text-sm text-primary hover:underline"
+          className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
-          {tDevices("title")}
+          <ArrowLeft aria-hidden="true" className="size-4" />
         </Link>
-        <span className="text-muted-foreground">/</span>
         <h1 className="text-2xl font-bold">{tDevices("pendingTab")}</h1>
       </div>
+
+      <DeviceTabNav active="pending" />
 
       {!loading && pendingDevices && pendingDevices.length === 0 ? (
         <div className="glass-card rounded-xl p-8 text-center text-muted-foreground">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { StoreSummaryResponse } from "./types";
 
 interface SummaryCardsProps {
@@ -31,7 +32,22 @@ export function SummaryCards({ summary, loading }: SummaryCardsProps) {
   const t = useTranslations("analytics.summary");
   const tAnalytics = useTranslations("analytics");
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="glass-card rounded-xl p-4 l:p-5">
+        <Skeleton className="mb-3 h-4 w-20 l:mb-4" />
+        <div className="grid grid-cols-2 gap-3 l:grid-cols-4 l:gap-4">
+          {Array.from({ length: 8 }, (_, idx) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton placeholders never reorder
+            <div key={idx}>
+              <Skeleton className="mb-1 h-3 w-20" />
+              <Skeleton className="h-6 w-14" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (!summary) {
     return (

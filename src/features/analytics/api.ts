@@ -1,7 +1,6 @@
 import { get } from "@/lib/api";
 import { API_ROUTES } from "@/lib/constants";
 import type {
-  AnalyticsRange,
   DailyThroughputResponse,
   HourlyHeatmapResponse,
   OverviewRealtimeResponse,
@@ -12,30 +11,27 @@ import type {
   StoreSummaryResponse,
   WaitDistributionResponse,
 } from "./types";
-import { isDateRange } from "./types";
+import { type DateRange, isDateRange } from "./types";
 
-function periodParam(v: PeriodOrRange): string {
-  if (isDateRange(v)) return `CUSTOM&from=${v.from}&to=${v.to}`;
-  return v;
+function customQueryParams(range: DateRange): string {
+  return `from=${range.from}&to=${range.to}`;
 }
 
-function rangeParam(v: PeriodOrRange): AnalyticsRange {
-  if (isDateRange(v)) {
-    const days = Math.ceil(
-      (new Date(v.to).getTime() - new Date(v.from).getTime()) / 86_400_000,
-    );
-    if (days <= 7) return "D7";
-    if (days <= 30) return "D30";
-    return "D90";
-  }
+function periodParam(v: PeriodOrRange): string {
+  if (isDateRange(v)) return customQueryParams(v);
+  return `period=${v}`;
+}
+
+function rangeParam(v: PeriodOrRange): string {
+  if (isDateRange(v)) return customQueryParams(v);
   switch (v) {
     case "TODAY":
     case "WEEK":
-      return "D7";
+      return "range=D7";
     case "MONTH":
-      return "D30";
+      return "range=D30";
     case "QUARTER":
-      return "D90";
+      return "range=D90";
   }
 }
 

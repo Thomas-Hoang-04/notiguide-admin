@@ -343,6 +343,7 @@
     "overview": "Tổng quan phân tích",
     "storeAnalytics": "Phân tích cửa hàng",
     "storeAnalyticsWithName": "Phân tích — {storeName}",
+    "backToOverview": "Quay lại tổng quan",
     "viewFullAnalytics": "Xem phân tích đầy đủ",
     "noData": "Chưa có đủ dữ liệu",
     "estimating": "Đang ước tính...",
@@ -391,7 +392,8 @@
       "avgWait": "Chờ trung bình"
     },
     "dateRange": {
-      "custom": "Tùy chọn"
+      "custom": "Tùy chọn",
+      "clear": "Xóa khoảng ngày"
     },
     "storeRanking": {
       "title": "Xếp hạng cửa hàng",
@@ -443,6 +445,7 @@
   },
   "devices": {
     "title": "Thiết bị",
+    "allTab": "Tất cả",
     "pendingTab": "Chờ duyệt",
     "tokensTab": "Mã đăng ký",
     "listTitle": "Tất cả thiết bị",

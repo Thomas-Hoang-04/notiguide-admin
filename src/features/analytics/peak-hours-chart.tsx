@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { PeakHoursResponse } from "./types";
 
 interface PeakHoursChartProps {
@@ -38,7 +39,9 @@ export function PeakHoursChart({ data, loading }: PeakHoursChartProps) {
       <h3 className="mb-3 text-sm font-semibold text-foreground l:mb-4">
         {t("peakHours")}
       </h3>
-      {loading || !data ? (
+      {loading ? (
+        <Skeleton className="h-56 w-full rounded l:h-64" />
+      ) : !data ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
           {tAnalytics("noData")}
         </p>

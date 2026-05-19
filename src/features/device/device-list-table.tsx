@@ -106,7 +106,7 @@ export function DeviceListTable({ devices, loading }: DeviceListTableProps) {
                 <td className="px-4 py-3 font-medium">
                   <Link
                     href={`/dashboard/devices/${device.id}`}
-                    className="text-primary hover:underline"
+                    className="text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary/70"
                   >
                     {device.assignedName ||
                       device.publicId ||

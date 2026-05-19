@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import type { ValueType } from "recharts/types/component/DefaultTooltipContent";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { StoreSummaryResponse } from "./types";
 
 interface OutcomeChartProps {
@@ -38,7 +39,9 @@ export function OutcomeChart({ summary, loading }: OutcomeChartProps) {
       <h3 className="mb-3 text-sm font-semibold text-foreground l:mb-4">
         {t("title")}
       </h3>
-      {loading || total === 0 ? (
+      {loading ? (
+        <Skeleton className="h-56 w-full rounded l:h-64" />
+      ) : total === 0 ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
           {tAnalytics("noData")}
         </p>

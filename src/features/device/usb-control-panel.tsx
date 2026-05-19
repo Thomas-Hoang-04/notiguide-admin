@@ -284,7 +284,7 @@ export function UsbControlPanel({
             )}
 
             {backendMqttConnected && (
-              <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-warning-foreground">
+              <div className="rounded-xl border border-warning/40 bg-warning/15 p-3 text-sm text-warning dark:border-warning/50 dark:bg-warning/20">
                 {tUsb("local_warning")}
               </div>
             )}

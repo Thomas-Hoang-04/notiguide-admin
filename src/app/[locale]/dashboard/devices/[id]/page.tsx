@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Radio, RotateCcw, Usb } from "lucide-react";
+import { ArrowLeft, Loader2, Radio, RotateCcw, Usb } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
@@ -137,12 +137,17 @@ export default function DeviceDetailPage() {
   if (!device) {
     return (
       <div className="space-y-6">
-        <Link
-          href="/dashboard/devices"
-          className="text-sm text-primary hover:underline"
-        >
-          {tDevices("title")}
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/dashboard/devices"
+            className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <ArrowLeft aria-hidden="true" className="size-4" />
+          </Link>
+          <span className="text-lg font-semibold text-primary">
+            {tDevices("title")}
+          </span>
+        </div>
         <div className="glass-card rounded-xl p-8 text-center text-muted-foreground">
           {tErrors("notFound")}
         </div>
@@ -155,11 +160,10 @@ export default function DeviceDetailPage() {
       <div className="flex items-center gap-3">
         <Link
           href="/dashboard/devices"
-          className="text-sm text-primary hover:underline"
+          className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
-          {tDevices("title")}
+          <ArrowLeft aria-hidden="true" className="size-4" />
         </Link>
-        <span className="text-muted-foreground">/</span>
         <h1 className="text-2xl font-bold">
           {device.assignedName || device.publicId || tCommon("unknown")}
         </h1>

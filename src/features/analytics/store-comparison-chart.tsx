@@ -13,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import type { ValueType } from "recharts/types/component/DefaultTooltipContent";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { StoreAnalyticsSummary } from "./types";
 
 interface StoreComparisonChartProps {
@@ -44,7 +45,9 @@ export function StoreComparisonChart({
       <h3 className="mb-3 text-sm font-semibold text-foreground l:mb-4">
         {t("title")}
       </h3>
-      {loading || chartData.length === 0 ? (
+      {loading ? (
+        <Skeleton className="h-56 w-full rounded" />
+      ) : chartData.length === 0 ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
           {tAnalytics("noData")}
         </p>

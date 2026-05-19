@@ -8,6 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@/i18n/navigation";
 import type { StoreAnalyticsSummary } from "./types";
 
@@ -65,10 +66,17 @@ export function StoreRankingTable({ stores, loading }: StoreRankingTableProps) {
   if (loading) {
     return (
       <div className="glass-card rounded-xl p-4 l:p-5">
-        <h3 className="mb-3 text-sm font-semibold text-foreground">
-          {t("title")}
-        </h3>
-        <p className="text-sm text-muted-foreground">{tAnalytics("noData")}</p>
+        <div className="mb-3 flex items-center justify-between gap-2 l:mb-4">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-7 w-32 rounded" />
+        </div>
+        <div className="space-y-3">
+          <Skeleton className="h-3 w-full" />
+          {Array.from({ length: 3 }, (_, idx) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton placeholders never reorder
+            <Skeleton key={idx} className="h-8 w-full rounded" />
+          ))}
+        </div>
       </div>
     );
   }

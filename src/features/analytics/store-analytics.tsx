@@ -1,8 +1,10 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { useStoreName } from "@/features/queue/store-selector";
+import { Link } from "@/i18n/navigation";
 import {
   getDailyThroughput,
   getHourlyHeatmap,
@@ -29,9 +31,13 @@ import { WaitDistributionChart } from "./wait-distribution-chart";
 
 interface StoreAnalyticsProps {
   storeId: string;
+  showBackButton?: boolean;
 }
 
-export function StoreAnalytics({ storeId }: StoreAnalyticsProps) {
+export function StoreAnalytics({
+  storeId,
+  showBackButton,
+}: StoreAnalyticsProps) {
   const t = useTranslations("analytics");
   const storeName = useStoreName(storeId);
 
@@ -83,11 +89,22 @@ export function StoreAnalytics({ storeId }: StoreAnalyticsProps) {
 
   return (
     <div className="space-y-4 l:space-y-6">
-      <h1 className="text-xl font-bold l:text-2xl">
-        {storeName
-          ? t("storeAnalyticsWithName", { storeName })
-          : t("storeAnalytics")}
-      </h1>
+      <div className="flex items-center gap-3">
+        {showBackButton && (
+          <Link
+            href="/dashboard/analytics"
+            aria-label={t("backToOverview")}
+            className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <ArrowLeft aria-hidden="true" className="size-4" />
+          </Link>
+        )}
+        <h1 className="text-xl font-bold l:text-2xl">
+          {storeName
+            ? t("storeAnalyticsWithName", { storeName })
+            : t("storeAnalytics")}
+        </h1>
+      </div>
 
       <DateRangePicker value={period} onChange={handlePeriodChange} />
 

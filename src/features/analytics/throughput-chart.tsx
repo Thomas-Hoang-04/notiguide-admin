@@ -11,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { DailyThroughputResponse } from "./types";
 
 interface ThroughputChartProps {
@@ -32,7 +33,9 @@ export function ThroughputChart({ data, loading }: ThroughputChartProps) {
       <h3 className="mb-3 text-sm font-semibold text-foreground l:mb-4">
         {t("dailyThroughput")}
       </h3>
-      {loading || !data || data.days.length === 0 ? (
+      {loading ? (
+        <Skeleton className="h-56 w-full rounded l:h-64" />
+      ) : !data || data.days.length === 0 ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
           {tAnalytics("noData")}
         </p>

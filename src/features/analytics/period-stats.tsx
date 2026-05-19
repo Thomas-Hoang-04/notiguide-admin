@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Skeleton } from "@/components/ui/skeleton";
 import type {
   OverviewResponse,
   PeriodOrRange,
@@ -52,7 +53,6 @@ export function OverviewPeriodStats({
   loading,
 }: OverviewPeriodStatsProps) {
   const t = useTranslations("analytics.periodStats");
-  const tCommon = useTranslations("common");
   const periodLabel = usePeriodLabel(period);
 
   return (
@@ -61,25 +61,21 @@ export function OverviewPeriodStats({
         label={t("storesActive")}
         value={!loading && data ? data.totalStores : null}
         loading={loading}
-        loadingText={tCommon("loading")}
       />
       <StatCard
         label={t("issued", { period: periodLabel })}
         value={!loading && data ? data.totalIssued : null}
         loading={loading}
-        loadingText={tCommon("loading")}
       />
       <StatCard
         label={t("completed", { period: periodLabel })}
         value={!loading && data ? data.totalCompleted : null}
         loading={loading}
-        loadingText={tCommon("loading")}
       />
       <StatCard
         label={t("avgWait")}
         value={!loading && data ? formatWait(data.avgWaitSeconds) : null}
         loading={loading}
-        loadingText={tCommon("loading")}
         isText
       />
     </div>
@@ -92,7 +88,6 @@ export function StorePeriodStats({
   loading,
 }: StorePeriodStatsProps) {
   const t = useTranslations("analytics.periodStats");
-  const tCommon = useTranslations("common");
   const periodLabel = usePeriodLabel(period);
 
   return (
@@ -101,25 +96,21 @@ export function StorePeriodStats({
         label={t("issued", { period: periodLabel })}
         value={!loading && data ? data.totalIssued : null}
         loading={loading}
-        loadingText={tCommon("loading")}
       />
       <StatCard
         label={t("completed", { period: periodLabel })}
         value={!loading && data ? data.totalCompleted : null}
         loading={loading}
-        loadingText={tCommon("loading")}
       />
       <StatCard
         label={t("cancelled", { period: periodLabel })}
         value={!loading && data ? data.totalCancelled : null}
         loading={loading}
-        loadingText={tCommon("loading")}
       />
       <StatCard
         label={t("avgWait")}
         value={!loading && data ? formatWait(data.avgWaitSeconds) : null}
         loading={loading}
-        loadingText={tCommon("loading")}
         isText
       />
     </div>
@@ -130,26 +121,28 @@ function StatCard({
   label,
   value,
   loading,
-  loadingText,
   isText = false,
 }: {
   label: string;
   value: number | string | null | undefined;
   loading: boolean;
-  loadingText: string;
   isText?: boolean;
 }) {
-  const display = loading
-    ? loadingText
-    : value != null
-      ? isText
-        ? value
-        : value.toLocaleString()
-      : "—";
   return (
     <div className="analytics-stat-card glass-card rounded-xl">
-      <span className="analytics-stat-value text-foreground">{display}</span>
-      <span className="analytics-stat-label">{label}</span>
+      {loading ? (
+        <>
+          <Skeleton className="h-7 w-16 rounded" />
+          <Skeleton className="h-3 w-24 rounded" />
+        </>
+      ) : (
+        <>
+          <span className="analytics-stat-value text-foreground">
+            {value != null ? (isText ? value : value.toLocaleString()) : "—"}
+          </span>
+          <span className="analytics-stat-label">{label}</span>
+        </>
+      )}
     </div>
   );
 }

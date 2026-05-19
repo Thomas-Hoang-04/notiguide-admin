@@ -18,6 +18,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getDailyThroughput, getOverviewThroughput } from "./api";
 import type {
   DailyThroughputResponse,
@@ -105,7 +106,9 @@ export function OverviewThroughputChart({
         </Select>
       </div>
 
-      {loading || !data || data.days.length === 0 ? (
+      {loading ? (
+        <Skeleton className="h-56 w-full rounded l:h-64" />
+      ) : !data || data.days.length === 0 ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
           {tAnalytics("noData")}
         </p>

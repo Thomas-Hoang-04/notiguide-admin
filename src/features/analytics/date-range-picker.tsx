@@ -1,7 +1,7 @@
 "use client";
 
 import { addMonths, format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { DateRange as RDPDateRange } from "react-day-picker";
@@ -99,34 +99,46 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
         </Button>
       ))}
 
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger
-          className={`inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors ${
-            isCustom
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          }`}
-        >
-          <CalendarIcon className="size-3.5" />
-          {customLabel}
-        </PopoverTrigger>
-        <PopoverContent align="start" className="w-auto p-2">
-          <Calendar
-            mode="range"
-            min={1}
-            selected={draft}
-            onSelect={handleCalendarSelect}
-            month={month}
-            onMonthChange={setMonth}
-            endMonth={new Date()}
-            numberOfMonths={2}
-            disabled={{ after: new Date() }}
-            classNames={{
-              months: "relative flex flex-row gap-4",
-            }}
-          />
-        </PopoverContent>
-      </Popover>
+      <div className="flex items-center">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger
+            className={`inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors ${
+              isCustom
+                ? "bg-primary text-primary-foreground rounded-r-none"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            }`}
+          >
+            <CalendarIcon className="size-3.5" />
+            {customLabel}
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-auto p-2">
+            <Calendar
+              mode="range"
+              min={1}
+              selected={draft}
+              onSelect={handleCalendarSelect}
+              month={month}
+              onMonthChange={setMonth}
+              endMonth={new Date()}
+              numberOfMonths={2}
+              disabled={{ after: new Date() }}
+              classNames={{
+                months: "relative flex flex-row gap-4",
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+        {isCustom && (
+          <button
+            type="button"
+            aria-label={tCommon("clear")}
+            onClick={() => onChange("TODAY")}
+            className="inline-flex h-8 items-center rounded-r-md bg-primary px-1.5 text-primary-foreground transition-colors hover:bg-primary/80"
+          >
+            <XIcon aria-hidden="true" className="size-3.5" />
+          </button>
+        )}
+      </div>
     </div>
   );
 }

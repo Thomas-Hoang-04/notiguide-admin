@@ -73,7 +73,7 @@ export function HubHealthCard() {
         </div>
         <Link
           href="/dashboard/devices"
-          className="text-xs text-primary hover:underline"
+          className="text-xs font-medium text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary/70"
         >
           {t("manageDevices")} →
         </Link>

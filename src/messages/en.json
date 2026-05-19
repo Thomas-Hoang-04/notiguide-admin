@@ -343,6 +343,7 @@
     "overview": "Analytics Overview",
     "storeAnalytics": "Store Analytics",
     "storeAnalyticsWithName": "Analytics — {storeName}",
+    "backToOverview": "Back to overview",
     "viewFullAnalytics": "View full analytics",
     "noData": "Not enough data yet",
     "estimating": "Estimating...",
@@ -391,7 +392,8 @@
       "avgWait": "Avg Wait"
     },
     "dateRange": {
-      "custom": "Custom"
+      "custom": "Custom",
+      "clear": "Clear date range"
     },
     "storeRanking": {
       "title": "Store Rankings",
@@ -443,6 +445,7 @@
   },
   "devices": {
     "title": "Devices",
+    "allTab": "All",
     "pendingTab": "Pending Review",
     "tokensTab": "Enrollment Tokens",
     "listTitle": "All Devices",

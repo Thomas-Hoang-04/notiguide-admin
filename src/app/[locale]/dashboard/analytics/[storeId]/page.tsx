@@ -29,5 +29,5 @@ export default function StoreAnalyticsPage() {
     return null;
   }
 
-  return <StoreAnalytics storeId={params.storeId} />;
+  return <StoreAnalytics storeId={params.storeId} showBackButton />;
 }

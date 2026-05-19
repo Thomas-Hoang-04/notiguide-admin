@@ -1,11 +1,12 @@
 "use client";
 
-import { Radio } from "lucide-react";
+import { ArrowLeft, Radio } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { listEnrollmentTokens } from "@/features/device/api";
+import { DeviceTabNav } from "@/features/device/device-tab-nav";
 import { EnrollmentTokenDialog } from "@/features/device/enrollment-token-dialog";
 import { EnrollmentTokenTable } from "@/features/device/enrollment-token-table";
 import { listStores } from "@/features/store/api";
@@ -69,11 +70,10 @@ export default function DevicesTokensPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard/devices"
-            className="text-sm text-primary hover:underline"
+            className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            {tDevices("title")}
+            <ArrowLeft aria-hidden="true" className="size-4" />
           </Link>
-          <span className="text-muted-foreground">/</span>
           <h1 className="text-2xl font-bold">{tDevices("tokensTab")}</h1>
         </div>
         <Button variant="outline" onClick={() => setTokenDialogOpen(true)}>
@@ -81,6 +81,8 @@ export default function DevicesTokensPage() {
           {tDevices("tokens.issueAction")}
         </Button>
       </div>
+
+      <DeviceTabNav active="tokens" />
 
       <EnrollmentTokenTable
         tokens={tokens}

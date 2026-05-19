@@ -9,23 +9,27 @@ type RequestOptions = Omit<RequestInit, "body"> & {
   skipAuth?: boolean;
 };
 
+type RefreshResult = "refreshed" | "unauthorized" | "transient-failure";
+
 // Refresh mutex: ensures only one refresh request runs at a time.
 // Other 401'd requests wait for the same refresh to complete, then retry.
-let refreshPromise: Promise<boolean> | null = null;
+let refreshPromise: Promise<RefreshResult> | null = null;
 
-async function attemptRefresh(): Promise<boolean> {
+async function attemptRefresh(): Promise<RefreshResult> {
   try {
     const res = await fetch(`${API_BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {
       method: "POST",
       credentials: "include",
     });
-    return res.ok;
+    if (res.ok) return "refreshed";
+    if (res.status === 401 || res.status === 403) return "unauthorized";
+    return "transient-failure";
   } catch {
-    return false;
+    return "transient-failure";
   }
 }
 
-async function refreshOnce(): Promise<boolean> {
+async function refreshOnce(): Promise<RefreshResult> {
   if (refreshPromise) return refreshPromise;
   refreshPromise = attemptRefresh().finally(() => {
     refreshPromise = null;
@@ -61,8 +65,8 @@ export async function api<T>(
 
   // On 401 for authenticated requests, try a silent refresh then retry once
   if (response.status === 401 && !skipAuth) {
-    const refreshed = await refreshOnce();
-    if (refreshed) {
+    const refreshResult = await refreshOnce();
+    if (refreshResult === "refreshed") {
       try {
         response = await doFetch();
       } catch {
@@ -70,8 +74,14 @@ export async function api<T>(
       }
     }
 
-    // If refresh failed or the retried request is still 401, force logout
-    if (!refreshed || response.status === 401) {
+    // Network/CORS/rate-limit failures during refresh are transient. Do not
+    // clear cookies unless the refresh endpoint actually rejects the session.
+    if (refreshResult === "transient-failure") {
+      throw new NetworkError();
+    }
+
+    // If refresh was rejected or the retried request is still 401, force logout
+    if (refreshResult === "unauthorized" || response.status === 401) {
       fetch(`${API_BASE_URL}${API_ROUTES.AUTH.LOGOUT}`, {
         method: "POST",
         credentials: "include",

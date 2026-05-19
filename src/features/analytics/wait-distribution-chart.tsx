@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { WaitDistributionResponse } from "./types";
 
 interface WaitDistributionChartProps {
@@ -31,7 +32,9 @@ export function WaitDistributionChart({
       <h3 className="mb-3 text-sm font-semibold text-foreground l:mb-4">
         {t("title")}
       </h3>
-      {loading || !hasData ? (
+      {loading ? (
+        <Skeleton className="h-56 w-full rounded l:h-64" />
+      ) : !hasData ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
           {tAnalytics("noData")}
         </p>

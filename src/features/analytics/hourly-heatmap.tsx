@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -49,7 +50,9 @@ export function HourlyHeatmap({ data, loading }: HourlyHeatmapProps) {
       <h3 className="mb-3 text-sm font-semibold text-foreground l:mb-4">
         {t("title")}
       </h3>
-      {loading || !hasData ? (
+      {loading ? (
+        <Skeleton className="h-48 w-full rounded" />
+      ) : !hasData ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
           {tAnalytics("noData")}
         </p>

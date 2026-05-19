@@ -57,20 +57,20 @@ export const API_ROUTES = {
   },
   ANALYTICS: {
     REALTIME: (storeId: string) => `/api/analytics/${storeId}/realtime`,
-    SUMMARY: (storeId: string, period: string) =>
-      `/api/analytics/${storeId}/summary?period=${period}`,
-    PEAK_HOURS: (storeId: string, range: string) =>
-      `/api/analytics/${storeId}/peak-hours?range=${range}`,
-    THROUGHPUT: (storeId: string, range: string) =>
-      `/api/analytics/${storeId}/throughput?range=${range}`,
-    WAIT_DISTRIBUTION: (storeId: string, period: string) =>
-      `/api/analytics/${storeId}/wait-distribution?period=${period}`,
-    HEATMAP: (storeId: string, range: string) =>
-      `/api/analytics/${storeId}/heatmap?range=${range}`,
+    SUMMARY: (storeId: string, qs: string) =>
+      `/api/analytics/${storeId}/summary?${qs}`,
+    PEAK_HOURS: (storeId: string, qs: string) =>
+      `/api/analytics/${storeId}/peak-hours?${qs}`,
+    THROUGHPUT: (storeId: string, qs: string) =>
+      `/api/analytics/${storeId}/throughput?${qs}`,
+    WAIT_DISTRIBUTION: (storeId: string, qs: string) =>
+      `/api/analytics/${storeId}/wait-distribution?${qs}`,
+    HEATMAP: (storeId: string, qs: string) =>
+      `/api/analytics/${storeId}/heatmap?${qs}`,
     OVERVIEW_REALTIME: "/api/analytics/overview/realtime",
-    OVERVIEW: (period: string) => `/api/analytics/overview?period=${period}`,
-    OVERVIEW_THROUGHPUT: (range: string) =>
-      `/api/analytics/overview/throughput?range=${range}`,
+    OVERVIEW: (qs: string) => `/api/analytics/overview?${qs}`,
+    OVERVIEW_THROUGHPUT: (qs: string) =>
+      `/api/analytics/overview/throughput?${qs}`,
   },
   DEVICES: {
     BASE: "/api/devices",

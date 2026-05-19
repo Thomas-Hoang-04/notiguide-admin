@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Ticket } from "lucide-react";
+import { Eye, EyeOff, Loader2, Ticket } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type React from "react";
 import { useEffect, useState } from "react";
@@ -33,6 +33,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [unverifiedBanner, setUnverifiedBanner] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -193,24 +194,40 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <Label htmlFor="password">{tAuth("passwordLabel")}</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder={tAuth("passwordPlaceholder")}
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (errors.password) {
-                    setErrors((prev) => {
-                      const next = { ...prev };
-                      delete next.password;
-                      return next;
-                    });
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder={tAuth("passwordPlaceholder")}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password) {
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.password;
+                        return next;
+                      });
+                    }
+                  }}
+                  aria-invalid={!!errors.password}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={
+                    showPassword ? tAuth("hidePassword") : tAuth("showPassword")
                   }
-                }}
-                aria-invalid={!!errors.password}
-                autoComplete="current-password"
-              />
+                >
+                  {showPassword ? (
+                    <EyeOff aria-hidden="true" className="size-4" />
+                  ) : (
+                    <Eye aria-hidden="true" className="size-4" />
+                  )}
+                </button>
+              </div>
               {errors.password && (
                 <InlineError message={errors.password} className="mt-1" />
               )}

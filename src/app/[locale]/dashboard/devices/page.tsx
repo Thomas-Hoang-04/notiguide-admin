@@ -13,6 +13,7 @@ import {
 import { listDevices } from "@/features/device/api";
 import { DeviceFilterBar } from "@/features/device/device-filter-bar";
 import { DeviceListTable } from "@/features/device/device-list-table";
+import { DeviceTabNav } from "@/features/device/device-tab-nav";
 import { EnrollmentTokenDialog } from "@/features/device/enrollment-token-dialog";
 import { HubCapBadge } from "@/features/device/hub-cap-badge";
 import { PassiveDeviceFormDialog } from "@/features/device/passive-device-form-dialog";
@@ -20,7 +21,6 @@ import { PendingReviewCard } from "@/features/device/pending-review-card";
 import { UsbProvisionDialog } from "@/features/device/usb-provision-dialog";
 import { getAvailableDevices } from "@/features/queue/api";
 import { listStores } from "@/features/store/api";
-import { Link } from "@/i18n/navigation";
 import {
   translateCommonApiError,
   translateNetworkError,
@@ -180,21 +180,7 @@ export default function DevicesPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 text-sm">
-        <Link
-          href="/dashboard/devices/pending"
-          className="text-primary hover:underline"
-        >
-          {tDevices("pendingTab")}
-        </Link>
-        <span className="text-muted-foreground">·</span>
-        <Link
-          href="/dashboard/devices/tokens"
-          className="text-primary hover:underline"
-        >
-          {tDevices("tokensTab")}
-        </Link>
-      </div>
+      <DeviceTabNav active="all" />
 
       <DeviceFilterBar
         statusFilter={statusFilter}
