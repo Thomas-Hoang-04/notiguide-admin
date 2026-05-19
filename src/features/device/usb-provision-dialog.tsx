@@ -26,7 +26,12 @@ import { useSerial } from "@/lib/serial/use-serial";
 import { useAuthStore } from "@/store/auth";
 import { ApiError } from "@/types/api";
 import type { StoreDto } from "@/types/store";
-import { approveDevice, issueEnrollmentToken, listDevices } from "./api";
+import {
+  approveDevice,
+  getDevice,
+  issueEnrollmentToken,
+  listDevices,
+} from "./api";
 import { StoreSelectField } from "./store-select-field";
 
 type ProvisionStep =
@@ -253,6 +258,18 @@ export function UsbProvisionDialog({
     }
   }
 
+  async function waitForActivation(deviceId: string): Promise<void> {
+    for (let attempt = 0; attempt < 15; attempt++) {
+      await sleep(2_000);
+      try {
+        const device = await getDevice(deviceId);
+        if (device.status !== "PENDING") return;
+      } catch {
+        // retry
+      }
+    }
+  }
+
   async function pollForPendingDevice(existingPendingIds: Set<string>) {
     setStep("pending");
 
@@ -271,6 +288,7 @@ export function UsbProvisionDialog({
               assignedName: assignedName.trim(),
               storeId,
             });
+            await waitForActivation(pending[0].id);
             setStep("done");
             onSuccess();
             return;

@@ -5,7 +5,6 @@ import { useFormatter, useNow, useTranslations } from "next-intl";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { DeviceDetailDto, HubDiagnosticsDto } from "@/types/device";
 import { getDevice } from "./api";
 
@@ -128,9 +127,7 @@ export function HubDiagnosticsPanel({
           {isAlive ? tHub("liveness.alive") : tHub("liveness.stale")}
         </Badge>
 
-        {isElected === undefined || isElected === null ? (
-          <Skeleton className="h-5 w-20 rounded-full" />
-        ) : (
+        {isElected != null && (
           <Badge
             variant="outline"
             className={
