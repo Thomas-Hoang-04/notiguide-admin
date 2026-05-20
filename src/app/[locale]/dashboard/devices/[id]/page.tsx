@@ -140,9 +140,9 @@ export default function DeviceDetailPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard/devices"
-            className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            <ArrowLeft aria-hidden="true" className="size-4" />
+            <ArrowLeft aria-hidden="true" className="size-5" />
           </Link>
           <span className="text-lg font-semibold text-primary">
             {tDevices("title")}
@@ -160,9 +160,9 @@ export default function DeviceDetailPage() {
       <div className="flex items-center gap-3">
         <Link
           href="/dashboard/devices"
-          className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
-          <ArrowLeft aria-hidden="true" className="size-4" />
+          <ArrowLeft aria-hidden="true" className="size-5" />
         </Link>
         <h1 className="text-2xl font-bold">
           {device.assignedName || device.publicId || tCommon("unknown")}

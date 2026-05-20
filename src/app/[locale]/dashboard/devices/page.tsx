@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Radio, Usb } from "lucide-react";
+import { Plus, Radio, RefreshCcw, Usb } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -62,27 +62,32 @@ export default function DevicesPage() {
     setCanUseSerial(hasWebSerialSupport());
   }, []);
 
-  const fetchDevices = useCallback(async () => {
-    setLoading(true);
-    try {
-      const filterKind = kindFilter === "all" ? null : kindFilter;
-      const filterStore = isSuperAdmin
-        ? storeFilter === "all"
-          ? null
-          : storeFilter
-        : adminStoreId;
-      const result = await listDevices(filterKind, filterStore);
-      setDevices(result.devices);
-    } catch (err) {
-      if (err instanceof ApiError) {
-        toast.error(translateCommonApiError(err, tErrors));
-      } else {
-        toast.error(translateNetworkError(tErrors));
+  const fetchDevices = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      try {
+        const filterKind = kindFilter === "all" ? null : kindFilter;
+        const filterStore = isSuperAdmin
+          ? storeFilter === "all"
+            ? null
+            : storeFilter
+          : adminStoreId;
+        const result = await listDevices(filterKind, filterStore);
+        setDevices(result.devices);
+      } catch (err) {
+        if (!silent) {
+          if (err instanceof ApiError) {
+            toast.error(translateCommonApiError(err, tErrors));
+          } else {
+            toast.error(translateNetworkError(tErrors));
+          }
+        }
+      } finally {
+        if (!silent) setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [kindFilter, storeFilter, isSuperAdmin, adminStoreId, tErrors]);
+    },
+    [kindFilter, storeFilter, isSuperAdmin, adminStoreId, tErrors],
+  );
 
   useEffect(() => {
     void fetchDevices();
@@ -92,6 +97,18 @@ export default function DevicesPage() {
         .catch(() => toast.error(tQueue("failedToLoadStores")));
     }
   }, [fetchDevices, isSuperAdmin, tQueue]);
+
+  useEffect(() => {
+    const hasPendingRf =
+      devices?.some((d) => d.status === "PENDING_RF_CODE") ?? false;
+    if (!hasPendingRf) return;
+
+    const timer = setInterval(() => {
+      void fetchDevices(true);
+    }, 15_000);
+
+    return () => clearInterval(timer);
+  }, [devices, fetchDevices]);
 
   useEffect(() => {
     const storeIds = isSuperAdmin
@@ -133,6 +150,17 @@ export default function DevicesPage() {
       <div className="flex flex-col gap-3 s:flex-row s:items-center s:justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold">{tDevices("title")}</h1>
+          <Button
+            variant="outline"
+            disabled={loading}
+            onClick={() => void fetchDevices()}
+          >
+            <RefreshCcw
+              aria-hidden="true"
+              className={`mr-2 size-4 ${loading ? "animate-spin" : ""}`}
+            />
+            {tDevices("reloadAction")}
+          </Button>
           {!isSuperAdmin && adminStoreHubCap && (
             <HubCapBadge
               registered={adminStoreHubCap.registered}

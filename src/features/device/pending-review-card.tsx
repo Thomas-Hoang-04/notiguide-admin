@@ -106,14 +106,14 @@ export function PendingReviewCard({
                           render={
                             <Button
                               variant="ghost"
-                              size="icon-sm"
+                              size="icon-lg"
                               onClick={() => setApproveTarget(device)}
                               className="text-success hover:text-success"
                               aria-label={tDevices("pending.approveButton")}
                             />
                           }
                         >
-                          <Check aria-hidden="true" className="size-4" />
+                          <Check aria-hidden="true" className="size-5" />
                         </TooltipTrigger>
                         <TooltipContent>
                           {tDevices("pending.approveButton")}
@@ -124,20 +124,26 @@ export function PendingReviewCard({
                           render={
                             <Button
                               variant="ghost"
-                              size="icon-sm"
+                              size="icon-lg"
                               onClick={() => setRejectTarget(device)}
                               className="text-destructive hover:text-destructive"
                               aria-label={tDevices("pending.rejectButton")}
                             />
                           }
                         >
-                          <X aria-hidden="true" className="size-4" />
+                          <X aria-hidden="true" className="size-5" />
                         </TooltipTrigger>
                         <TooltipContent>
                           {tDevices("pending.rejectButton")}
                         </TooltipContent>
                       </Tooltip>
                     </>
+                  )}
+
+                  {device.status === "PENDING_RF_CODE" && (
+                    <span className="text-xs text-muted-foreground">
+                      {tDevices("pending.waitingForDevice")}
+                    </span>
                   )}
                 </div>
               </div>

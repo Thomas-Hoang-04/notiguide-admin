@@ -452,6 +452,7 @@
     "emptyState": "No devices registered yet.",
     "pendingTitle": "Pending Devices",
     "pendingEmpty": "No devices pending review.",
+    "reloadAction": "Reload devices",
     "columnName": "Name",
     "columnKind": "Type",
     "columnHardware": "Hardware",
@@ -541,7 +542,8 @@
       "rejectTitle": "Reject Device",
       "rejectDescription": "Reject this device? It will not be able to activate. This action cannot be undone.",
       "rejectedToast": "Device rejected",
-      "errorHubCapReached": "This store has reached the maximum number of transmitter hubs."
+      "errorHubCapReached": "This store has reached the maximum number of transmitter hubs.",
+      "waitingForDevice": "Waiting for device..."
     },
     "rfCode": {
       "title": "RF Code",

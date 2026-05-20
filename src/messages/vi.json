@@ -452,6 +452,7 @@
     "emptyState": "Chưa có thiết bị nào.",
     "pendingTitle": "Thiết bị chờ duyệt",
     "pendingEmpty": "Không có thiết bị nào chờ duyệt.",
+    "reloadAction": "Tải lại thiết bị",
     "columnName": "Tên",
     "columnKind": "Loại",
     "columnHardware": "Phần cứng",
@@ -541,7 +542,8 @@
       "rejectTitle": "Từ chối thiết bị",
       "rejectDescription": "Từ chối thiết bị này? Thiết bị sẽ không thể kích hoạt. Lựa chọn này không thể hoàn tác.",
       "rejectedToast": "Đã từ chối thiết bị",
-      "errorHubCapReached": "Cửa hàng đã đạt giới hạn số bộ phát tín hiệu."
+      "errorHubCapReached": "Cửa hàng đã đạt giới hạn số bộ phát tín hiệu.",
+      "waitingForDevice": "Đang chờ thiết bị..."
     },
     "rfCode": {
       "title": "Mã RF",

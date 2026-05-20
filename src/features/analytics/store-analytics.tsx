@@ -94,9 +94,9 @@ export function StoreAnalytics({
           <Link
             href="/dashboard/analytics"
             aria-label={t("backToOverview")}
-            className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            <ArrowLeft aria-hidden="true" className="size-4" />
+            <ArrowLeft aria-hidden="true" className="size-5" />
           </Link>
         )}
         <h1 className="text-xl font-bold l:text-2xl">
