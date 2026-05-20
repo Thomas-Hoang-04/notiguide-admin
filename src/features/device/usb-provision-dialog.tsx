@@ -36,7 +36,6 @@ import { StoreSelectField } from "./store-select-field";
 
 type ProvisionStep =
   | "connect"
-  | "identify"
   | "form"
   | "testing_wifi"
   | "issuing_token"
@@ -65,7 +64,6 @@ const STEPPER_KEYS = [
 
 const STEP_INDEX_MAP: Record<string, number> = {
   connect: -1,
-  identify: -1,
   form: -1,
   testing_wifi: -1,
   issuing_token: 0,
@@ -147,17 +145,37 @@ export function UsbProvisionDialog({
     }
   }, [open, portState, disconnect]);
 
-  async function handleConnect() {
-    try {
-      setStep("identify");
-      await connect();
-      const id = await sendCommand("identify");
-      setIdentity(id);
-      setStep("form");
-    } catch {
-      setStep("connect");
+  useEffect(() => {
+    if (step !== "done") return;
+    const timer = setTimeout(() => onOpenChange(false), 5_000);
+    return () => clearTimeout(timer);
+  }, [step, onOpenChange]);
+
+  useEffect(() => {
+    if (!open || step !== "connect" || portState !== "open") return;
+
+    let cancelled = false;
+
+    async function identifyDevice() {
+      try {
+        const id = await sendCommand("identify");
+        if (!cancelled) {
+          setIdentity(id);
+          setStep("form");
+        }
+      } catch {
+        if (!cancelled) {
+          void disconnect();
+        }
+      }
     }
-  }
+
+    void identifyDevice();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, step, portState, sendCommand, disconnect]);
 
   function validate(): boolean {
     const errs: Record<string, string> = {};
@@ -334,21 +352,21 @@ export function UsbProvisionDialog({
                 {tCommon("cancel")}
               </Button>
               <Button
-                onClick={() => void handleConnect()}
+                onClick={() => void connect().catch(() => {})}
                 className="bg-primary text-primary-foreground hover:bg-primary-hover"
-                disabled={!canUseSerial}
+                disabled={!canUseSerial || portState !== "closed"}
               >
-                <Usb aria-hidden="true" className="mr-2 size-4" />
-                {tUsb("connect")}
+                {portState !== "closed" ? (
+                  <Loader2
+                    aria-hidden="true"
+                    className="mr-2 size-4 animate-spin"
+                  />
+                ) : (
+                  <Usb aria-hidden="true" className="mr-2 size-4" />
+                )}
+                {portState !== "closed" ? tUsb("connecting") : tUsb("connect")}
               </Button>
             </DialogFooter>
-          </div>
-        )}
-
-        {step === "identify" && (
-          <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-            <Loader2 aria-hidden="true" className="size-4 animate-spin" />
-            {tUsb("connecting")}
           </div>
         )}
 
@@ -546,9 +564,10 @@ export function UsbProvisionDialog({
             <Card className="rounded-lg p-4">
               <div className="flex flex-col gap-2">
                 {STEPPER_KEYS.map((key, i) => {
-                  const isActive = i === activeStepIndex;
-                  const isComplete = i < activeStepIndex;
-                  const isPending = i > activeStepIndex;
+                  const isDone = step === "done";
+                  const isActive = !isDone && i === activeStepIndex;
+                  const isComplete = isDone || i < activeStepIndex;
+                  const isPending = !isDone && i > activeStepIndex;
 
                   return (
                     <div key={key} className="flex items-center gap-3">

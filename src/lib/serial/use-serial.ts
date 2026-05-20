@@ -149,11 +149,35 @@ export function useSerial(): UseSerialReturn {
       const port = await navigator.serial.requestPort({
         filters: [ESP32_C3_USB_FILTER],
       });
-      await openPort(port);
+
+      try {
+        await openPort(port);
+        return;
+      } catch {
+        // First-time pairing may cause a CDC-ACM USB enumeration reset,
+        // leaving the original port object in a broken state. Wait for
+        // re-enumeration, then get a fresh port reference via getPorts().
+      }
+
+      updatePortState("opening");
+      await new Promise((resolve) => setTimeout(resolve, 2_000));
+
+      const ports = await navigator.serial.getPorts();
+      const freshPort = ports.find((p) => {
+        const info = p.getInfo();
+        return (
+          info.usbVendorId === ESP32_C3_USB_FILTER.usbVendorId &&
+          info.usbProductId === ESP32_C3_USB_FILTER.usbProductId
+        );
+      });
+
+      if (freshPort) {
+        await openPort(freshPort);
+      }
     } finally {
       manualConnectRef.current = false;
     }
-  }, [canUseSerial, openPort]);
+  }, [canUseSerial, openPort, updatePortState]);
 
   const reconnectKnownPort = useCallback(async () => {
     if (!canUseSerial) return;
