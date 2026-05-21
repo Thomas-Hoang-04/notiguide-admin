@@ -21,7 +21,8 @@ import {
   translateCommonApiError,
   translateNetworkError,
 } from "@/lib/api-error";
-import type { IdentifyPayload, TestWifiResult } from "@/lib/serial/types";
+import type { TestWifiResult } from "@/lib/serial/types";
+import { isReceiverKind } from "@/lib/serial/types";
 import { useSerial } from "@/lib/serial/use-serial";
 import { useAuthStore } from "@/store/auth";
 import { ApiError } from "@/types/api";
@@ -90,16 +91,17 @@ export function UsbProvisionDialog({
   const {
     canUseSerial,
     portState,
+    identifyPayload,
+    deviceKind,
+    isNativeUsbPort,
     connect,
     reconnectKnownPort,
     disconnect,
-    refreshStatus,
     sendCommand,
     deviceState,
   } = useSerial();
 
   const [step, setStep] = useState<ProvisionStep>("connect");
-  const [identity, setIdentity] = useState<IdentifyPayload | null>(null);
   const [stores, setStores] = useState<StoreDto[]>([]);
 
   const [assignedName, setAssignedName] = useState("");
@@ -119,7 +121,6 @@ export function UsbProvisionDialog({
     if (!open) return;
 
     setStep("connect");
-    setIdentity(null);
     setAssignedName("");
     setStoreId(adminStoreId ?? "");
     setWifiSsid("");
@@ -152,34 +153,13 @@ export function UsbProvisionDialog({
   }, [step, onOpenChange]);
 
   useEffect(() => {
-    if (!open || step !== "connect" || portState !== "open") return;
-
-    let cancelled = false;
-
-    async function identifyDevice() {
-      try {
-        const id = await sendCommand("identify");
-        if (!cancelled) {
-          setIdentity(id);
-          setStep("form");
-        }
-      } catch {
-        if (!cancelled) {
-          void disconnect();
-        }
-      }
-    }
-
-    void identifyDevice();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [open, step, portState, sendCommand, disconnect]);
+    if (!open || step !== "connect" || !identifyPayload) return;
+    setStep("form");
+  }, [open, step, identifyPayload]);
 
   function validate(): boolean {
     const errs: Record<string, string> = {};
-    if (!assignedName.trim())
+    if (deviceKind && !isReceiverKind(deviceKind) && !assignedName.trim())
       errs.assignedName = tDevices("pending.approveNameRequired");
     if (!storeId) errs.storeId = tDevices("pending.approveStoreRequired");
     if (!wifiSsid.trim()) errs.wifiSsid = tDevices("usb.wifi_fail");
@@ -211,8 +191,10 @@ export function UsbProvisionDialog({
     await new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  async function listPendingHubIds(): Promise<Set<string>> {
-    const result = await listDevices("TRANSMITTER_HUB", storeId);
+  async function listPendingDeviceIds(): Promise<Set<string>> {
+    const kind =
+      deviceKind && isReceiverKind(deviceKind) ? deviceKind : "TRANSMITTER_HUB";
+    const result = await listDevices(kind, storeId);
     return new Set(
       result.devices
         .filter((device) => device.status === "PENDING")
@@ -221,14 +203,26 @@ export function UsbProvisionDialog({
   }
 
   async function waitForRestartReconnect(): Promise<void> {
-    for (let attempt = 0; attempt < 20; attempt++) {
-      await sleep(2_000);
-      try {
-        await reconnectKnownPort();
-        const status = await refreshStatus();
-        if (status) return;
-      } catch {
-        // wait for the USB device to re-enumerate
+    if (isNativeUsbPort) {
+      for (let attempt = 0; attempt < 20; attempt++) {
+        await sleep(2_000);
+        try {
+          await reconnectKnownPort();
+          await sendCommand("ping");
+          return;
+        } catch {
+          // waiting for USB re-enumeration
+        }
+      }
+    } else {
+      for (let attempt = 0; attempt < 20; attempt++) {
+        await sleep(2_000);
+        try {
+          await sendCommand("ping");
+          return;
+        } catch {
+          // device still rebooting
+        }
       }
     }
   }
@@ -239,7 +233,7 @@ export function UsbProvisionDialog({
     setErrorMessage("");
 
     try {
-      const existingPendingIds = await listPendingHubIds();
+      const existingPendingIds = await listPendingDeviceIds();
 
       setStep("issuing_token");
 
@@ -294,7 +288,11 @@ export function UsbProvisionDialog({
     for (let attempt = 0; attempt < 10; attempt++) {
       await sleep(3_000);
       try {
-        const result = await listDevices("TRANSMITTER_HUB", storeId);
+        const kind =
+          deviceKind && isReceiverKind(deviceKind)
+            ? deviceKind
+            : "TRANSMITTER_HUB";
+        const result = await listDevices(kind, storeId);
         const pending = result.devices.filter(
           (d) => d.status === "PENDING" && !existingPendingIds.has(d.id),
         );
@@ -303,7 +301,10 @@ export function UsbProvisionDialog({
           setStep("approving");
           try {
             await approveDevice(pending[0].id, {
-              assignedName: assignedName.trim(),
+              assignedName:
+                deviceKind && isReceiverKind(deviceKind)
+                  ? `Receiver ${identifyPayload?.mac.slice(-5).replace(":", "")}`
+                  : assignedName.trim(),
               storeId,
             });
             await waitForActivation(pending[0].id);
@@ -370,20 +371,32 @@ export function UsbProvisionDialog({
           </div>
         )}
 
-        {(step === "form" || step === "testing_wifi") && identity && (
+        {(step === "form" || step === "testing_wifi") && identifyPayload && (
           <div className="space-y-4">
             <Card className="rounded-lg p-3">
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <span className="text-muted-foreground">{tUsb("mac")}</span>
-                <span className="font-mono">{identity.mac}</span>
+                <span className="font-mono">{identifyPayload.mac}</span>
+                <span className="text-muted-foreground">
+                  {tUsb("device_type")}
+                </span>
+                <span>
+                  {deviceKind === "TRANSMITTER_HUB"
+                    ? tUsb("type_transmitter_hub")
+                    : deviceKind === "RECEIVER_433M"
+                      ? tUsb("type_receiver_433m")
+                      : deviceKind === "RECEIVER_2_4G"
+                        ? tUsb("type_receiver_2_4g")
+                        : deviceKind}
+                </span>
                 <span className="text-muted-foreground">
                   {tUsb("firmware")}
                 </span>
-                <span>{identity.firmware_version}</span>
+                <span>{identifyPayload.firmware_version}</span>
                 <span className="text-muted-foreground">
                   {tDevices("detail.status")}
                 </span>
-                <span>{identity.op_state}</span>
+                <span>{identifyPayload.op_state}</span>
               </div>
             </Card>
 
@@ -413,19 +426,24 @@ export function UsbProvisionDialog({
                 error={errors.storeId}
               />
 
-              <div className="space-y-2">
-                <Label htmlFor="usb-name">{tUsb("assigned_name")}</Label>
-                <Input
-                  id="usb-name"
-                  value={assignedName}
-                  onChange={(e) => setAssignedName(e.target.value)}
-                  maxLength={100}
-                  aria-invalid={!!errors.assignedName}
-                />
-                {errors.assignedName && (
-                  <InlineError message={errors.assignedName} className="mt-1" />
-                )}
-              </div>
+              {deviceKind && !isReceiverKind(deviceKind) && (
+                <div className="space-y-2">
+                  <Label htmlFor="usb-name">{tUsb("assigned_name")}</Label>
+                  <Input
+                    id="usb-name"
+                    value={assignedName}
+                    onChange={(e) => setAssignedName(e.target.value)}
+                    maxLength={100}
+                    aria-invalid={!!errors.assignedName}
+                  />
+                  {errors.assignedName && (
+                    <InlineError
+                      message={errors.assignedName}
+                      className="mt-1"
+                    />
+                  )}
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
@@ -625,7 +643,7 @@ export function UsbProvisionDialog({
                 {tCommon("close")}
               </Button>
               <Button
-                onClick={() => setStep(identity ? "form" : "connect")}
+                onClick={() => setStep(identifyPayload ? "form" : "connect")}
                 className="bg-primary text-primary-foreground hover:bg-primary-hover"
               >
                 {tCommon("retry")}

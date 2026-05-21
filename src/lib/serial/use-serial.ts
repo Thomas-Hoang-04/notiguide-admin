@@ -3,9 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SerialProtocol } from "./serial-protocol";
 import { hasWebSerialSupport } from "./support";
-import type { SerialCommandMap, StatusPayload } from "./types";
+import type {
+  DeviceKind,
+  IdentifyPayload,
+  SerialCommandMap,
+  StatusPayload,
+} from "./types";
 import {
+  ALL_DEVICE_FILTERS,
   ESP32_C3_USB_FILTER,
+  isReceiverKind,
   SERIAL_BAUD_RATE,
   SERIAL_SESSION_POLL_INTERVAL_MS,
 } from "./types";
@@ -15,6 +22,9 @@ export type PortState = "closed" | "opening" | "open" | "closing";
 export interface UseSerialReturn {
   canUseSerial: boolean;
   portState: PortState;
+  identifyPayload: IdentifyPayload | null;
+  deviceKind: DeviceKind | null;
+  isNativeUsbPort: boolean;
   connect: () => Promise<void>;
   reconnectKnownPort: () => Promise<void>;
   disconnect: () => Promise<void>;
@@ -33,6 +43,11 @@ export function useSerial(): UseSerialReturn {
   const [canUseSerial, setCanUseSerial] = useState(false);
   const [portState, setPortState] = useState<PortState>("closed");
   const [deviceState, setDeviceState] = useState<StatusPayload | null>(null);
+  const [identifyPayload, setIdentifyPayload] =
+    useState<IdentifyPayload | null>(null);
+  const [isNativeUsbPort, setIsNativeUsbPort] = useState(true);
+
+  const deviceKind = identifyPayload?.device_kind ?? null;
 
   const portRef = useRef<SerialPort | null>(null);
   const portStateRef = useRef<PortState>("closed");
@@ -119,11 +134,20 @@ export function useSerial(): UseSerialReturn {
         await port.open({ baudRate: SERIAL_BAUD_RATE });
         await protocolRef.current.connect(port);
         portRef.current = port;
+        const portInfo = port.getInfo();
+        setIsNativeUsbPort(
+          portInfo.usbVendorId === ESP32_C3_USB_FILTER.usbVendorId,
+        );
         updatePortState("open");
 
-        const status = await protocolRef.current.send("status");
-        setDeviceState(status);
-        startStatusPoll();
+        const id = await protocolRef.current.send("identify");
+        setIdentifyPayload(id);
+
+        if (!isReceiverKind(id.device_kind as DeviceKind)) {
+          const status = await protocolRef.current.send("status");
+          setDeviceState(status);
+          startStatusPoll();
+        }
       } catch (error) {
         stopStatusPoll();
         await protocolRef.current.disconnect();
@@ -133,6 +157,8 @@ export function useSerial(): UseSerialReturn {
           // ignore close errors after a partially opened port
         }
         portRef.current = null;
+        setIdentifyPayload(null);
+        setIsNativeUsbPort(true);
         updatePortState("closed");
         throw error;
       }
@@ -147,7 +173,7 @@ export function useSerial(): UseSerialReturn {
     manualConnectRef.current = true;
     try {
       const port = await navigator.serial.requestPort({
-        filters: [ESP32_C3_USB_FILTER],
+        filters: [...ALL_DEVICE_FILTERS],
       });
 
       try {
@@ -165,9 +191,10 @@ export function useSerial(): UseSerialReturn {
       const ports = await navigator.serial.getPorts();
       const freshPort = ports.find((p) => {
         const info = p.getInfo();
-        return (
-          info.usbVendorId === ESP32_C3_USB_FILTER.usbVendorId &&
-          info.usbProductId === ESP32_C3_USB_FILTER.usbProductId
+        return ALL_DEVICE_FILTERS.some(
+          (f) =>
+            info.usbVendorId === f.usbVendorId &&
+            info.usbProductId === f.usbProductId,
         );
       });
 
@@ -184,15 +211,16 @@ export function useSerial(): UseSerialReturn {
     if (portStateRef.current !== "closed") return;
 
     const ports = await navigator.serial.getPorts();
-    const espPort = ports.find((p) => {
+    const knownPort = ports.find((p) => {
       const info = p.getInfo();
-      return (
-        info.usbVendorId === ESP32_C3_USB_FILTER.usbVendorId &&
-        info.usbProductId === ESP32_C3_USB_FILTER.usbProductId
+      return ALL_DEVICE_FILTERS.some(
+        (f) =>
+          info.usbVendorId === f.usbVendorId &&
+          info.usbProductId === f.usbProductId,
       );
     });
-    if (espPort) {
-      await openPort(espPort);
+    if (knownPort) {
+      await openPort(knownPort);
     }
   }, [canUseSerial, openPort]);
 
@@ -201,6 +229,8 @@ export function useSerial(): UseSerialReturn {
     updatePortState("closing");
     stopStatusPoll();
     setDeviceState(null);
+    setIdentifyPayload(null);
+    setIsNativeUsbPort(true);
 
     await protocolRef.current.disconnect();
 
@@ -252,6 +282,8 @@ export function useSerial(): UseSerialReturn {
     const handleStreamClosed = () => {
       stopStatusPoll();
       setDeviceState(null);
+      setIdentifyPayload(null);
+      setIsNativeUsbPort(true);
       portRef.current = null;
       updatePortState("closed");
     };
@@ -274,6 +306,8 @@ export function useSerial(): UseSerialReturn {
         stopStatusPoll();
         void protocolRef.current.disconnect();
         setDeviceState(null);
+        setIdentifyPayload(null);
+        setIsNativeUsbPort(true);
         portRef.current = null;
         updatePortState("closed");
       }
@@ -284,10 +318,12 @@ export function useSerial(): UseSerialReturn {
       if (portStateRef.current !== "closed") return;
       const port = e.target as SerialPort;
       const info = port.getInfo();
-      if (
-        info.usbVendorId === ESP32_C3_USB_FILTER.usbVendorId &&
-        info.usbProductId === ESP32_C3_USB_FILTER.usbProductId
-      ) {
+      const isKnown = ALL_DEVICE_FILTERS.some(
+        (f) =>
+          info.usbVendorId === f.usbVendorId &&
+          info.usbProductId === f.usbProductId,
+      );
+      if (isKnown) {
         void openPort(port).catch(() => {
           portRef.current = null;
           updatePortState("closed");
@@ -320,6 +356,9 @@ export function useSerial(): UseSerialReturn {
   return {
     canUseSerial,
     portState,
+    identifyPayload,
+    deviceKind,
+    isNativeUsbPort,
     connect,
     reconnectKnownPort,
     disconnect,

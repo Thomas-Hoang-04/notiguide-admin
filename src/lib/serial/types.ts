@@ -1,3 +1,5 @@
+import type { DeviceKind } from "@/types/device";
+
 // --- Message envelope types ---
 
 export interface SerialResponse {
@@ -69,9 +71,16 @@ export interface StatusPayload {
 export interface IdentifyPayload {
   public_id: string;
   device_name: string;
+  device_kind: DeviceKind;
   op_state: string;
   firmware_version: string;
   mac: string;
+}
+
+export type { DeviceKind };
+
+export function isReceiverKind(kind: DeviceKind): boolean {
+  return kind !== "TRANSMITTER_HUB";
 }
 
 export interface TestWifiResult {
@@ -110,6 +119,7 @@ export interface SerialCommandMap {
   factory_reset: { payload: undefined; response: RestartResult };
   transmit: { payload: TransmitPayload; response: TransmitResult };
   lifecycle: { payload: LifecyclePayload; response: LifecycleResult };
+  retry: { payload: undefined; response: RestartResult };
 }
 
 // --- Hardware constants ---
@@ -118,6 +128,16 @@ export const ESP32_C3_USB_FILTER = {
   usbVendorId: 0x303a,
   usbProductId: 0x1001,
 } as const;
+
+export const FTDI_USB_FILTER = {
+  usbVendorId: 0x0403,
+  usbProductId: 0x6001,
+} as const;
+
+export const ALL_DEVICE_FILTERS = [
+  ESP32_C3_USB_FILTER,
+  FTDI_USB_FILTER,
+] as const;
 
 export const SERIAL_BAUD_RATE = 115200;
 export const SERIAL_COMMAND_TIMEOUT_MS = 10_000;
