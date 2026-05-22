@@ -100,9 +100,9 @@ export function HubHealthCard() {
 
       {data.warnings.length > 0 ? (
         <div className="mt-3 space-y-1.5">
-          {data.warnings.map((w, i) => (
+          {data.warnings.map((w) => (
             <div
-              key={`${w.deviceId}-${w.type}-${i}`}
+              key={`${w.deviceId}-${w.type}-${w.value}`}
               className="flex items-center gap-2 rounded-md border border-warning/40 bg-warning/15 px-3 py-1.5 text-xs text-warning dark:border-warning/50 dark:bg-warning/20"
             >
               <AlertTriangle className="size-3.5 shrink-0" />

@@ -349,7 +349,7 @@ export function UsbProvisionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{tUsb("provision_title")}</DialogTitle>
         </DialogHeader>
@@ -479,6 +479,7 @@ export function UsbProvisionDialog({
                       value={wifiPwd}
                       onChange={(e) => setWifiPwd(e.target.value)}
                       maxLength={64}
+                      className="pr-10"
                     />
                     <button
                       type="button"
@@ -539,6 +540,7 @@ export function UsbProvisionDialog({
                       onChange={(e) => setMqttPwd(e.target.value)}
                       maxLength={127}
                       aria-invalid={!!errors.mqttPwd}
+                      className="pr-10"
                     />
                     <button
                       type="button"

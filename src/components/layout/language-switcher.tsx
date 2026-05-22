@@ -41,7 +41,10 @@ export function LanguageSwitcher() {
         isPending && "pointer-events-none opacity-60",
       )}
     >
-      <Flag aria-hidden="true" className="h-3.5 w-5 rounded-sm" />
+      <Flag
+        aria-hidden="true"
+        className="h-3 w-[1.125rem] shrink-0 overflow-hidden rounded-[2px]"
+      />
       <span className="text-xs font-semibold">{locale.toUpperCase()}</span>
     </Toggle>
   );
