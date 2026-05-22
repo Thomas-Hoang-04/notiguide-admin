@@ -1,5 +1,6 @@
 "use client";
 
+import { GB, VN } from "country-flag-icons/react/3x2";
 import { useLocale } from "next-intl";
 import { useTransition } from "react";
 import { Toggle } from "@/components/ui/toggle";
@@ -7,8 +8,8 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 const LOCALE_META = {
-  vi: { flag: "🇻🇳", label: "Tiếng Việt" },
-  en: { flag: "🇬🇧", label: "English" },
+  vi: { Flag: VN, label: "Tiếng Việt" },
+  en: { Flag: GB, label: "English" },
 } as const;
 
 type Locale = keyof typeof LOCALE_META;
@@ -20,6 +21,7 @@ export function LanguageSwitcher() {
   const [isPending, startTransition] = useTransition();
 
   const nextLocale: Locale = locale === "vi" ? "en" : "vi";
+  const { Flag } = LOCALE_META[locale];
 
   function handlePress() {
     startTransition(() => {
@@ -39,7 +41,7 @@ export function LanguageSwitcher() {
         isPending && "pointer-events-none opacity-60",
       )}
     >
-      <span className="text-base leading-none">{LOCALE_META[locale].flag}</span>
+      <Flag aria-hidden="true" className="h-3.5 w-5 rounded-sm" />
       <span className="text-xs font-semibold">{locale.toUpperCase()}</span>
     </Toggle>
   );

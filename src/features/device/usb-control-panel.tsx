@@ -1,16 +1,8 @@
 "use client";
 
-import {
-  Activity,
-  ChevronDown,
-  Loader2,
-  Pause,
-  Play,
-  Terminal,
-  Usb,
-} from "lucide-react";
+import { Activity, ChevronDown, Loader2, Usb } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -34,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { UseSerialReturn } from "@/lib/serial/use-serial";
 import { relayDiagnostics } from "./api";
-import "@/styles/usb-console.css";
+import { SerialConsole } from "./serial-console";
 
 interface UsbControlPanelProps {
   serial: UseSerialReturn;
@@ -43,24 +35,10 @@ interface UsbControlPanelProps {
   expectedPublicId?: string | null;
 }
 
-interface ConsoleEntry {
-  timestamp: number;
-  text: string;
-  level: string;
-}
-
 interface EventEntry {
   timestamp: number;
   type: string;
   payload: Record<string, unknown>;
-}
-
-function detectLogLevel(line: string): string {
-  if (line.startsWith("E ") || line.startsWith("E (")) return "E";
-  if (line.startsWith("W ") || line.startsWith("W (")) return "W";
-  if (line.startsWith("I ") || line.startsWith("I (")) return "I";
-  if (line.startsWith("D ") || line.startsWith("D (")) return "D";
-  return "";
 }
 
 export function UsbControlPanel({
@@ -86,10 +64,7 @@ export function UsbControlPanel({
   const isMismatched =
     hasExpectedPublicId && serialPublicId !== expectedPublicId;
 
-  const [consoleLogs, setConsoleLogs] = useState<ConsoleEntry[]>([]);
   const [eventLog, setEventLog] = useState<EventEntry[]>([]);
-  const [consolePaused, setConsolePaused] = useState(false);
-  const [consoleOpen, setConsoleOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<
     "suspend" | "resume" | "decommission" | "factory_reset" | null
   >(null);
@@ -98,8 +73,6 @@ export function UsbControlPanel({
   const [mqttUser, setMqttUser] = useState("");
   const [mqttPwd, setMqttPwd] = useState("");
   const [mqttError, setMqttError] = useState("");
-
-  const consoleEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isConnected || !deviceState || isMismatched || !expectedPublicId)
@@ -128,23 +101,6 @@ export function UsbControlPanel({
     }).catch(() => {});
   }, [deviceId, deviceState, expectedPublicId, isConnected, isMismatched]);
 
-  const addConsoleLog = useCallback(
-    (text: string) => {
-      if (consolePaused) return;
-      setConsoleLogs((prev) => {
-        const next = [
-          ...prev,
-          { timestamp: Date.now(), text, level: detectLogLevel(text) },
-        ];
-        return next.length > 500 ? next.slice(-500) : next;
-      });
-      requestAnimationFrame(() => {
-        consoleEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      });
-    },
-    [consolePaused],
-  );
-
   const addEvent = useCallback(
     (type: string, payload: Record<string, unknown>) => {
       setEventLog((prev) => {
@@ -154,14 +110,6 @@ export function UsbControlPanel({
     },
     [],
   );
-
-  useEffect(() => {
-    const handleConsole = (e: Event) => {
-      addConsoleLog((e as CustomEvent).detail);
-    };
-    events.addEventListener("console.log", handleConsole);
-    return () => events.removeEventListener("console.log", handleConsole);
-  }, [events, addConsoleLog]);
 
   useEffect(() => {
     const eventTypes = [
@@ -188,12 +136,6 @@ export function UsbControlPanel({
       }
     };
   }, [events, addEvent]);
-
-  useEffect(() => {
-    if (!consolePaused) {
-      consoleEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [consolePaused]);
 
   function eventColorClass(type: string): string {
     if (type.includes("rejected")) return "text-destructive";
@@ -485,49 +427,7 @@ export function UsbControlPanel({
               </Card>
             )}
 
-            <Collapsible open={consoleOpen} onOpenChange={setConsoleOpen}>
-              <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-                <Terminal aria-hidden="true" className="size-4" />
-                <span>{tUsb("console_log")}</span>
-                <ChevronDown
-                  aria-hidden="true"
-                  className="size-3.5 transition-transform [[data-panel-open]_&]:rotate-180"
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="mt-2">
-                  <div className="flex items-center justify-end mb-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setConsolePaused(!consolePaused)}
-                      className="h-6 px-2 text-xs"
-                    >
-                      {consolePaused ? (
-                        <Play aria-hidden="true" className="mr-1 size-3" />
-                      ) : (
-                        <Pause aria-hidden="true" className="mr-1 size-3" />
-                      )}
-                      {consolePaused
-                        ? tUsb("console_resume")
-                        : tUsb("console_pause")}
-                    </Button>
-                  </div>
-                  <div className="usb-console">
-                    {consoleLogs.map((entry) => (
-                      <div
-                        key={entry.timestamp}
-                        className="usb-console-line"
-                        data-level={entry.level}
-                      >
-                        {entry.text}
-                      </div>
-                    ))}
-                    <div ref={consoleEndRef} />
-                  </div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+            <SerialConsole events={events} />
           </div>
         </CollapsibleContent>
       </Card>

@@ -2294,6 +2294,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"country-flag-icons@npm:^1.6.17":
+  version: 1.6.17
+  resolution: "country-flag-icons@npm:1.6.17"
+  checksum: 10c0/1b9e8dc62380a08dbce50250b62c2f7807bf5ca2b72f29c14b26d30e4f9257f0536641d0d3e8276ae4fcf863e3e4b5729b1cb3c99d607ccd51e48568dfb3d0e4
+  languageName: node
+  linkType: hard
+
 "cross-spawn@npm:^7.0.3, cross-spawn@npm:^7.0.5, cross-spawn@npm:^7.0.6":
   version: 7.0.6
   resolution: "cross-spawn@npm:7.0.6"
@@ -4110,6 +4117,7 @@ __metadata:
     babel-plugin-react-compiler: "npm:1.0.0"
     class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"
+    country-flag-icons: "npm:^1.6.17"
     date-fns: "npm:^4.1.0"
     lucide-react: "npm:^0.577.0"
     next: "npm:16.2.1"

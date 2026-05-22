@@ -719,6 +719,8 @@
       "mqtt_uri": "MQTT URI",
       "mqtt_username": "MQTT username",
       "mqtt_password": "MQTT password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
       "rssi": "RSSI",
       "free_heap": "Free heap",
       "uptime": "Uptime",

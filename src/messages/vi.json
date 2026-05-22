@@ -719,6 +719,8 @@
       "mqtt_uri": "URI MQTT",
       "mqtt_username": "Tên đăng nhập MQTT",
       "mqtt_password": "Mật khẩu MQTT",
+      "showPassword": "Hiện mật khẩu",
+      "hidePassword": "Ẩn mật khẩu",
       "rssi": "RSSI",
       "free_heap": "Bộ nhớ trống",
       "uptime": "Thời gian chạy",

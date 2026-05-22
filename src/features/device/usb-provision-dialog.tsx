@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Loader2, Usb, Wifi, WifiOff } from "lucide-react";
+import { Check, Eye, EyeOff, Loader2, Usb, Wifi, WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -33,6 +33,7 @@ import {
   issueEnrollmentToken,
   listDevices,
 } from "./api";
+import { SerialConsole } from "./serial-console";
 import { StoreSelectField } from "./store-select-field";
 
 type ProvisionStep =
@@ -99,6 +100,7 @@ export function UsbProvisionDialog({
     disconnect,
     sendCommand,
     deviceState,
+    events,
   } = useSerial();
 
   const [step, setStep] = useState<ProvisionStep>("connect");
@@ -116,6 +118,8 @@ export function UsbProvisionDialog({
   const [loading, setLoading] = useState(false);
   const [wifiResult, setWifiResult] = useState<TestWifiResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showWifiPwd, setShowWifiPwd] = useState(false);
+  const [showMqttPwd, setShowMqttPwd] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -132,6 +136,8 @@ export function UsbProvisionDialog({
     setWifiResult(null);
     setErrorMessage("");
     setLoading(false);
+    setShowWifiPwd(false);
+    setShowMqttPwd(false);
 
     if (isSuperAdmin) {
       listStores(0, 100)
@@ -250,6 +256,11 @@ export function UsbProvisionDialog({
         mqtt_user: mqttUser,
         mqtt_pwd: mqttPwd,
         enroll_token: tokenResult.token,
+      }).catch((provisionErr: unknown) => {
+        const msg = provisionErr instanceof Error ? provisionErr.message : "";
+        const isDeviceRestart =
+          msg.startsWith("serial_timeout") || msg === "serial_disconnected";
+        if (!isDeviceRestart) throw provisionErr;
       });
 
       setStep("restarting");
@@ -338,7 +349,7 @@ export function UsbProvisionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{tUsb("provision_title")}</DialogTitle>
         </DialogHeader>
@@ -461,13 +472,31 @@ export function UsbProvisionDialog({
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="usb-wifi-pwd">{tUsb("wifi_password")}</Label>
-                  <Input
-                    id="usb-wifi-pwd"
-                    type="password"
-                    value={wifiPwd}
-                    onChange={(e) => setWifiPwd(e.target.value)}
-                    maxLength={64}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="usb-wifi-pwd"
+                      type={showWifiPwd ? "text" : "password"}
+                      value={wifiPwd}
+                      onChange={(e) => setWifiPwd(e.target.value)}
+                      maxLength={64}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowWifiPwd((v) => !v)}
+                      className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label={
+                        showWifiPwd
+                          ? tUsb("hidePassword")
+                          : tUsb("showPassword")
+                      }
+                    >
+                      {showWifiPwd ? (
+                        <EyeOff aria-hidden="true" className="size-4" />
+                      ) : (
+                        <Eye aria-hidden="true" className="size-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -502,14 +531,32 @@ export function UsbProvisionDialog({
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="usb-mqtt-pwd">{tUsb("mqtt_password")}</Label>
-                  <Input
-                    id="usb-mqtt-pwd"
-                    type="password"
-                    value={mqttPwd}
-                    onChange={(e) => setMqttPwd(e.target.value)}
-                    maxLength={127}
-                    aria-invalid={!!errors.mqttPwd}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="usb-mqtt-pwd"
+                      type={showMqttPwd ? "text" : "password"}
+                      value={mqttPwd}
+                      onChange={(e) => setMqttPwd(e.target.value)}
+                      maxLength={127}
+                      aria-invalid={!!errors.mqttPwd}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowMqttPwd((v) => !v)}
+                      className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label={
+                        showMqttPwd
+                          ? tUsb("hidePassword")
+                          : tUsb("showPassword")
+                      }
+                    >
+                      {showMqttPwd ? (
+                        <EyeOff aria-hidden="true" className="size-4" />
+                      ) : (
+                        <Eye aria-hidden="true" className="size-4" />
+                      )}
+                    </button>
+                  </div>
                   {errors.mqttPwd && (
                     <InlineError message={errors.mqttPwd} className="mt-1" />
                   )}
@@ -649,6 +696,11 @@ export function UsbProvisionDialog({
                 {tCommon("retry")}
               </Button>
             </DialogFooter>
+          </div>
+        )}
+        {portState === "open" && (
+          <div className="border-t pt-4">
+            <SerialConsole events={events} />
           </div>
         )}
       </DialogContent>
