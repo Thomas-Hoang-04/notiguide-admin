@@ -1,1 +1,21 @@
 /* Device feature styles — kept minimal; most styling via Tailwind + glass.css */
+@reference "../app/globals.css";
+
+.password-field-wrapper {
+  @apply flex h-8 w-full items-center rounded-lg border border-input bg-transparent transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 dark:bg-input/30;
+}
+
+.password-field-wrapper[aria-invalid="true"] {
+  @apply border-destructive ring-3 ring-destructive/20 dark:border-destructive/50 dark:ring-destructive/40;
+}
+
+.password-field-input {
+  @apply h-full flex-1 min-w-0 bg-transparent px-2.5 py-1 text-base outline-none placeholder:text-muted-foreground;
+}
+
+@media (width >= 48rem) {
+  .password-field-input {
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+  }
+}

@@ -35,6 +35,7 @@ import {
 } from "./api";
 import { SerialConsole } from "./serial-console";
 import { StoreSelectField } from "./store-select-field";
+import "@/styles/device.css";
 
 type ProvisionStep =
   | "connect"
@@ -472,19 +473,19 @@ export function UsbProvisionDialog({
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="usb-wifi-pwd">{tUsb("wifi_password")}</Label>
-                  <div className="relative">
-                    <Input
+                  <div className="password-field-wrapper">
+                    <input
                       id="usb-wifi-pwd"
                       type={showWifiPwd ? "text" : "password"}
                       value={wifiPwd}
                       onChange={(e) => setWifiPwd(e.target.value)}
                       maxLength={64}
-                      className="pr-10"
+                      className="password-field-input"
                     />
                     <button
                       type="button"
                       onClick={() => setShowWifiPwd((v) => !v)}
-                      className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="shrink-0 px-2.5 text-muted-foreground hover:text-foreground"
                       aria-label={
                         showWifiPwd
                           ? tUsb("hidePassword")
@@ -532,20 +533,22 @@ export function UsbProvisionDialog({
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="usb-mqtt-pwd">{tUsb("mqtt_password")}</Label>
-                  <div className="relative">
-                    <Input
+                  <div
+                    className="password-field-wrapper"
+                    aria-invalid={!!errors.mqttPwd || undefined}
+                  >
+                    <input
                       id="usb-mqtt-pwd"
                       type={showMqttPwd ? "text" : "password"}
                       value={mqttPwd}
                       onChange={(e) => setMqttPwd(e.target.value)}
                       maxLength={127}
-                      aria-invalid={!!errors.mqttPwd}
-                      className="pr-10"
+                      className="password-field-input"
                     />
                     <button
                       type="button"
                       onClick={() => setShowMqttPwd((v) => !v)}
-                      className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="shrink-0 px-2.5 text-muted-foreground hover:text-foreground"
                       aria-label={
                         showMqttPwd
                           ? tUsb("hidePassword")
