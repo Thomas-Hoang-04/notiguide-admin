@@ -335,7 +335,8 @@
       "errorNoActiveTransmitter": "No active transmitter hub — the device cannot receive the signal right now.",
       "errorDeviceBusy": "This device is currently busy with another ticket.",
       "errorDeviceNotFound": "Target device could not be found or is no longer available.",
-      "errorInfrastructure": "Dispatch failed due to a system issue. Please try again."
+      "errorInfrastructure": "Dispatch failed due to a system issue. Please try again.",
+      "refresh": "Refresh device availability"
     }
   },
   "analytics": {
@@ -583,6 +584,10 @@
         "IGNORED": "Ignored",
         "REJECTED": "Rejected"
       }
+    },
+    "rename": {
+      "successToast": "Device renamed",
+      "placeholder": "Enter device name"
     },
     "reprovision": {
       "button": "Reprovision",

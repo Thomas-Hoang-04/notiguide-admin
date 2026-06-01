@@ -1,4 +1,4 @@
-import { del, get, post } from "@/lib/api";
+import { del, get, patch, post } from "@/lib/api";
 import { API_ROUTES } from "@/lib/constants";
 import type {
   ApproveDeviceRequest,
@@ -12,6 +12,7 @@ import type {
   HubHealthSummaryResponse,
   IssueEnrollmentTokenRequest,
   PassiveDeviceRegistrationRequest,
+  RenameDeviceRequest,
   RotateRfCodeRequest,
   UsbDispatchPayloadRequest,
   UsbDispatchPayloadResponse,
@@ -81,6 +82,10 @@ export function relayDiagnostics(
   data: DeviceDiagnosticsRelayRequest,
 ) {
   return post<void>(API_ROUTES.DEVICES.DIAGNOSTICS(id), data);
+}
+
+export function renameDevice(id: string, request: RenameDeviceRequest) {
+  return patch<DeviceDetailDto>(API_ROUTES.DEVICES.RENAME(id), request);
 }
 
 export function getHubHealth() {

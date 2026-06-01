@@ -1,9 +1,18 @@
 "use client";
 
-import { ArrowLeft, Loader2, Radio, RotateCcw, Usb } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  Loader2,
+  Pencil,
+  Radio,
+  RotateCcw,
+  Usb,
+  X,
+} from "lucide-react";
 import { useParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -18,7 +27,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getDevice, reprovisionDevice } from "@/features/device/api";
+import {
+  getDevice,
+  renameDevice,
+  reprovisionDevice,
+} from "@/features/device/api";
 import { DeviceStatusBadge } from "@/features/device/device-status-badge";
 import { DispatchedTicketPanel } from "@/features/device/dispatched-ticket-panel";
 import { HubDiagnosticsPanel } from "@/features/device/hub-diagnostics-panel";
@@ -51,6 +64,10 @@ export default function DeviceDetailPage() {
   const [reprovisionOpen, setReprovisionOpen] = useState(false);
   const [reprovisionLoading, setReprovisionLoading] = useState(false);
   const [usbDispatchOpen, setUsbDispatchOpen] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [renameDraft, setRenameDraft] = useState("");
+  const [renameLoading, setRenameLoading] = useState(false);
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   const fetchDevice = useCallback(async () => {
     if (!params.id) return;
@@ -118,6 +135,33 @@ export default function DeviceDetailPage() {
       }
     } finally {
       setReprovisionLoading(false);
+    }
+  }
+
+  function startRenaming() {
+    setRenameDraft(device?.assignedName ?? "");
+    setRenaming(true);
+    setTimeout(() => renameInputRef.current?.focus(), 0);
+  }
+
+  async function handleRename() {
+    if (renameLoading || !device || !renameDraft.trim()) return;
+    setRenameLoading(true);
+    try {
+      const updated = await renameDevice(device.id, {
+        assignedName: renameDraft.trim(),
+      });
+      setDevice(updated);
+      setRenaming(false);
+      toast.success(tDevices("rename.successToast"));
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(translateCommonApiError(err, tErrors));
+      } else {
+        toast.error(translateNetworkError(tErrors));
+      }
+    } finally {
+      setRenameLoading(false);
     }
   }
 
@@ -189,7 +233,60 @@ export default function DeviceDetailPage() {
             <p className="text-xs text-muted-foreground">
               {tDevices("detail.assignedName")}
             </p>
-            <p className="text-sm">{device.assignedName || tCommon("none")}</p>
+            {renaming ? (
+              <div className="flex items-center gap-1.5">
+                <input
+                  ref={renameInputRef}
+                  type="text"
+                  value={renameDraft}
+                  onChange={(e) => setRenameDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") void handleRename();
+                    if (e.key === "Escape") setRenaming(false);
+                  }}
+                  maxLength={100}
+                  placeholder={tDevices("rename.placeholder")}
+                  className="h-7 w-full rounded-md border border-input bg-transparent px-2 text-sm outline-none ring-ring focus:ring-1"
+                  disabled={renameLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleRename()}
+                  disabled={renameLoading || !renameDraft.trim()}
+                  className="shrink-0 rounded p-0.5 text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
+                >
+                  {renameLoading ? (
+                    <Loader2
+                      aria-hidden="true"
+                      className="size-4 animate-spin"
+                    />
+                  ) : (
+                    <Check aria-hidden="true" className="size-4" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRenaming(false)}
+                  disabled={renameLoading}
+                  className="shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <X aria-hidden="true" className="size-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm">
+                  {device.assignedName || tCommon("none")}
+                </p>
+                <button
+                  type="button"
+                  onClick={startRenaming}
+                  className="shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <Pencil aria-hidden="true" className="size-3.5" />
+                </button>
+              </div>
+            )}
           </div>
           <div>
             <p className="text-xs text-muted-foreground">

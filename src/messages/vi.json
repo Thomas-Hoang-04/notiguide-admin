@@ -335,7 +335,8 @@
       "errorNoActiveTransmitter": "Chưa có bộ phát hoạt động — thiết bị không thể nhận tín hiệu.",
       "errorDeviceBusy": "Thiết bị này đang bận xử lý vé khác.",
       "errorDeviceNotFound": "Không tìm thấy thiết bị hoặc thiết bị không còn khả dụng.",
-      "errorInfrastructure": "Gửi tín hiệu thất bại do lỗi hệ thống. Vui lòng thử lại."
+      "errorInfrastructure": "Gửi tín hiệu thất bại do lỗi hệ thống. Vui lòng thử lại.",
+      "refresh": "Làm mới trạng thái thiết bị"
     }
   },
   "analytics": {
@@ -583,6 +584,10 @@
         "IGNORED": "Bỏ qua",
         "REJECTED": "Bị từ chối"
       }
+    },
+    "rename": {
+      "successToast": "Đã đổi tên thiết bị",
+      "placeholder": "Nhập tên thiết bị"
     },
     "reprovision": {
       "button": "Cấp phát lại",

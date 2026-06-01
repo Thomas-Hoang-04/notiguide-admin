@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, PauseCircle, Radio } from "lucide-react";
+import { Loader2, PauseCircle, Radio, RefreshCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -73,6 +73,7 @@ export default function QueuePage() {
   const [dispatchDialogOpen, setDispatchDialogOpen] = useState(false);
   const [dispatchReady, setDispatchReady] = useState(false);
   const [hasAvailableDevices, setHasAvailableDevices] = useState(false);
+  const [dispatchRefreshing, setDispatchRefreshing] = useState(false);
 
   // Refs for keyboard shortcut checks
   const callLoadingRef = useRef(false);
@@ -151,13 +152,15 @@ export default function QueuePage() {
     }
 
     if (
-      (event.type === "TICKET_SERVED" ||
-        event.type === "TICKET_CANCELLED" ||
-        event.type === "TICKET_SKIPPED" ||
-        event.type === "TICKET_REQUEUED") &&
-      servingTicketsRef.current.some((t) => t.id === event.ticketId)
+      event.type === "TICKET_SERVED" ||
+      event.type === "TICKET_CANCELLED" ||
+      event.type === "TICKET_SKIPPED" ||
+      event.type === "TICKET_REQUEUED"
     ) {
-      removeServingTicket(event.ticketId);
+      if (servingTicketsRef.current.some((t) => t.id === event.ticketId)) {
+        removeServingTicket(event.ticketId);
+      }
+      void fetchDispatchAvailability();
     }
   });
 
@@ -266,6 +269,30 @@ export default function QueuePage() {
                 </TooltipContent>
               </Tooltip>
             )}
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={dispatchRefreshing}
+                    onClick={() => {
+                      setDispatchRefreshing(true);
+                      void fetchDispatchAvailability().finally(() =>
+                        setDispatchRefreshing(false),
+                      );
+                    }}
+                    aria-label={tQueue("dispatch.refresh")}
+                  >
+                    <RefreshCcw
+                      aria-hidden="true"
+                      className={`size-4 ${dispatchRefreshing ? "animate-spin" : ""}`}
+                    />
+                  </Button>
+                }
+              />
+              <TooltipContent>{tQueue("dispatch.refresh")}</TooltipContent>
+            </Tooltip>
             <QueueStateToggle
               storeId={storeId}
               currentState={queueState}

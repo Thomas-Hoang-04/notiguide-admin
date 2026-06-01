@@ -86,6 +86,7 @@ export const API_ROUTES = {
     USB_DISPATCH_PAYLOAD: "/api/devices/usb-dispatch-payload",
     DIAGNOSTICS: (id: string) => `/api/devices/${id}/diagnostics`,
     HUB_HEALTH: "/api/devices/hub-health",
+    RENAME: (id: string) => `/api/devices/${id}/name`,
   },
 } as const;
 

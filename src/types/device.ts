@@ -137,6 +137,10 @@ export interface DeviceDetailDto extends DeviceDto {
   diagnostics?: HubDiagnosticsDto | null;
 }
 
+export interface RenameDeviceRequest {
+  assignedName: string;
+}
+
 export interface ApproveDeviceRequest {
   assignedName: string;
   storeId: string;
