@@ -455,14 +455,12 @@
     "reloadAction": "Reload devices",
     "columnName": "Name",
     "columnKind": "Type",
-    "columnHardware": "Hardware",
     "columnStatus": "Status",
     "columnStore": "Store",
     "columnCreated": "Created",
     "groupByStore": "Group by store",
     "filterStatus": "All Statuses",
     "filterKind": "All Types",
-    "filterHardware": "All Hardware",
     "filterStore": "All Stores",
     "status": {
       "PENDING": "Pending",
@@ -507,7 +505,6 @@
       "dialogTitle": "Register Passive Device",
       "dialogDescription": "Register a PT2272-class decoder that has no firmware. Enter the chip's preset address code.",
       "kindLabel": "Type",
-      "hardwareLabel": "Hardware",
       "storeLabel": "Store",
       "storeRequired": "Store is required",
       "nameLabel": "Assigned Name",
@@ -649,12 +646,12 @@
         "manageDevices": "Manage devices"
       }
     },
+    "hubPaired": "Hub-paired",
     "detail": {
       "identity": "Identity",
       "publicId": "Public ID",
       "assignedName": "Assigned Name",
       "kind": "Type",
-      "hardware": "Hardware",
       "status": "Status",
       "store": "Store",
       "firmware": "Firmware",
@@ -664,7 +661,8 @@
       "rfBits": "Bit Width",
       "rfVersion": "Version",
       "rfAck": "Acknowledgment",
-      "rfValue": "Value"
+      "rfValue": "Value",
+      "pairingMode": "Pairing mode"
     },
     "usb": {
       "connect": "Connect USB",

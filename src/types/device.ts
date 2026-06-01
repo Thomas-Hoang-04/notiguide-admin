@@ -12,8 +12,6 @@ export type DeviceKind =
   | "RECEIVER_2_4G"
   | "TRANSMITTER_HUB";
 
-export type DeviceHardwareModel = "ESP-01" | "ESP32-C3" | "PT2272";
-
 export type DeviceRfAckStatus =
   | "PENDING"
   | "APPLIED"
@@ -32,7 +30,6 @@ export interface DeviceRfCodeSummaryDto {
 export interface DeviceDto {
   id: string;
   publicId: string | null;
-  hardwareModel: DeviceHardwareModel;
   kind: DeviceKind;
   status: DeviceStatus;
   assignedName: string | null;
@@ -44,6 +41,7 @@ export interface DeviceDto {
   createdAt: string | null;
   updatedAt: string | null;
   rfCode: DeviceRfCodeSummaryDto | null;
+  hubSlot: number | null;
 }
 
 export interface DeviceListResponse {
@@ -69,7 +67,6 @@ export interface IssueEnrollmentTokenRequest {
 }
 
 export interface PassiveDeviceRegistrationRequest {
-  hardwareModel: "PT2272";
   kind: "RECEIVER_433M_PASSIVE";
   assignedName: string;
   storeId: string;

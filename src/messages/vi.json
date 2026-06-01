@@ -455,14 +455,12 @@
     "reloadAction": "Tải lại thiết bị",
     "columnName": "Tên",
     "columnKind": "Loại",
-    "columnHardware": "Phần cứng",
     "columnStatus": "Trạng thái",
     "columnStore": "Cửa hàng",
     "columnCreated": "Ngày tạo",
     "groupByStore": "Nhóm theo cửa hàng",
     "filterStatus": "Tất cả trạng thái",
     "filterKind": "Tất cả loại",
-    "filterHardware": "Tất cả phần cứng",
     "filterStore": "Tất cả cửa hàng",
     "status": {
       "PENDING": "Chờ duyệt",
@@ -507,7 +505,6 @@
       "dialogTitle": "Đăng ký thiết bị thu tĩnh",
       "dialogDescription": "Đăng ký bộ giải mã PT2272 không có firmware. Nhập mã địa chỉ cài sẵn trên chip.",
       "kindLabel": "Loại",
-      "hardwareLabel": "Phần cứng",
       "storeLabel": "Cửa hàng",
       "storeRequired": "Cửa hàng là bắt buộc",
       "nameLabel": "Tên gán",
@@ -649,12 +646,12 @@
         "manageDevices": "Quản lý thiết bị"
       }
     },
+    "hubPaired": "Ghép cục bộ",
     "detail": {
       "identity": "Thông tin",
       "publicId": "ID công khai",
       "assignedName": "Tên gán",
       "kind": "Loại",
-      "hardware": "Phần cứng",
       "status": "Trạng thái",
       "store": "Cửa hàng",
       "firmware": "Firmware",
@@ -664,7 +661,8 @@
       "rfBits": "Độ rộng bit",
       "rfVersion": "Phiên bản",
       "rfAck": "Xác nhận",
-      "rfValue": "Giá trị"
+      "rfValue": "Giá trị",
+      "pairingMode": "Chế độ ghép nối"
     },
     "usb": {
       "connect": "Kết nối USB",

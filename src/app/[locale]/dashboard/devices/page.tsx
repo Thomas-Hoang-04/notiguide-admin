@@ -48,7 +48,6 @@ export default function DevicesPage() {
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [kindFilter, setKindFilter] = useState("all");
-  const [hardwareFilter, setHardwareFilter] = useState("all");
   const [storeFilter, setStoreFilter] = useState("all");
 
   const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
@@ -137,8 +136,8 @@ export default function DevicesPage() {
   }, [isSuperAdmin, stores, adminStoreId]);
 
   const filteredDevices = devices?.filter((d) => {
-    if (statusFilter !== "all" && d.status !== statusFilter) return false;
-    return !(hardwareFilter !== "all" && d.hardwareModel !== hardwareFilter);
+    return !(statusFilter !== "all" && d.status !== statusFilter);
+
   });
 
   const hasNoStore = !isSuperAdmin && !adminStoreId;
@@ -213,13 +212,11 @@ export default function DevicesPage() {
       <DeviceFilterBar
         statusFilter={statusFilter}
         kindFilter={kindFilter}
-        hardwareFilter={hardwareFilter}
         storeFilter={storeFilter}
         stores={stores}
         isSuperAdmin={isSuperAdmin}
         onStatusChange={setStatusFilter}
         onKindChange={setKindFilter}
-        onHardwareChange={setHardwareFilter}
         onStoreChange={setStoreFilter}
       />
 

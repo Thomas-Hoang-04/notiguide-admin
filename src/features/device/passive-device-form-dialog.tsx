@@ -107,7 +107,6 @@ export function PassiveDeviceFormDialog({
 
     try {
       const result = await registerPassiveDevice({
-        hardwareModel: "PT2272",
         kind: "RECEIVER_433M_PASSIVE",
         assignedName: assignedName.trim(),
         storeId,

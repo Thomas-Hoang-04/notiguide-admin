@@ -78,10 +78,12 @@ export default function DeviceDetailPage() {
   const isHub = device?.kind === "TRANSMITTER_HUB";
   const isPassive = device?.kind === "RECEIVER_433M_PASSIVE";
   const isReceiver = device !== null && !isHub;
-  const showRfCode = isReceiver && device.rfCode !== null;
+  const showRfCode =
+    isReceiver && device.rfCode !== null && device.hubSlot == null;
   const showReprovision =
     device !== null &&
     !isPassive &&
+    device.hubSlot == null &&
     device.status !== "DECOMMISSIONED" &&
     device.status !== "REJECTED";
   const showLifecycle =
@@ -197,12 +199,19 @@ export default function DeviceDetailPage() {
               {tDevices(`kind.${device.kind}`)}
             </Badge>
           </div>
-          <div>
-            <p className="text-xs text-muted-foreground">
-              {tDevices("detail.hardware")}
-            </p>
-            <p className="text-sm">{device.hardwareModel}</p>
-          </div>
+          {device.hubSlot != null && (
+            <div>
+              <p className="text-xs text-muted-foreground">
+                {tDevices("detail.pairingMode")}
+              </p>
+              <Badge
+                variant="outline"
+                className="border-primary/30 text-primary"
+              >
+                {tDevices("hubPaired")} · Slot {device.hubSlot}
+              </Badge>
+            </div>
+          )}
           <div>
             <p className="text-xs text-muted-foreground">
               {tDevices("detail.status")}

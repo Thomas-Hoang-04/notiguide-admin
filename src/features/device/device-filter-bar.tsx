@@ -13,13 +13,11 @@ import type { StoreDto } from "@/types/store";
 interface DeviceFilterBarProps {
   statusFilter: string;
   kindFilter: string;
-  hardwareFilter: string;
   storeFilter: string;
   stores: StoreDto[];
   isSuperAdmin: boolean;
   onStatusChange: (v: string) => void;
   onKindChange: (v: string) => void;
-  onHardwareChange: (v: string) => void;
   onStoreChange: (v: string) => void;
 }
 
@@ -41,18 +39,14 @@ const KIND_OPTIONS = [
   "TRANSMITTER_HUB",
 ] as const;
 
-const HARDWARE_OPTIONS = ["all", "ESP-01", "ESP32-C3", "PT2272"] as const;
-
 export function DeviceFilterBar({
   statusFilter,
   kindFilter,
-  hardwareFilter,
   storeFilter,
   stores,
   isSuperAdmin,
   onStatusChange,
   onKindChange,
-  onHardwareChange,
   onStoreChange,
 }: DeviceFilterBarProps) {
   const tDevices = useTranslations("devices");
@@ -65,11 +59,6 @@ export function DeviceFilterBar({
   function getKindLabel(value: string) {
     if (value === "all") return tDevices("filterKind");
     return tDevices(`kind.${value as DeviceKind}`);
-  }
-
-  function getHardwareLabel(value: string) {
-    if (value === "all") return tDevices("filterHardware");
-    return value;
   }
 
   return (
@@ -106,26 +95,6 @@ export function DeviceFilterBar({
           {KIND_OPTIONS.map((opt) => (
             <SelectItem key={opt} value={opt} className="py-2">
               {getKindLabel(opt)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Select
-        value={hardwareFilter}
-        onValueChange={(v) => v && onHardwareChange(v)}
-      >
-        <SelectTrigger className="h-9 w-full gap-2 px-3 text-sm s:w-36">
-          <span className="truncate">{getHardwareLabel(hardwareFilter)}</span>
-        </SelectTrigger>
-        <SelectContent
-          align="start"
-          alignItemWithTrigger={false}
-          className="p-1.5"
-        >
-          {HARDWARE_OPTIONS.map((opt) => (
-            <SelectItem key={opt} value={opt} className="py-2">
-              {getHardwareLabel(opt)}
             </SelectItem>
           ))}
         </SelectContent>

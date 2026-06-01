@@ -37,12 +37,6 @@ export function DeviceListTable({ devices, loading }: DeviceListTableProps) {
               </th>
               <th
                 scope="col"
-                className="hidden px-4 py-3 font-medium text-muted-foreground s:table-cell"
-              >
-                {tDevices("columnHardware")}
-              </th>
-              <th
-                scope="col"
                 className="px-4 py-3 font-medium text-muted-foreground"
               >
                 {tDevices("columnStatus")}
@@ -72,9 +66,6 @@ export function DeviceListTable({ devices, loading }: DeviceListTableProps) {
                   <td className="px-4 py-3">
                     <Skeleton className="h-5 w-24 rounded-full" />
                   </td>
-                  <td className="hidden px-4 py-3 s:table-cell">
-                    <Skeleton className="h-4 w-20" />
-                  </td>
                   <td className="px-4 py-3">
                     <Skeleton className="h-5 w-20 rounded-full" />
                   </td>
@@ -90,7 +81,7 @@ export function DeviceListTable({ devices, loading }: DeviceListTableProps) {
             {!loading && devices && devices.length === 0 && (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={5}
                   className="px-4 py-12 text-center text-muted-foreground"
                 >
                   {tDevices("emptyState")}
@@ -112,14 +103,16 @@ export function DeviceListTable({ devices, loading }: DeviceListTableProps) {
                       device.publicId ||
                       tCommon("unknown")}
                   </Link>
+                  {device.hubSlot != null && (
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      {tDevices("hubPaired")} · Slot {device.hubSlot}
+                    </span>
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   <Badge variant="outline" className="border-border">
                     {tDevices(`kind.${device.kind}`)}
                   </Badge>
-                </td>
-                <td className="hidden px-4 py-3 text-muted-foreground s:table-cell">
-                  {device.hardwareModel}
                 </td>
                 <td className="px-4 py-3">
                   <DeviceStatusBadge status={device.status} />
