@@ -745,7 +745,18 @@
       "command_sent": "Đã gửi lệnh USB",
       "command_failed": "Không gửi được lệnh USB",
       "mqtt_uri_invalid": "URI MQTT phải bắt đầu bằng mqtts://.",
-      "mqtt_credentials_required": "Cần nhập tên đăng nhập và mật khẩu MQTT."
+      "mqtt_credentials_required": "Cần nhập tên đăng nhập và mật khẩu MQTT.",
+      "roster": {
+        "title": "Thiết bị đã ghép nối",
+        "empty": "Hub chưa ghép nối thiết bị nào.",
+        "slot": "Vị trí",
+        "band": "Băng tần",
+        "paired": "Đã ghép",
+        "delete": "Gỡ",
+        "confirm_title": "Gỡ thiết bị đã ghép nối?",
+        "confirm_desc": "Thao tác này sẽ gỡ {name} (Vị trí {slot}) khỏi hub. Thiết bị vẫn giữ dữ liệu ghép nối cho đến khi khôi phục cài đặt gốc.",
+        "removed": "Đã gỡ {name} khỏi vị trí {slot}"
+      }
     }
   },
   "validation": {

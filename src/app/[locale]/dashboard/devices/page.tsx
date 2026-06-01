@@ -137,7 +137,6 @@ export default function DevicesPage() {
 
   const filteredDevices = devices?.filter((d) => {
     return !(statusFilter !== "all" && d.status !== statusFilter);
-
   });
 
   const hasNoStore = !isSuperAdmin && !adminStoreId;

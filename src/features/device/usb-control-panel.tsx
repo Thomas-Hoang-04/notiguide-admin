@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { UseSerialReturn } from "@/lib/serial/use-serial";
 import { relayDiagnostics } from "./api";
+import { HubRosterPanel } from "./hub-roster-panel";
 import { SerialConsole } from "./serial-console";
 
 interface UsbControlPanelProps {
@@ -121,6 +122,7 @@ export function UsbControlPanel({
       "event.lifecycle_changed",
       "event.dispatch_ok",
       "event.dispatch_rejected",
+      "event.roster_changed",
     ];
 
     const handler = (e: Event) => {
@@ -289,6 +291,8 @@ export function UsbControlPanel({
                 </Card>
               </div>
             )}
+
+            {isConnected && !isMismatched && <HubRosterPanel serial={serial} />}
 
             {isConnected && (
               <div className="flex flex-wrap items-center gap-2">

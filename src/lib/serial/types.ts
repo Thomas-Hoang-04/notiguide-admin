@@ -99,6 +99,29 @@ export interface LifecycleResult {
   op_state: string;
 }
 
+export interface RosterUnpairPayload {
+  slot: number;
+}
+
+export interface RosterReceiver {
+  slot: number;
+  name: string;
+  band: "433M" | "2_4G";
+  mac: string;
+  paired_at_ms: number;
+}
+
+export interface RosterListResult {
+  count: number;
+  max: number;
+  receivers: RosterReceiver[];
+}
+
+export interface RosterUnpairResult {
+  slot: number;
+  removed_name: string;
+}
+
 export interface RestartResult {
   restarting: true;
 }
@@ -119,6 +142,11 @@ export interface SerialCommandMap {
   factory_reset: { payload: undefined; response: RestartResult };
   transmit: { payload: TransmitPayload; response: TransmitResult };
   lifecycle: { payload: LifecyclePayload; response: LifecycleResult };
+  "roster.list": { payload: undefined; response: RosterListResult };
+  "roster.unpair": {
+    payload: RosterUnpairPayload;
+    response: RosterUnpairResult;
+  };
   retry: { payload: undefined; response: RestartResult };
 }
 

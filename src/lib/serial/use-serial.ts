@@ -273,6 +273,7 @@ export function useSerial(): UseSerialReturn {
       "event.mqtt_disconnected",
       "event.activated",
       "event.lifecycle_changed",
+      "event.roster_changed",
     ];
 
     for (const type of eventTypes) {

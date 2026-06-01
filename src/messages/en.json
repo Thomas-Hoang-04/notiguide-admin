@@ -745,7 +745,18 @@
       "command_sent": "USB command sent",
       "command_failed": "USB command failed",
       "mqtt_uri_invalid": "MQTT URI must start with mqtts://.",
-      "mqtt_credentials_required": "MQTT username and password are required."
+      "mqtt_credentials_required": "MQTT username and password are required.",
+      "roster": {
+        "title": "Paired Receivers",
+        "empty": "No paired receivers on this hub.",
+        "slot": "Slot",
+        "band": "Band",
+        "paired": "Paired",
+        "delete": "Remove",
+        "confirm_title": "Remove paired receiver?",
+        "confirm_desc": "This will unpair {name} (Slot {slot}) from the hub. The receiver will keep its pairing data until manually factory-reset.",
+        "removed": "Removed {name} from slot {slot}"
+      }
     }
   },
   "validation": {
