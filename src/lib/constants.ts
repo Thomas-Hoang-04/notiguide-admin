@@ -30,6 +30,11 @@ export const API_ROUTES = {
     SERVICE_TYPES: (id: string) => `/api/stores/${id}/service-types`,
     SERVICE_TYPE: (storeId: string, id: string) =>
       `/api/stores/${storeId}/service-types/${id}`,
+    SLUGS: (id: string) => `/api/stores/${id}/slugs`,
+    SLUG_RETIRE: (storeId: string, slug: string) =>
+      `/api/stores/${storeId}/slugs/${encodeURIComponent(slug)}/retire`,
+    SLUG: (storeId: string, slug: string) =>
+      `/api/stores/${storeId}/slugs/${encodeURIComponent(slug)}`,
   },
   QUEUE: {
     PUBLIC_INFO: (storeId: string) => `/api/queue/public/${storeId}/info`,

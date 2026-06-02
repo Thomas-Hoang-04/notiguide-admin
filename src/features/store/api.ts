@@ -2,10 +2,13 @@ import { del, get, post, put } from "@/lib/api";
 import { API_ROUTES } from "@/lib/constants";
 import type {
   CreateServiceTypeRequest,
+  CreateSlugRequest,
   CreateStoreRequest,
   ServiceTypeDto,
   StoreDto,
   StorePageResponse,
+  StoreSlugDto,
+  StoreSlugListResponse,
   UpdateServiceTypeRequest,
   UpdateStoreRequest,
 } from "@/types/store";
@@ -59,4 +62,20 @@ export function updateServiceType(
 
 export function deleteServiceType(storeId: string, id: string) {
   return del<void>(API_ROUTES.STORES.SERVICE_TYPE(storeId, id));
+}
+
+export function listSlugs(storeId: string) {
+  return get<StoreSlugListResponse>(API_ROUTES.STORES.SLUGS(storeId));
+}
+
+export function createSlug(storeId: string, request: CreateSlugRequest) {
+  return post<StoreSlugDto>(API_ROUTES.STORES.SLUGS(storeId), request);
+}
+
+export function retireSlug(storeId: string, slug: string) {
+  return post<StoreSlugDto>(API_ROUTES.STORES.SLUG_RETIRE(storeId, slug), {});
+}
+
+export function removeSlug(storeId: string, slug: string) {
+  return del<void>(API_ROUTES.STORES.SLUG(storeId, slug));
 }

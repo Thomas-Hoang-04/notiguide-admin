@@ -79,3 +79,25 @@ export interface UpdateServiceTypeRequest {
   prefix?: string;
   isActive?: boolean;
 }
+
+export interface StoreSlugDto {
+  slug: string;
+  isDefault: boolean;
+  status: "ACTIVE" | "GRACE";
+  retiredAt: string | null;
+  expiresAt: string | null;
+  createdAt: string | null;
+}
+
+export interface StoreSlugListResponse {
+  items: StoreSlugDto[];
+  activeCount: number;
+  activeMax: number;
+  graceCount: number;
+  graceMax: number;
+}
+
+export interface CreateSlugRequest {
+  slug: string;
+  confirmAutoRetire?: boolean;
+}

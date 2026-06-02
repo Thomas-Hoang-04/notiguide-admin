@@ -1,15 +1,16 @@
 "use client";
 
-import { Settings, ShieldCheck, Users } from "lucide-react";
+import { Link2, Settings, ShieldCheck, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { StoreAdminsSection } from "@/features/store/store-admins-section";
 import { StoreGeneralSection } from "@/features/store/store-general-section";
 import { StoreQueueSettingsSection } from "@/features/store/store-queue-settings-section";
+import { StoreSlugsPanel } from "@/features/store/store-slugs-panel";
 import type { StoreDto } from "@/types/store";
 
-type TabId = "general" | "admins" | "queue";
+type TabId = "general" | "admins" | "queue" | "slugs";
 
 interface StoreSettingsPanelProps {
   store: StoreDto;
@@ -20,6 +21,7 @@ const TABS: { id: TabId; icon: typeof Settings }[] = [
   { id: "general", icon: ShieldCheck },
   { id: "admins", icon: Users },
   { id: "queue", icon: Settings },
+  { id: "slugs", icon: Link2 },
 ];
 
 export function StoreSettingsPanel({
@@ -37,6 +39,8 @@ export function StoreSettingsPanel({
         return tStores("sectionAdmins");
       case "queue":
         return tStores("sectionQueueSettings");
+      case "slugs":
+        return tStores("sectionSlugs");
     }
   }
 
@@ -78,6 +82,7 @@ export function StoreSettingsPanel({
             onStoreUpdated={onStoreUpdated}
           />
         )}
+        {activeTab === "slugs" && <StoreSlugsPanel storeId={store.id} />}
       </div>
     </div>
   );
