@@ -11,6 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useMyOrg } from "@/features/organization/use-my-org";
 import { getRoleTranslationKey } from "@/lib/i18n-keys";
 import { useAuthStore } from "@/store/auth";
 import { LanguageSwitcher } from "./language-switcher";
@@ -20,7 +21,9 @@ import { ThemeToggle } from "./theme-toggle";
 
 export function Topbar() {
   const tNavigation = useTranslations("navigation");
+  const tCommon = useTranslations("common");
   const { admin, isSuperAdmin } = useAuthStore();
+  const { org, selfManaged } = useMyOrg();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
@@ -61,6 +64,19 @@ export function Topbar() {
             <span className="hidden text-sm font-medium s:inline">
               {admin.username}
             </span>
+            {org && (
+              <span className="hidden text-sm text-muted-foreground s:inline">
+                {org.name}
+              </span>
+            )}
+            {selfManaged && (
+              <Badge
+                variant="outline"
+                className="border-border text-muted-foreground"
+              >
+                {tCommon("selfManaged")}
+              </Badge>
+            )}
             <Badge
               variant={isSuperAdmin ? "default" : "secondary"}
               className={

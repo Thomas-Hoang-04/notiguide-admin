@@ -18,6 +18,7 @@ import { InlineError } from "@/components/ui/inline-error";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { updateUsername } from "@/features/admin/api";
+import { useMyOrg } from "@/features/organization/use-my-org";
 import {
   translateCommonApiError,
   translateNetworkError,
@@ -47,6 +48,7 @@ function InfoRow({
 
 export default function AccountPage() {
   const { admin, isSuperAdmin, updateAdmin } = useAuthStore();
+  const { org, selfManaged } = useMyOrg();
   const format = useFormatter();
   const tAdmins = useTranslations("admins");
   const tCommon = useTranslations("common");
@@ -203,6 +205,21 @@ export default function AccountPage() {
             >
               {tSettings(getRoleTranslationKey(admin.role))}
             </Badge>
+          </InfoRow>
+          <Separator />
+          <InfoRow label={tSettings("organizationTitle")}>
+            {org ? (
+              org.name
+            ) : selfManaged ? (
+              <Badge
+                variant="outline"
+                className="border-border text-muted-foreground"
+              >
+                {tCommon("selfManaged")}
+              </Badge>
+            ) : (
+              "—"
+            )}
           </InfoRow>
           <Separator />
           <InfoRow label={tSettings("storeLabel")}>

@@ -18,6 +18,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isSuperAdmin: boolean;
   storeId: string | null;
+  orgId: string | null;
 
   // Actions
   login: (response: LoginResponse) => void;
@@ -31,6 +32,7 @@ function deriveState(admin: AdminDto | null) {
     isAuthenticated: admin !== null,
     isSuperAdmin: admin?.role === ROLES.SUPER_ADMIN,
     storeId: admin?.storeId ?? null,
+    orgId: admin?.orgId ?? null,
   };
 }
 
@@ -42,6 +44,7 @@ export const useAuthStore = create<AuthState>()((set, getState) => ({
   isAuthenticated: false,
   isSuperAdmin: false,
   storeId: null,
+  orgId: null,
 
   login: (response: LoginResponse) => {
     localStorage.setItem("admin", JSON.stringify(response.admin));

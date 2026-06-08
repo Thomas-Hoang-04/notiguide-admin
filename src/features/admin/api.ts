@@ -5,6 +5,7 @@ import type {
   AdminPageResponse,
   AdminSessionDto,
   CreateAdminRequest,
+  JoinRequestDto,
   LoginHistoryPageResponse,
   UpdatePasswordRequest,
   UpdateUsernameRequest,
@@ -78,4 +79,19 @@ export function revokeAllOtherSessions(adminId: string) {
 
 export function deleteAllSessions(adminId: string) {
   return del<{ revoked: number }>(API_ROUTES.ADMINS.SESSIONS_ALL(adminId));
+}
+
+export function listJoinRequests() {
+  return get<JoinRequestDto[]>(API_ROUTES.ADMINS.REQUESTS);
+}
+
+export function approveJoinRequest(requestId: string, storeId?: string) {
+  return post<void>(
+    API_ROUTES.ADMINS.APPROVE_REQUEST(requestId),
+    storeId ? { storeId } : undefined,
+  );
+}
+
+export function rejectJoinRequest(requestId: string) {
+  return post<void>(API_ROUTES.ADMINS.REJECT_REQUEST(requestId), undefined);
 }

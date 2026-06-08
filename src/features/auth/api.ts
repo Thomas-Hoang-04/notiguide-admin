@@ -1,6 +1,11 @@
 import { post } from "@/lib/api";
 import { API_BASE_URL, API_ROUTES } from "@/lib/constants";
-import type { LoginRequest, LoginResponse } from "@/types/admin";
+import type {
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+} from "@/types/admin";
 
 export function login(request: LoginRequest) {
   return post<LoginResponse>(API_ROUTES.AUTH.LOGIN, request, {
@@ -10,6 +15,12 @@ export function login(request: LoginRequest) {
 
 export function logout() {
   return post<void>(API_ROUTES.AUTH.LOGOUT, undefined, {
+    skipAuth: true,
+  });
+}
+
+export function register(request: RegisterRequest) {
+  return post<RegisterResponse>(API_ROUTES.AUTH.REGISTER, request, {
     skipAuth: true,
   });
 }

@@ -11,6 +11,7 @@ import { deleteAdmin, listAdmins, verifyAdmin } from "@/features/admin/api";
 import { AssignStoreDialog } from "@/features/admin/assign-store-dialog";
 import { CreateAdminDialog } from "@/features/admin/create-admin-dialog";
 import { DeleteAdminDialog } from "@/features/admin/delete-admin-dialog";
+import { JoinRequestsPanel } from "@/features/admin/join-requests-panel";
 import { listStores } from "@/features/store/api";
 import {
   translateCommonApiError,
@@ -135,6 +136,7 @@ export default function AdminsPage() {
 
   return (
     <div>
+      <JoinRequestsPanel isSuperAdmin={isSuperAdmin} stores={stores} />
       <AdminDirectoryToolbar
         isSuperAdmin={isSuperAdmin}
         roleFilter={roleFilter}

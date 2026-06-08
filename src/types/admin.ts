@@ -4,6 +4,7 @@ export interface AdminDto {
   id: string;
   username: string;
   role: AdminRole;
+  orgId: string | null;
   storeId: string | null;
   storeName: string | null;
   isVerified: boolean;
@@ -72,4 +73,29 @@ export interface AdminSessionDto {
   lastActive: string | null;
   createdAt: string | null;
   isCurrent: boolean;
+}
+
+export type RegisterMode = "CREATE_ORG" | "CREATE_STORE" | "JOIN";
+export type RegisterOutcome = "ACTIVE" | "PENDING";
+
+export interface RegisterRequest {
+  mode: RegisterMode;
+  username: string;
+  password: string;
+  orgName?: string;
+  storeName?: string;
+  storeAddress?: string;
+  joinCode?: string;
+}
+
+export interface RegisterResponse {
+  outcome: RegisterOutcome;
+  role: AdminRole | null;
+  targetType: "ORG" | "STORE" | null;
+}
+
+export interface JoinRequestDto {
+  requestId: string;
+  username: string;
+  createdAt: string;
 }

@@ -7,6 +7,7 @@ export const API_ROUTES = {
     LOGOUT: "/api/auth/logout",
     REFRESH: "/api/auth/refresh",
     ABORT: "/api/auth/abort",
+    REGISTER: "/api/auth/register",
   },
   ADMINS: {
     BASE: "/api/admins",
@@ -22,6 +23,9 @@ export const API_ROUTES = {
     SESSIONS_ALL: (id: string) => `/api/admins/${id}/sessions/all`,
     SESSION: (id: string, sessionId: string) =>
       `/api/admins/${id}/sessions/${sessionId}`,
+    REQUESTS: "/api/admins/requests",
+    APPROVE_REQUEST: (id: string) => `/api/admins/requests/${id}/approve`,
+    REJECT_REQUEST: (id: string) => `/api/admins/requests/${id}/reject`,
   },
   STORES: {
     BASE: "/api/stores",
@@ -35,6 +39,8 @@ export const API_ROUTES = {
       `/api/stores/${storeId}/slugs/${encodeURIComponent(slug)}/retire`,
     SLUG: (storeId: string, slug: string) =>
       `/api/stores/${storeId}/slugs/${encodeURIComponent(slug)}`,
+    JOIN_CODE: (id: string) => `/api/stores/${id}/join-code`,
+    JOIN_CODE_ROTATE: (id: string) => `/api/stores/${id}/join-code/rotate`,
   },
   QUEUE: {
     PUBLIC_INFO: (storeId: string) => `/api/queue/public/${storeId}/info`,
@@ -92,6 +98,11 @@ export const API_ROUTES = {
     DIAGNOSTICS: (id: string) => `/api/devices/${id}/diagnostics`,
     HUB_HEALTH: "/api/devices/hub-health",
     RENAME: (id: string) => `/api/devices/${id}/name`,
+  },
+  ORGS: {
+    ME: "/api/orgs/me",
+    JOIN_CODE: "/api/orgs/me/join-code",
+    JOIN_CODE_ROTATE: "/api/orgs/me/join-code/rotate",
   },
 } as const;
 

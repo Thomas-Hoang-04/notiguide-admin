@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Building2,
   KeyRound,
   Link2,
   ListOrdered,
@@ -46,6 +47,15 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
             href: "/dashboard/settings/slugs",
             label: "slugsTab" as const,
             icon: Link2,
+          },
+        ]
+      : []),
+    ...(isSuperAdmin
+      ? [
+          {
+            href: "/dashboard/settings/organization",
+            label: "organizationTab" as const,
+            icon: Building2,
           },
         ]
       : []),

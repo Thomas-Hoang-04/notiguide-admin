@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { abortLogin, login, verifySession } from "@/features/auth/api";
 import { CookieConsentDialog } from "@/features/auth/cookie-consent-dialog";
 import { useCookieConsent } from "@/hooks/use-cookie-consent";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { translateCommonApiError } from "@/lib/api-error";
 import { useAuthStore } from "@/store/auth";
 import { ApiError } from "@/types/api";
@@ -33,6 +33,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [unverifiedBanner, setUnverifiedBanner] = useState(false);
+  const [pendingBanner, setPendingBanner] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -46,6 +47,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setUnverifiedBanner(false);
+    setPendingBanner(false);
 
     const nextErrors: Record<string, string> = {};
 
@@ -100,6 +102,11 @@ export default function LoginPage() {
       if (err instanceof ApiError) {
         if (
           err.code === 403 &&
+          err.message.toLowerCase().includes("awaiting approval")
+        ) {
+          setPendingBanner(true);
+        } else if (
+          err.code === 403 &&
           err.message.toLowerCase().includes("not been verified")
         ) {
           setUnverifiedBanner(true);
@@ -151,14 +158,20 @@ export default function LoginPage() {
             </div>
           )}
 
+          {pendingBanner && (
+            <div className="mb-5 rounded-lg border border-warning/40 bg-warning/15 p-4 text-sm font-medium text-warning dark:border-warning/50 dark:bg-warning/20">
+              {tAuth("awaitingApproval")}
+            </div>
+          )}
+
           {consent.status === "declined" && (
             <div className="mb-5 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-warning dark:border-warning/50 dark:bg-warning/15">
               <span className="font-medium">{tConsent("declinedBanner")}</span>
               <Button
                 type="button"
-                variant="outline"
                 size="sm"
                 onClick={consent.reopen}
+                className="bg-warning/80 text-warning-foreground hover:bg-warning/90"
               >
                 {tConsent("declinedBannerAction")}
               </Button>
@@ -248,6 +261,15 @@ export default function LoginPage() {
               )}
               {tAuth("signInButton")}
             </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              <Link
+                href="/register"
+                locale={locale}
+                className="text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary/70"
+              >
+                {tAuth("createAccountLink")}
+              </Link>
+            </p>
           </form>
         </CardContent>
       </Card>

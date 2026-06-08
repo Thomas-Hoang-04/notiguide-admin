@@ -6,6 +6,7 @@ export interface StoreDto {
   isActive: boolean;
   allowJumpCall: boolean;
   allowNoShow: boolean;
+  orgId: string | null;
   createdAt: string | null;
   updatedAt: string | null;
 }

@@ -30,7 +30,6 @@ import {
 } from "@/lib/api-error";
 import { PASSWORD_RULES, ROLES, USERNAME_RULES } from "@/lib/constants";
 import { getFirstMissingPasswordRequirementKey } from "@/lib/password-validation";
-import type { AdminRole } from "@/types/admin";
 import { ApiError } from "@/types/api";
 import type { StoreDto } from "@/types/store";
 import { createAdmin } from "./api";
@@ -55,7 +54,6 @@ export function CreateAdminDialog({
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<AdminRole>(ROLES.ADMIN);
   const [storeId, setStoreId] = useState("");
   const [stores, setStores] = useState<StoreDto[]>([]);
   const [loading, setLoading] = useState(false);
@@ -65,7 +63,6 @@ export function CreateAdminDialog({
     if (open) {
       setUsername("");
       setPassword("");
-      setRole(ROLES.ADMIN);
       setStoreId("");
       setErrors({});
       listStores(0, 100)
@@ -129,8 +126,8 @@ export function CreateAdminDialog({
       await createAdmin({
         username,
         password,
-        role,
-        storeId: role === ROLES.SUPER_ADMIN ? null : storeId || null,
+        role: ROLES.ADMIN,
+        storeId: storeId || null,
       });
       toast.success(tAdmins("createdToast"));
       onOpenChange(false);
@@ -179,8 +176,6 @@ export function CreateAdminDialog({
       setLoading(false);
     }
   }
-
-  const isSuperAdminRole = role === ROLES.SUPER_ADMIN;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -238,18 +233,22 @@ export function CreateAdminDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>{tAdmins("roleLabel")}</Label>
+            <Label>{tAdmins("storeLabel")}</Label>
             <Select
-              value={role}
+              value={storeId}
               onValueChange={(v) => {
-                if (v) setRole(v as AdminRole);
+                if (v) setStoreId(v);
               }}
             >
-              <SelectTrigger className="h-10 w-full gap-2 px-3">
+              <SelectTrigger
+                className="h-10 w-full gap-2 px-3"
+                aria-invalid={!!errors.storeId}
+              >
                 <span>
-                  {role === ROLES.SUPER_ADMIN
-                    ? tAdmins("roleSuperAdmin")
-                    : tAdmins("roleAdmin")}
+                  {storeId
+                    ? (stores.find((s) => s.id === storeId)?.name ??
+                      tCommon("unknown"))
+                    : tAdmins("storePlaceholder")}
                 </span>
               </SelectTrigger>
               <SelectContent
@@ -257,60 +256,20 @@ export function CreateAdminDialog({
                 alignItemWithTrigger={false}
                 className="p-1.5"
               >
-                <SelectItem value={ROLES.ADMIN} className="py-2">
-                  {tAdmins("roleAdmin")}
-                </SelectItem>
-                <SelectItem value={ROLES.SUPER_ADMIN} className="py-2">
-                  {tAdmins("roleSuperAdmin")}
-                </SelectItem>
+                {stores.map((s) => (
+                  <SelectItem key={s.id} value={s.id} className="py-2">
+                    {s.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
+            {errors.storeId && (
+              <InlineError message={errors.storeId} className="mt-1" />
+            )}
           </div>
 
-          {!isSuperAdminRole && (
-            <div className="space-y-2">
-              <Label>{tAdmins("storeLabel")}</Label>
-              <Select
-                value={storeId}
-                onValueChange={(v) => {
-                  if (v) setStoreId(v);
-                }}
-              >
-                <SelectTrigger
-                  className="h-10 w-full gap-2 px-3"
-                  aria-invalid={!!errors.storeId}
-                >
-                  <span>
-                    {storeId
-                      ? (stores.find((s) => s.id === storeId)?.name ??
-                        tCommon("unknown"))
-                      : tAdmins("storePlaceholder")}
-                  </span>
-                </SelectTrigger>
-                <SelectContent
-                  align="start"
-                  alignItemWithTrigger={false}
-                  className="p-1.5"
-                >
-                  {stores.map((s) => (
-                    <SelectItem key={s.id} value={s.id} className="py-2">
-                      {s.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.storeId && (
-                <InlineError message={errors.storeId} className="mt-1" />
-              )}
-            </div>
-          )}
-
           <div className="rounded-lg border border-border bg-muted p-3 text-sm text-muted-foreground">
-            {isSuperAdminRole
-              ? tAdmins("noteSuperAdmin")
-              : storeId
-                ? tAdmins("noteAdmin")
-                : tAdmins("noteAdminPending")}
+            {storeId ? tAdmins("noteAdmin") : tAdmins("noteAdminPending")}
           </div>
 
           <DialogFooter>

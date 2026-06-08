@@ -17,7 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { listServiceTypes } from "@/features/store/api";
+import {
+  getStoreJoinCode,
+  rotateStoreJoinCode,
+} from "@/features/organization/api";
+import { JoinCodePanel } from "@/features/organization/join-code-panel";
+import { getStore, listServiceTypes } from "@/features/store/api";
 import { StoreQueueSettingsContent } from "@/features/store/store-queue-settings-content";
 import { useStoreQueueSettings } from "@/features/store/use-store-queue-settings";
 import { useAuthStore } from "@/store/auth";
@@ -30,6 +35,9 @@ export default function StoreSettingsPage() {
   // Default service type (localStorage)
   const [serviceTypes, setServiceTypes] = useState<ServiceTypeDto[]>([]);
   const [defaultServiceTypeId, setDefaultServiceTypeId] = useState("");
+  const [storeOrgId, setStoreOrgId] = useState<string | null | undefined>(
+    undefined,
+  );
 
   const {
     alertThreshold,
@@ -63,6 +71,13 @@ export default function StoreSettingsPage() {
       `store:${storeId}:defaultServiceTypeId`,
     );
     if (stored) setDefaultServiceTypeId(stored);
+  }, [storeId]);
+
+  useEffect(() => {
+    if (!storeId) return;
+    getStore(storeId)
+      .then((s) => setStoreOrgId(s.orgId))
+      .catch(() => setStoreOrgId(undefined));
   }, [storeId]);
 
   useEffect(() => {
@@ -165,6 +180,13 @@ export default function StoreSettingsPage() {
         setRequeueOffset={setRequeueOffset}
         toggleLoading={toggleLoading}
       />
+
+      {storeId && storeOrgId === null && (
+        <JoinCodePanel
+          fetchCode={() => getStoreJoinCode(storeId)}
+          rotateCode={() => rotateStoreJoinCode(storeId)}
+        />
+      )}
     </div>
   );
 }
