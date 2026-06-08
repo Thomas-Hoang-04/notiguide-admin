@@ -65,7 +65,7 @@ export function Topbar() {
               {admin.username}
             </span>
             {org && (
-              <span className="hidden text-sm text-muted-foreground s:inline">
+              <span className="hidden text-xs text-muted-foreground s:inline">
                 {org.name}
               </span>
             )}

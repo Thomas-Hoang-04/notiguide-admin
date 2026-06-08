@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, PauseCircle, Radio, RefreshCcw } from "lucide-react";
+import { Loader2, PauseCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -14,18 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  callNext,
-  getAvailableDevices,
-  getPublicStoreInfo,
-} from "@/features/queue/api";
+import { callNext, getPublicStoreInfo } from "@/features/queue/api";
 import { CleanupButton } from "@/features/queue/cleanup-button";
-import { DeviceDispatchDialog } from "@/features/queue/device-dispatch-dialog";
+import { DeviceDispatchPanel } from "@/features/queue/device-dispatch-panel";
 import { QueueStateToggle } from "@/features/queue/queue-state-toggle";
 import { QueueStats } from "@/features/queue/queue-stats";
 import { ServingDisplay } from "@/features/queue/serving-display";
@@ -70,10 +61,8 @@ export default function QueuePage() {
   const [allowNoShow, setAllowNoShow] = useState(false);
   const [queueState, setQueueState] = useState("ACTIVE");
 
-  const [dispatchDialogOpen, setDispatchDialogOpen] = useState(false);
-  const [dispatchReady, setDispatchReady] = useState(false);
-  const [hasAvailableDevices, setHasAvailableDevices] = useState(false);
-  const [dispatchRefreshing, setDispatchRefreshing] = useState(false);
+  const [deviceRefreshSignal, setDeviceRefreshSignal] = useState(0);
+  const [ticketReloading, setTicketReloading] = useState(false);
 
   // Refs for keyboard shortcut checks
   const callLoadingRef = useRef(false);
@@ -91,19 +80,6 @@ export default function QueuePage() {
   useEffect(() => {
     void hydrateQueue(storeId);
   }, [hydrateQueue, storeId]);
-
-  // Fetch dispatch availability
-  const fetchDispatchAvailability = useCallback(async () => {
-    if (!storeId) return;
-    try {
-      const res = await getAvailableDevices(storeId);
-      setDispatchReady(res.dispatchReady);
-      setHasAvailableDevices(res.devices.length > 0);
-    } catch {
-      setDispatchReady(false);
-      setHasAvailableDevices(false);
-    }
-  }, [storeId]);
 
   // Fetch store settings, service types, and queue state
   useEffect(() => {
@@ -129,10 +105,20 @@ export default function QueuePage() {
         // Default to false / ACTIVE if fetch fails
       }
     })();
-    void fetchDispatchAvailability();
-  }, [storeId, fetchDispatchAvailability]);
+  }, [storeId]);
 
   const storeName = useStoreName(storeId);
+
+  const handleDeviceDispatched = useCallback(() => {
+    setStatsRefreshSignal((s) => s + 1);
+    setDeviceRefreshSignal((s) => s + 1);
+  }, []);
+
+  const handleTicketReload = useCallback(() => {
+    setTicketReloading(true);
+    setStatsRefreshSignal((s) => s + 1);
+    window.setTimeout(() => setTicketReloading(false), 500);
+  }, []);
 
   // SSE: real-time queue events
   useQueueEvents(storeId, (event) => {
@@ -147,7 +133,7 @@ export default function QueuePage() {
       } else {
         toast.error(tQueue("dispatch.errorInfrastructure"));
       }
-      void fetchDispatchAvailability();
+      setDeviceRefreshSignal((s) => s + 1);
       return;
     }
 
@@ -160,7 +146,7 @@ export default function QueuePage() {
       if (servingTicketsRef.current.some((t) => t.id === event.ticketId)) {
         removeServingTicket(event.ticketId);
       }
-      void fetchDispatchAvailability();
+      setDeviceRefreshSignal((s) => s + 1);
     }
   });
 
@@ -213,13 +199,6 @@ export default function QueuePage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [storeId, handleCallNext]);
 
-  const dispatchEnabled = dispatchReady && hasAvailableDevices;
-  const dispatchTooltip = !hasAvailableDevices
-    ? tQueue("dispatch.disabledNoDevice")
-    : !dispatchReady
-      ? tQueue("dispatch.disabledNoHub")
-      : null;
-
   if (!storeId) {
     return (
       <div className="queue-page-shell -m-3 p-3 s:-m-4 s:p-4 xl:-m-5 xl:p-5 3xl:-m-6 3xl:p-6 4xl:-m-8 4xl:p-8">
@@ -232,7 +211,7 @@ export default function QueuePage() {
 
   return (
     <div className="queue-page-shell -m-3 p-3 s:-m-4 s:p-4 xl:-m-5 xl:p-5 3xl:-m-6 3xl:p-6 4xl:-m-8 4xl:p-8">
-      <div className="space-y-4 l:space-y-6">
+      <div className="space-y-4 l:space-y-6 2xl:flex 2xl:h-full 2xl:min-h-0 2xl:flex-col 2xl:space-y-0 2xl:gap-6 2xl:overflow-hidden">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3 l:gap-4">
           <h1 className="text-xl font-bold l:text-2xl">
@@ -242,57 +221,6 @@ export default function QueuePage() {
           </h1>
           <p className="sr-only">{tQueue("keyboardShortcutsDescription")}</p>
           <div className="flex items-center gap-2">
-            {dispatchEnabled ? (
-              <Button
-                variant="outline"
-                onClick={() => setDispatchDialogOpen(true)}
-              >
-                <Radio aria-hidden="true" className="mr-2 size-4" />
-                {tQueue("dispatch.action")}
-              </Button>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      variant="outline"
-                      disabled
-                      aria-label={tQueue("dispatch.action")}
-                    >
-                      <Radio aria-hidden="true" className="mr-2 size-4" />
-                      {tQueue("dispatch.action")}
-                    </Button>
-                  }
-                />
-                <TooltipContent>
-                  {dispatchTooltip ?? tQueue("dispatch.disabledNoDevice")}
-                </TooltipContent>
-              </Tooltip>
-            )}
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={dispatchRefreshing}
-                    onClick={() => {
-                      setDispatchRefreshing(true);
-                      void fetchDispatchAvailability().finally(() =>
-                        setDispatchRefreshing(false),
-                      );
-                    }}
-                    aria-label={tQueue("dispatch.refresh")}
-                  >
-                    <RefreshCcw
-                      aria-hidden="true"
-                      className={`size-4 ${dispatchRefreshing ? "animate-spin" : ""}`}
-                    />
-                  </Button>
-                }
-              />
-              <TooltipContent>{tQueue("dispatch.refresh")}</TooltipContent>
-            </Tooltip>
             <QueueStateToggle
               storeId={storeId}
               currentState={queueState}
@@ -318,9 +246,9 @@ export default function QueuePage() {
           </div>
         )}
 
-        <div className="grid gap-4 l:gap-6 2xl:grid-cols-3">
+        <div className="grid gap-4 l:gap-6 2xl:min-h-0 2xl:flex-1 2xl:grid-cols-3">
           {/* Left column — main controls */}
-          <div className="space-y-4 l:space-y-6 2xl:col-span-2">
+          <div className="space-y-4 l:space-y-6 2xl:col-span-2 2xl:flex 2xl:min-h-0 2xl:flex-col 2xl:space-y-0 2xl:gap-6">
             {/* Stats + Call Next */}
             <div className="glass-card glass-context-action flex flex-wrap items-center gap-4 rounded-xl p-3 l:gap-6 l:p-4">
               <QueueStats
@@ -409,13 +337,22 @@ export default function QueuePage() {
 
             {/* Currently Serving */}
             <ServingDisplay storeId={storeId} allowNoShow={allowNoShow} />
+
+            {/* Receivers — inline device dispatch */}
+            <DeviceDispatchPanel
+              storeId={storeId}
+              refreshSignal={deviceRefreshSignal}
+              onDispatched={handleDeviceDispatched}
+            />
           </div>
 
           {/* Right column — ticket lookup + waiting list */}
-          <div className="space-y-4 l:space-y-6">
+          <div className="space-y-4 l:space-y-6 2xl:min-h-0 2xl:overflow-y-auto">
             <TicketLookup
               searchQuery={ticketSearchQuery}
               onSearchQueryChange={setTicketSearchQuery}
+              onReload={handleTicketReload}
+              reloading={ticketReloading}
             />
             <WaitingList
               storeId={storeId}
@@ -426,16 +363,6 @@ export default function QueuePage() {
           </div>
         </div>
       </div>
-
-      <DeviceDispatchDialog
-        open={dispatchDialogOpen}
-        onOpenChange={setDispatchDialogOpen}
-        storeId={storeId}
-        onSuccess={() => {
-          setStatsRefreshSignal((s) => s + 1);
-          void fetchDispatchAvailability();
-        }}
-      />
     </div>
   );
 }

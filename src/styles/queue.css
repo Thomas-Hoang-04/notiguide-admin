@@ -199,3 +199,22 @@
 .dark .queue-call-next-button:disabled {
   box-shadow: none;
 }
+
+/* ── Device dispatch panel ───────────────────────────────── */
+
+/* Fixed height so the visible-card count is deterministic.
+   slot = card height (3.5rem / 56px) + list gap (0.5rem / 8px) = 64px. */
+.queue-device-card {
+  height: 3.5rem;
+}
+
+@media (min-width: 64rem) {
+  /* 2xl breakpoint — 1024px. Replace the page-shell's min-height bleed bump with a
+     DEFINITE height so the inner h-full / flex-1 chain resolves against <main>'s
+     definite height (main is flex-1 inside an h-screen column). Without a definite
+     height here, percentage/flex heights collapse and the device list will not bound. */
+  .queue-page-shell {
+    height: 100%;
+    min-height: 0;
+  }
+}

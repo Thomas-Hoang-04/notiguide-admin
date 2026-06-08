@@ -407,22 +407,23 @@
     "graceTimerLabel": "THỜI GIAN CÒN LẠI",
     "keyboardShortcutsDescription": "Phím tắt: N để gọi tiếp, S để phục vụ, C để hủy, X để đánh dấu vắng mặt",
     "dispatch": {
-      "action": "Gửi qua thiết bị",
       "disabledNoDevice": "Không có bộ thu khả dụng",
       "disabledNoHub": "Chưa có bộ phát đang hoạt động cho cửa hàng này",
-      "dialogTitle": "Gửi tín hiệu thiết bị",
-      "dialogDescription": "Chọn bộ thu để phát vé gắn thiết bị.",
-      "deviceLabel": "Bộ thu",
-      "confirm": "Gửi",
-      "cancel": "Hủy",
       "successToast": "Đã phát vé #{number} qua thiết bị",
       "badgeLabel": "{deviceName}",
       "errorNoActiveTransmitter": "Chưa có bộ phát hoạt động — thiết bị không thể nhận tín hiệu.",
       "errorDeviceBusy": "Thiết bị này đang bận xử lý vé khác.",
       "errorDeviceNotFound": "Không tìm thấy thiết bị hoặc thiết bị không còn khả dụng.",
       "errorInfrastructure": "Gửi tín hiệu thất bại do lỗi hệ thống. Vui lòng thử lại.",
-      "refresh": "Làm mới trạng thái thiết bị"
-    }
+      "refresh": "Làm mới trạng thái thiết bị",
+      "panelTitle": "Thiết bị nhận",
+      "searchPlaceholder": "Tìm thiết bị",
+      "dispatchButton": "Phát vé",
+      "pageIndicator": "Trang {current} / {total}",
+      "prevPage": "Trang trước",
+      "nextPage": "Trang sau"
+    },
+    "reloadTickets": "Tải lại danh sách chờ"
   },
   "analytics": {
     "title": "Phân tích",
