@@ -414,6 +414,7 @@
       "errorNoActiveTransmitter": "No active transmitter hub — the device cannot receive the signal right now.",
       "errorDeviceBusy": "This device is currently busy with another ticket.",
       "errorDeviceNotFound": "Target device could not be found or is no longer available.",
+      "errorAckTimeout": "The device didn't respond in time — it may be offline. Please try again.",
       "errorInfrastructure": "Dispatch failed due to a system issue. Please try again.",
       "refresh": "Refresh device availability",
       "panelTitle": "Receivers",

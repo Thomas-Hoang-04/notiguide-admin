@@ -130,6 +130,8 @@ export default function QueuePage() {
         toast.error(tQueue("dispatch.errorNoActiveTransmitter"));
       } else if (reason === "device_not_found") {
         toast.error(tQueue("dispatch.errorDeviceNotFound"));
+      } else if (reason === "ack_timeout") {
+        toast.error(tQueue("dispatch.errorAckTimeout"));
       } else {
         toast.error(tQueue("dispatch.errorInfrastructure"));
       }

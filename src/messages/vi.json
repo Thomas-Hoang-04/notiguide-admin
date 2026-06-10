@@ -414,6 +414,7 @@
       "errorNoActiveTransmitter": "Chưa có bộ phát hoạt động — thiết bị không thể nhận tín hiệu.",
       "errorDeviceBusy": "Thiết bị này đang bận xử lý vé khác.",
       "errorDeviceNotFound": "Không tìm thấy thiết bị hoặc thiết bị không còn khả dụng.",
+      "errorAckTimeout": "Thiết bị không phản hồi kịp thời — có thể đã mất kết nối. Vui lòng thử lại.",
       "errorInfrastructure": "Gửi tín hiệu thất bại do lỗi hệ thống. Vui lòng thử lại.",
       "refresh": "Làm mới trạng thái thiết bị",
       "panelTitle": "Thiết bị nhận",
