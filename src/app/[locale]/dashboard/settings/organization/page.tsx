@@ -1,14 +1,17 @@
 "use client";
 
-import { getOrgJoinCode, rotateOrgJoinCode } from "@/features/organization/api";
-import { JoinCodePanel } from "@/features/organization/join-code-panel";
+import {
+  getOrgInviteLink,
+  rotateOrgInviteLink,
+} from "@/features/organization/api";
+import { InviteLinkPanel } from "@/features/organization/invite-link-panel";
 
 export default function OrganizationSettingsPage() {
   return (
-    <div className="mx-auto max-w-2xl">
-      <JoinCodePanel
-        fetchCode={getOrgJoinCode}
-        rotateCode={rotateOrgJoinCode}
+    <div className="mx-auto max-w-2xl space-y-6">
+      <InviteLinkPanel
+        fetchLink={getOrgInviteLink}
+        generateLink={rotateOrgInviteLink}
       />
     </div>
   );

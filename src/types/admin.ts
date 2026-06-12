@@ -85,13 +85,18 @@ export interface RegisterRequest {
   orgName?: string;
   storeName?: string;
   storeAddress?: string;
-  joinCode?: string;
+  inviteToken?: string;
 }
 
 export interface RegisterResponse {
-  outcome: RegisterOutcome;
+  status: RegisterOutcome;
   role: AdminRole | null;
   targetType: "ORG" | "STORE" | null;
+}
+
+export interface InviteResolveResponse {
+  targetType: "ORG" | "STORE";
+  name: string;
 }
 
 export interface JoinRequestDto {

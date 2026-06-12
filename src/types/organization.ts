@@ -4,6 +4,14 @@ export interface OrganizationDto {
   createdAt: string | null;
 }
 
-export interface JoinCodeResponse {
-  joinCode: string;
+export interface InviteLinkUse {
+  username: string;
+  usedAt: string;
+  linkId: string;
+}
+
+export interface InviteLinkState {
+  token: string | null;
+  expiresAt: string | null;
+  recentUses: InviteLinkUse[];
 }

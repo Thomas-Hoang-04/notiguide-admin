@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, KeyRound, Store } from "lucide-react";
+import { Building2, Link2, Store } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { RegisterMode } from "@/types/admin";
 
@@ -23,7 +23,7 @@ const PATHS = [
   },
   {
     mode: "JOIN",
-    icon: KeyRound,
+    icon: Link2,
     titleKey: "pathJoinTitle",
     descKey: "pathJoinDesc",
   },

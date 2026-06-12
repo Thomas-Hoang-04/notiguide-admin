@@ -8,6 +8,7 @@ export const API_ROUTES = {
     REFRESH: "/api/auth/refresh",
     ABORT: "/api/auth/abort",
     REGISTER: "/api/auth/register",
+    INVITE: (token: string) => `/api/auth/invite/${encodeURIComponent(token)}`,
   },
   ADMINS: {
     BASE: "/api/admins",
@@ -39,8 +40,8 @@ export const API_ROUTES = {
       `/api/stores/${storeId}/slugs/${encodeURIComponent(slug)}/retire`,
     SLUG: (storeId: string, slug: string) =>
       `/api/stores/${storeId}/slugs/${encodeURIComponent(slug)}`,
-    JOIN_CODE: (id: string) => `/api/stores/${id}/join-code`,
-    JOIN_CODE_ROTATE: (id: string) => `/api/stores/${id}/join-code/rotate`,
+    INVITE_LINK: (id: string) => `/api/stores/${id}/invite-link`,
+    INVITE_LINK_ROTATE: (id: string) => `/api/stores/${id}/invite-link/rotate`,
   },
   QUEUE: {
     PUBLIC_INFO: (storeId: string) => `/api/queue/public/${storeId}/info`,
@@ -101,8 +102,8 @@ export const API_ROUTES = {
   },
   ORGS: {
     ME: "/api/orgs/me",
-    JOIN_CODE: "/api/orgs/me/join-code",
-    JOIN_CODE_ROTATE: "/api/orgs/me/join-code/rotate",
+    INVITE_LINK: "/api/orgs/me/invite-link",
+    INVITE_LINK_ROTATE: "/api/orgs/me/invite-link/rotate",
   },
 } as const;
 

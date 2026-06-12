@@ -12,7 +12,14 @@ import { AssignStoreDialog } from "@/features/admin/assign-store-dialog";
 import { CreateAdminDialog } from "@/features/admin/create-admin-dialog";
 import { DeleteAdminDialog } from "@/features/admin/delete-admin-dialog";
 import { JoinRequestsPanel } from "@/features/admin/join-requests-panel";
-import { listStores } from "@/features/store/api";
+import {
+  getOrgInviteLink,
+  getStoreInviteLink,
+  rotateOrgInviteLink,
+  rotateStoreInviteLink,
+} from "@/features/organization/api";
+import { InviteLinkPanel } from "@/features/organization/invite-link-panel";
+import { getStore, listStores } from "@/features/store/api";
 import {
   translateCommonApiError,
   translateNetworkError,
@@ -45,6 +52,18 @@ export default function AdminsPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
   const [assignTarget, setAssignTarget] = useState<AdminDto | null>(null);
+
+  const adminStoreId = currentAdmin?.storeId ?? null;
+  const [storeOrgId, setStoreOrgId] = useState<string | null | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    if (isSuperAdmin || !adminStoreId) return;
+    getStore(adminStoreId)
+      .then((s) => setStoreOrgId(s.orgId))
+      .catch(() => setStoreOrgId(undefined));
+  }, [isSuperAdmin, adminStoreId]);
 
   const fetchAdmins = useCallback(
     async (p: number, storeId?: string | null, role?: string | null) => {
@@ -136,6 +155,22 @@ export default function AdminsPage() {
 
   return (
     <div>
+      {isSuperAdmin && (
+        <div className="mb-6">
+          <InviteLinkPanel
+            fetchLink={getOrgInviteLink}
+            generateLink={rotateOrgInviteLink}
+          />
+        </div>
+      )}
+      {!isSuperAdmin && adminStoreId && storeOrgId === null && (
+        <div className="mb-6">
+          <InviteLinkPanel
+            fetchLink={() => getStoreInviteLink(adminStoreId)}
+            generateLink={() => rotateStoreInviteLink(adminStoreId)}
+          />
+        </div>
+      )}
       <JoinRequestsPanel isSuperAdmin={isSuperAdmin} stores={stores} />
       <AdminDirectoryToolbar
         isSuperAdmin={isSuperAdmin}

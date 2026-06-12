@@ -21,9 +21,8 @@ import { ThemeToggle } from "./theme-toggle";
 
 export function Topbar() {
   const tNavigation = useTranslations("navigation");
-  const tCommon = useTranslations("common");
   const { admin, isSuperAdmin } = useAuthStore();
-  const { org, selfManaged } = useMyOrg();
+  const { org } = useMyOrg();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
@@ -65,16 +64,11 @@ export function Topbar() {
               {admin.username}
             </span>
             {org && (
-              <span className="hidden text-xs text-muted-foreground s:inline">
-                {org.name}
-              </span>
-            )}
-            {selfManaged && (
               <Badge
                 variant="outline"
                 className="border-border text-muted-foreground"
               >
-                {tCommon("selfManaged")}
+                {org.name}
               </Badge>
             )}
             <Badge

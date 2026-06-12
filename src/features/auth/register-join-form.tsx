@@ -1,10 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 import { InlineError } from "@/components/ui/inline-error";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   RegisterFormActions,
   type RegisterFormProps,
@@ -13,13 +10,19 @@ import {
   useRegisterForm,
 } from "@/features/auth/register-form-shared";
 
+interface RegisterJoinFormProps extends RegisterFormProps {
+  /** The invite resolved in this page session — joining has no other path,
+   * so the wizard only mounts this form once a token resolved. */
+  invite: { token: string; targetName: string };
+}
+
 export function RegisterJoinForm({
   submitting,
   onBack,
   onSubmit,
-}: RegisterFormProps) {
+  invite,
+}: RegisterJoinFormProps) {
   const t = useTranslations("register");
-  const [joinCode, setJoinCode] = useState("");
   const {
     username,
     setUsername,
@@ -34,19 +37,18 @@ export function RegisterJoinForm({
       mode: "JOIN",
       username,
       password,
-      joinCode: joinCode.trim(),
+      inviteToken: invite.token,
     }),
-    validateExtra: (e) => {
-      if (!joinCode.trim()) e.joinCode = t("joinCodeRequired");
-    },
-    mapApiError: (err) =>
-      err.message.toLowerCase().includes("join code")
-        ? { joinCode: t("invalidJoinCode") }
-        : undefined,
   });
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      <div className="rounded-xl border border-success/40 bg-success/10 px-3.5 py-3 text-sm text-success dark:border-success/50 dark:bg-success/15">
+        {t.rich("joiningTarget", {
+          name: invite.targetName,
+          bold: (chunks) => <span className="font-semibold">{chunks}</span>,
+        })}
+      </div>
       <RegisterUsernameField
         value={username}
         onChange={setUsername}
@@ -57,21 +59,6 @@ export function RegisterJoinForm({
         onChange={setPassword}
         error={errors.password}
       />
-      <div className="space-y-2">
-        <Label htmlFor="reg-joincode">{t("joinCodeLabel")}</Label>
-        <Input
-          id="reg-joincode"
-          value={joinCode}
-          maxLength={64}
-          placeholder={t("joinCodePlaceholder")}
-          className="font-mono"
-          onChange={(e) => setJoinCode(e.target.value)}
-          aria-invalid={!!errors.joinCode}
-        />
-        {errors.joinCode && (
-          <InlineError message={errors.joinCode} className="mt-1" />
-        )}
-      </div>
       {errors.form && <InlineError message={errors.form} />}
       <RegisterFormActions
         submitting={submitting}

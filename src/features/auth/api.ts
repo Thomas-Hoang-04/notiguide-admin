@@ -1,6 +1,7 @@
-import { post } from "@/lib/api";
+import { get, post } from "@/lib/api";
 import { API_BASE_URL, API_ROUTES } from "@/lib/constants";
 import type {
+  InviteResolveResponse,
   LoginRequest,
   LoginResponse,
   RegisterRequest,
@@ -21,6 +22,12 @@ export function logout() {
 
 export function register(request: RegisterRequest) {
   return post<RegisterResponse>(API_ROUTES.AUTH.REGISTER, request, {
+    skipAuth: true,
+  });
+}
+
+export function resolveInvite(token: string) {
+  return get<InviteResolveResponse>(API_ROUTES.AUTH.INVITE(token), {
     skipAuth: true,
   });
 }

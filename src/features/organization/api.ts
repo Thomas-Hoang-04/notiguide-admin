@@ -1,26 +1,26 @@
 import { get, post } from "@/lib/api";
 import { API_ROUTES } from "@/lib/constants";
-import type { JoinCodeResponse, OrganizationDto } from "@/types/organization";
+import type { InviteLinkState, OrganizationDto } from "@/types/organization";
 
 export function getMyOrg() {
   return get<OrganizationDto>(API_ROUTES.ORGS.ME);
 }
 
-export function getOrgJoinCode() {
-  return get<JoinCodeResponse>(API_ROUTES.ORGS.JOIN_CODE);
+export function getOrgInviteLink() {
+  return get<InviteLinkState>(API_ROUTES.ORGS.INVITE_LINK);
 }
 
-export function rotateOrgJoinCode() {
-  return post<JoinCodeResponse>(API_ROUTES.ORGS.JOIN_CODE_ROTATE, undefined);
+export function rotateOrgInviteLink() {
+  return post<InviteLinkState>(API_ROUTES.ORGS.INVITE_LINK_ROTATE, undefined);
 }
 
-export function getStoreJoinCode(storeId: string) {
-  return get<JoinCodeResponse>(API_ROUTES.STORES.JOIN_CODE(storeId));
+export function getStoreInviteLink(storeId: string) {
+  return get<InviteLinkState>(API_ROUTES.STORES.INVITE_LINK(storeId));
 }
 
-export function rotateStoreJoinCode(storeId: string) {
-  return post<JoinCodeResponse>(
-    API_ROUTES.STORES.JOIN_CODE_ROTATE(storeId),
+export function rotateStoreInviteLink(storeId: string) {
+  return post<InviteLinkState>(
+    API_ROUTES.STORES.INVITE_LINK_ROTATE(storeId),
     undefined,
   );
 }

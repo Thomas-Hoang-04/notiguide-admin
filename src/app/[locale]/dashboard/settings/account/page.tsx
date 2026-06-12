@@ -215,7 +215,7 @@ export default function AccountPage() {
                 variant="outline"
                 className="border-border text-muted-foreground"
               >
-                {tCommon("selfManaged")}
+                {tCommon("unknown")}
               </Badge>
             ) : (
               "—"

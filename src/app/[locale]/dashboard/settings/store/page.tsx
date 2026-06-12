@@ -18,10 +18,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  getStoreJoinCode,
-  rotateStoreJoinCode,
+  getStoreInviteLink,
+  rotateStoreInviteLink,
 } from "@/features/organization/api";
-import { JoinCodePanel } from "@/features/organization/join-code-panel";
+import { InviteLinkPanel } from "@/features/organization/invite-link-panel";
 import { getStore, listServiceTypes } from "@/features/store/api";
 import { StoreQueueSettingsContent } from "@/features/store/store-queue-settings-content";
 import { useStoreQueueSettings } from "@/features/store/use-store-queue-settings";
@@ -182,9 +182,9 @@ export default function StoreSettingsPage() {
       />
 
       {storeId && storeOrgId === null && (
-        <JoinCodePanel
-          fetchCode={() => getStoreJoinCode(storeId)}
-          rotateCode={() => rotateStoreJoinCode(storeId)}
+        <InviteLinkPanel
+          fetchLink={() => getStoreInviteLink(storeId)}
+          generateLink={() => rotateStoreInviteLink(storeId)}
         />
       )}
     </div>
