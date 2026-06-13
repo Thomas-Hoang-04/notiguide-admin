@@ -8,14 +8,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import type { ServiceTypeDto } from "@/types/store";
 
-type ServiceTypesTableProps = {
+interface ServiceTypesTableProps {
   items: ServiceTypeDto[];
   loading: boolean;
   onCreate: () => void;
   onEdit: (st: ServiceTypeDto) => void;
   onDelete: (st: ServiceTypeDto) => void;
   onToggleActive: (st: ServiceTypeDto) => void;
-};
+}
 
 export function ServiceTypesTable({
   items,

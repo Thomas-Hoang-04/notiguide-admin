@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Link2, Plus, RefreshCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,22 +12,30 @@ import {
 import { ROLES } from "@/lib/constants";
 import type { StoreDto } from "@/types/store";
 
-type AdminDirectoryToolbarProps = {
+interface AdminDirectoryToolbarProps {
   isSuperAdmin: boolean;
   onCreateAdmin: () => void;
+  onOpenInvite: () => void;
+  onRefresh: () => void;
   onRoleFilterChange: (value: string | null) => void;
   onStoreFilterChange: (value: string | null) => void;
+  refreshing: boolean;
   roleFilter: string;
+  showInviteButton: boolean;
   storeFilter: string;
   stores: StoreDto[];
-};
+}
 
 export function AdminDirectoryToolbar({
   isSuperAdmin,
   onCreateAdmin,
+  onOpenInvite,
+  onRefresh,
   onRoleFilterChange,
   onStoreFilterChange,
+  refreshing,
   roleFilter,
+  showInviteButton,
   storeFilter,
   stores,
 }: AdminDirectoryToolbarProps) {
@@ -37,15 +45,35 @@ export function AdminDirectoryToolbar({
     <div className="mb-4 space-y-3 l:mb-6">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-bold l:text-2xl">{tAdmins("title")}</h1>
-        {isSuperAdmin && (
+        <div className="flex items-center gap-2">
           <Button
-            onClick={onCreateAdmin}
-            className="bg-primary text-primary-foreground hover:bg-primary-hover"
+            variant="outline"
+            size="icon"
+            disabled={refreshing}
+            onClick={onRefresh}
+            aria-label={tAdmins("refresh")}
           >
-            <Plus className="mr-2 size-4" />
-            {tAdmins("createButton")}
+            <RefreshCcw
+              aria-hidden="true"
+              className={`size-4 ${refreshing ? "animate-spin" : ""}`}
+            />
           </Button>
-        )}
+          {showInviteButton && (
+            <Button variant="outline" onClick={onOpenInvite}>
+              <Link2 className="mr-2 size-4" />
+              {tAdmins("inviteLinkTitle")}
+            </Button>
+          )}
+          {isSuperAdmin && (
+            <Button
+              onClick={onCreateAdmin}
+              className="bg-primary text-primary-foreground hover:bg-primary-hover"
+            >
+              <Plus className="mr-2 size-4" />
+              {tAdmins("createButton")}
+            </Button>
+          )}
+        </div>
       </div>
 
       {isSuperAdmin && (

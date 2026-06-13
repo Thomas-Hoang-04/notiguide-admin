@@ -4,10 +4,10 @@ import { AlertCircle, RefreshCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
-type StoreManagementErrorBannerProps = {
+interface StoreManagementErrorBannerProps {
   error: string;
   onRetry: () => void;
-};
+}
 
 export function StoreManagementErrorBanner({
   error,

@@ -289,6 +289,7 @@
     "filterAllStores": "Tất cả cửa hàng",
     "filterByStore": "Lọc theo cửa hàng",
     "createButton": "Tạo quản trị viên",
+    "refresh": "Tải lại danh sách",
     "columnUsername": "Tên đăng nhập",
     "columnRole": "Vai trò",
     "columnStore": "Cửa hàng",

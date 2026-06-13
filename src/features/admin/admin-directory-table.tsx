@@ -16,7 +16,7 @@ import {
 } from "@/lib/i18n-keys";
 import type { AdminDto, AdminPageResponse } from "@/types/admin";
 
-type AdminDirectoryTableProps = {
+interface AdminDirectoryTableProps {
   actionLoading: string | null;
   currentAdminId?: string;
   data: AdminPageResponse | null;
@@ -27,7 +27,7 @@ type AdminDirectoryTableProps = {
   onRequestDelete: (admin: AdminDto) => void;
   onVerify: (admin: AdminDto) => void;
   resolveStoreName: (storeId: string | null) => string;
-};
+}
 
 export function AdminDirectoryTable({
   actionLoading,

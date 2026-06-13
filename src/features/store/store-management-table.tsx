@@ -10,13 +10,13 @@ import { StoreSettingsPanel } from "@/features/store/store-settings-panel";
 import { getStoreStatusTranslationKey } from "@/lib/i18n-keys";
 import type { StoreDto, StorePageResponse } from "@/types/store";
 
-type StoreManagementTableProps = {
+interface StoreManagementTableProps {
   data: StorePageResponse | null;
   loading: boolean;
   onCreate: () => void;
   onDelete: (store: StoreDto) => void;
   onStoreUpdated: (store: StoreDto) => void;
-};
+}
 
 export function StoreManagementTable({
   data,

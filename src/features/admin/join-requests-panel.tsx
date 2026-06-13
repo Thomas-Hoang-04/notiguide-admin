@@ -23,11 +23,15 @@ import type { StoreDto } from "@/types/store";
 interface JoinRequestsPanelProps {
   isSuperAdmin: boolean;
   stores: StoreDto[];
+  refreshSignal: number;
+  onApproved: () => void;
 }
 
 export function JoinRequestsPanel({
   isSuperAdmin,
   stores,
+  refreshSignal,
+  onApproved,
 }: JoinRequestsPanelProps) {
   const tAdmins = useTranslations("admins");
   const tErrors = useTranslations("errors");
@@ -50,6 +54,10 @@ export function JoinRequestsPanel({
     void fetchRequests();
   }, [fetchRequests]);
 
+  useEffect(() => {
+    if (refreshSignal) void fetchRequests();
+  }, [refreshSignal, fetchRequests]);
+
   async function doApprove(role: AdminRole, storeId?: string) {
     if (!approveTarget) return;
     try {
@@ -58,6 +66,7 @@ export function JoinRequestsPanel({
         tAdmins("requestApprovedToast", { username: approveTarget.username }),
       );
       await fetchRequests();
+      onApproved();
     } catch (err) {
       toast.error(
         err instanceof ApiError

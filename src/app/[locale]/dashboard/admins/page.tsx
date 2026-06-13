@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AdminDirectoryErrorBanner } from "@/features/admin/admin-directory-error-banner";
 import { AdminDirectoryPagination } from "@/features/admin/admin-directory-pagination";
@@ -12,13 +12,8 @@ import { AssignStoreDialog } from "@/features/admin/assign-store-dialog";
 import { CreateAdminDialog } from "@/features/admin/create-admin-dialog";
 import { DeleteAdminDialog } from "@/features/admin/delete-admin-dialog";
 import { JoinRequestsPanel } from "@/features/admin/join-requests-panel";
-import {
-  getOrgInviteLink,
-  getStoreInviteLink,
-  rotateOrgInviteLink,
-  rotateStoreInviteLink,
-} from "@/features/organization/api";
-import { InviteLinkPanel } from "@/features/organization/invite-link-panel";
+import { resolveInviteConfig } from "@/features/organization/invite-config";
+import { InviteLinkDialog } from "@/features/organization/invite-link-dialog";
 import { getStore, listStores } from "@/features/store/api";
 import {
   translateCommonApiError,
@@ -44,6 +39,9 @@ export default function AdminsPage() {
   const [storeFilter, setStoreFilter] = useState<string>("all");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshSignal, setRefreshSignal] = useState(0);
 
   // Dialogs
   const [createOpen, setCreateOpen] = useState(false);
@@ -64,6 +62,11 @@ export default function AdminsPage() {
       .then((s) => setStoreOrgId(s.orgId))
       .catch(() => setStoreOrgId(undefined));
   }, [isSuperAdmin, adminStoreId]);
+
+  const inviteConfig = useMemo(
+    () => resolveInviteConfig(isSuperAdmin, adminStoreId, storeOrgId),
+    [isSuperAdmin, adminStoreId, storeOrgId],
+  );
 
   const fetchAdmins = useCallback(
     async (p: number, storeId?: string | null, role?: string | null) => {
@@ -127,6 +130,16 @@ export default function AdminsPage() {
     }
   }
 
+  async function handleRefresh() {
+    setRefreshing(true);
+    setRefreshSignal((s) => s + 1);
+    try {
+      await fetchAdmins(page, storeFilter, roleFilter);
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   async function handleDelete() {
     if (!deleteTarget) return;
     setDeleteLoading(true);
@@ -155,29 +168,22 @@ export default function AdminsPage() {
 
   return (
     <div>
-      {isSuperAdmin && (
-        <div className="mb-6">
-          <InviteLinkPanel
-            fetchLink={getOrgInviteLink}
-            generateLink={rotateOrgInviteLink}
-          />
-        </div>
-      )}
-      {!isSuperAdmin && adminStoreId && storeOrgId === null && (
-        <div className="mb-6">
-          <InviteLinkPanel
-            fetchLink={() => getStoreInviteLink(adminStoreId)}
-            generateLink={() => rotateStoreInviteLink(adminStoreId)}
-          />
-        </div>
-      )}
-      <JoinRequestsPanel isSuperAdmin={isSuperAdmin} stores={stores} />
+      <JoinRequestsPanel
+        isSuperAdmin={isSuperAdmin}
+        stores={stores}
+        refreshSignal={refreshSignal}
+        onApproved={() => void fetchAdmins(page, storeFilter, roleFilter)}
+      />
       <AdminDirectoryToolbar
         isSuperAdmin={isSuperAdmin}
+        refreshing={refreshing}
         roleFilter={roleFilter}
+        showInviteButton={inviteConfig !== null}
         storeFilter={storeFilter}
         stores={stores}
         onCreateAdmin={() => setCreateOpen(true)}
+        onOpenInvite={() => setInviteOpen(true)}
+        onRefresh={() => void handleRefresh()}
         onRoleFilterChange={(v) => {
           if (v) {
             setRoleFilter(v);
@@ -248,6 +254,15 @@ export default function AdminsPage() {
         loading={deleteLoading}
         onConfirm={handleDelete}
       />
+
+      {inviteConfig && (
+        <InviteLinkDialog
+          open={inviteOpen}
+          onOpenChange={setInviteOpen}
+          fetchLink={inviteConfig.fetchLink}
+          generateLink={inviteConfig.generateLink}
+        />
+      )}
     </div>
   );
 }

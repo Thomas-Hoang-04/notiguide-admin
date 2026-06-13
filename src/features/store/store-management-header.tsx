@@ -4,9 +4,9 @@ import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
-type StoreManagementHeaderProps = {
+interface StoreManagementHeaderProps {
   onCreate: () => void;
-};
+}
 
 export function StoreManagementHeader({
   onCreate,

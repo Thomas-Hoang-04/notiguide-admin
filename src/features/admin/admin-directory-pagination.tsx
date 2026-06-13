@@ -5,12 +5,12 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import type { AdminPageResponse } from "@/types/admin";
 
-type AdminDirectoryPaginationProps = {
+interface AdminDirectoryPaginationProps {
   data: AdminPageResponse;
   onNext: () => void;
   onPrev: () => void;
   page: number;
-};
+}
 
 export function AdminDirectoryPagination({
   data,

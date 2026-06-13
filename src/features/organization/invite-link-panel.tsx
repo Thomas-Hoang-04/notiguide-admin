@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, Copy, Loader2, RefreshCw } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -27,31 +27,15 @@ import type { InviteLinkState } from "@/types/organization";
 interface InviteLinkPanelProps {
   fetchLink: () => Promise<InviteLinkState>;
   generateLink: () => Promise<InviteLinkState>;
+  embedded?: boolean;
 }
-
-// Time display is language-agnostic across the app: fixed locale, not next-intl
-// (same pattern as waiting-list.tsx / serving-display.tsx).
-const expiryFormatter = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: true,
-});
-
-const usedAtFormatter = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: true,
-});
 
 export function InviteLinkPanel({
   fetchLink,
   generateLink,
+  embedded = false,
 }: InviteLinkPanelProps) {
+  const format = useFormatter();
   const tAdmins = useTranslations("admins");
   const tCommon = useTranslations("common");
   const tErrors = useTranslations("errors");
@@ -109,11 +93,19 @@ export function InviteLinkPanel({
   const currentLinkId = link?.token ? link.token.slice(-4) : null;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <h2 className="text-sm font-semibold">{tAdmins("inviteLinkTitle")}</h2>
-      <p className="mt-1 mb-3 text-sm text-muted-foreground">
-        {tAdmins("inviteLinkDesc")}
-      </p>
+    <div
+      className={embedded ? "" : "rounded-xl border border-border bg-card p-4"}
+    >
+      {!embedded && (
+        <>
+          <h2 className="text-sm font-semibold">
+            {tAdmins("inviteLinkTitle")}
+          </h2>
+          <p className="mt-1 mb-3 text-sm text-muted-foreground">
+            {tAdmins("inviteLinkDesc")}
+          </p>
+        </>
+      )}
 
       {loading ? (
         <div className="flex justify-center py-4">
@@ -147,7 +139,13 @@ export function InviteLinkPanel({
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
             {tAdmins("inviteLinkValidUntil", {
-              date: expiryFormatter.format(new Date(link.expiresAt)),
+              date: format.dateTime(new Date(link.expiresAt), {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
             })}
           </p>
           <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-warning/40 bg-warning/15 px-3.5 py-3 text-sm text-warning dark:border-warning/50 dark:bg-warning/20">
@@ -200,7 +198,12 @@ export function InviteLinkPanel({
                   <span className="truncate font-medium">{use.username}</span>
                   <span className="flex shrink-0 items-center gap-2">
                     <span className="text-xs text-muted-foreground">
-                      {usedAtFormatter.format(new Date(use.usedAt))}
+                      {format.dateTime(new Date(use.usedAt), {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
                     <Badge
                       variant={isCurrent ? "default" : "outline"}

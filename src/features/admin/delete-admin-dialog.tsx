@@ -14,13 +14,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { AdminDto } from "@/types/admin";
 
-type DeleteAdminDialogProps = {
+interface DeleteAdminDialogProps {
   loading: boolean;
   onConfirm: () => Promise<void> | void;
   onOpenChange: (open: boolean) => void;
   open: boolean;
   target: AdminDto | null;
-};
+}
 
 export function DeleteAdminDialog({
   loading,

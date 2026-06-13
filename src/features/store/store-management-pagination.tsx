@@ -5,12 +5,12 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import type { StorePageResponse } from "@/types/store";
 
-type StoreManagementPaginationProps = {
+interface StoreManagementPaginationProps {
   data: StorePageResponse;
   onNext: () => void;
   onPrev: () => void;
   page: number;
-};
+}
 
 export function StoreManagementPagination({
   data,
