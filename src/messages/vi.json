@@ -336,6 +336,7 @@
     "requestReject": "Từ chối",
     "requestApproveTitle": "Duyệt yêu cầu tham gia",
     "requestApproveStoreLabel": "Gán vào cửa hàng",
+    "requestApproveSuperAdminNote": "Cấp quyền chủ tổ chức — có toàn quyền với mọi cửa hàng và quản lý các quản trị viên khác.",
     "requestRejectTitle": "Từ chối yêu cầu tham gia",
     "requestRejectConfirm": "Từ chối yêu cầu tham gia của {username}? Hành động này không thể hoàn tác.",
     "requestApprovedToast": "Đã duyệt {username}",

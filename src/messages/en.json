@@ -336,6 +336,7 @@
     "requestReject": "Reject",
     "requestApproveTitle": "Approve join request",
     "requestApproveStoreLabel": "Assign to store",
+    "requestApproveSuperAdminNote": "Makes this person an organization owner — full access to every store and the ability to manage other admins.",
     "requestRejectTitle": "Reject join request",
     "requestRejectConfirm": "Reject {username}'s request to join? This can't be undone.",
     "requestApprovedToast": "{username} approved",

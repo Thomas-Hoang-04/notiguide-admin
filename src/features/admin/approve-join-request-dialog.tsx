@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {
@@ -20,44 +20,58 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import type { JoinRequestDto } from "@/types/admin";
+import {
+  isConfirmEnabled,
+  isStoreRequired,
+} from "@/features/admin/approve-join-request-logic";
+import type { AdminRole, JoinRequestDto } from "@/types/admin";
 import type { StoreDto } from "@/types/store";
 
 interface ApproveJoinRequestDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   request: JoinRequestDto | null;
-  requireStore: boolean;
+  // True only for org-owner approvals (ORG-target requests): the approver may pick the
+  // role, and a store is required only when ROLE_ADMIN is chosen.
+  allowRoleChoice: boolean;
   stores: StoreDto[];
-  onConfirm: (storeId?: string) => Promise<void>;
+  onConfirm: (role: AdminRole, storeId?: string) => Promise<void>;
 }
 
 export function ApproveJoinRequestDialog({
   open,
   onOpenChange,
   request,
-  requireStore,
+  allowRoleChoice,
   stores,
   onConfirm,
 }: ApproveJoinRequestDialogProps) {
   const tAdmins = useTranslations("admins");
   const tCommon = useTranslations("common");
+  const [role, setRole] = useState<AdminRole>("ROLE_ADMIN");
   const [storeId, setStoreId] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Reset the store selection each time the dialog opens for a fresh request.
-  // A failed approve keeps the dialog open (open stays true), so the admin's
-  // selection is preserved for retry; only a new open resets it.
+  // Reset the selection each time the dialog opens for a fresh request. A failed approve
+  // keeps the dialog open (open stays true), so the admin's selection is preserved for
+  // retry; only a new open resets it.
   useEffect(() => {
-    if (open) setStoreId("");
+    if (open) {
+      setRole("ROLE_ADMIN");
+      setStoreId("");
+    }
   }, [open]);
 
+  const storeRequired = isStoreRequired(allowRoleChoice, role);
+  const confirmEnabled = isConfirmEnabled(allowRoleChoice, role, storeId);
+
   async function confirm() {
-    if (requireStore && !storeId) return;
+    if (!confirmEnabled) return;
     setLoading(true);
     try {
-      await onConfirm(requireStore ? storeId : undefined);
+      await onConfirm(role, storeRequired ? storeId : undefined);
       onOpenChange(false);
+      setRole("ROLE_ADMIN");
       setStoreId("");
     } finally {
       setLoading(false);
@@ -75,7 +89,36 @@ export function ApproveJoinRequestDialog({
           <AlertDialogDescription>{request?.username}</AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-4">
-          {requireStore && (
+          {allowRoleChoice && (
+            <div className="space-y-2">
+              <Label>{tAdmins("roleLabel")}</Label>
+              <Select
+                value={role}
+                onValueChange={(v) => v && setRole(v as AdminRole)}
+              >
+                <SelectTrigger className="h-10 w-full gap-2 px-3">
+                  <span>
+                    {role === "ROLE_SUPER_ADMIN"
+                      ? tAdmins("roleSuperAdmin")
+                      : tAdmins("roleAdmin")}
+                  </span>
+                </SelectTrigger>
+                <SelectContent
+                  align="start"
+                  alignItemWithTrigger={false}
+                  className="p-1.5"
+                >
+                  <SelectItem value="ROLE_ADMIN" className="py-2">
+                    {tAdmins("roleAdmin")}
+                  </SelectItem>
+                  <SelectItem value="ROLE_SUPER_ADMIN" className="py-2">
+                    {tAdmins("roleSuperAdmin")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {storeRequired && (
             <div className="space-y-2">
               <Label>{tAdmins("requestApproveStoreLabel")}</Label>
               <Select value={storeId} onValueChange={(v) => v && setStoreId(v)}>
@@ -100,13 +143,21 @@ export function ApproveJoinRequestDialog({
               </Select>
             </div>
           )}
+          {role === "ROLE_SUPER_ADMIN" && (
+            <div className="flex items-start gap-2.5 rounded-xl border border-warning/40 bg-warning/15 px-3.5 py-3 text-warning dark:border-warning/50 dark:bg-warning/20">
+              <AlertTriangle aria-hidden="true" className="size-4 shrink-0" />
+              <p className="text-sm">
+                {tAdmins("requestApproveSuperAdminNote")}
+              </p>
+            </div>
+          )}
         </div>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={loading}>
             {tCommon("cancel")}
           </AlertDialogCancel>
           <AlertDialogAction
-            disabled={loading || (requireStore && !storeId)}
+            disabled={loading || !confirmEnabled}
             onClick={(e) => {
               e.preventDefault();
               void confirm();

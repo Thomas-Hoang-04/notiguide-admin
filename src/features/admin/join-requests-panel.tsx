@@ -16,7 +16,7 @@ import {
   translateCommonApiError,
   translateNetworkError,
 } from "@/lib/api-error";
-import type { JoinRequestDto } from "@/types/admin";
+import type { AdminRole, JoinRequestDto } from "@/types/admin";
 import { ApiError } from "@/types/api";
 import type { StoreDto } from "@/types/store";
 
@@ -50,10 +50,10 @@ export function JoinRequestsPanel({
     void fetchRequests();
   }, [fetchRequests]);
 
-  async function doApprove(storeId?: string) {
+  async function doApprove(role: AdminRole, storeId?: string) {
     if (!approveTarget) return;
     try {
-      await approveJoinRequest(approveTarget.requestId, storeId);
+      await approveJoinRequest(approveTarget.requestId, role, storeId);
       toast.success(
         tAdmins("requestApprovedToast", { username: approveTarget.username }),
       );
@@ -129,7 +129,7 @@ export function JoinRequestsPanel({
         open={!!approveTarget}
         onOpenChange={(o) => !o && setApproveTarget(null)}
         request={approveTarget}
-        requireStore={isSuperAdmin}
+        allowRoleChoice={isSuperAdmin}
         stores={stores}
         onConfirm={doApprove}
       />

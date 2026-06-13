@@ -3,6 +3,7 @@ import { API_ROUTES } from "@/lib/constants";
 import type {
   AdminDto,
   AdminPageResponse,
+  AdminRole,
   AdminSessionDto,
   CreateAdminRequest,
   JoinRequestDto,
@@ -85,11 +86,15 @@ export function listJoinRequests() {
   return get<JoinRequestDto[]>(API_ROUTES.ADMINS.REQUESTS);
 }
 
-export function approveJoinRequest(requestId: string, storeId?: string) {
-  return post<void>(
-    API_ROUTES.ADMINS.APPROVE_REQUEST(requestId),
-    storeId ? { storeId } : undefined,
-  );
+export function approveJoinRequest(
+  requestId: string,
+  role: AdminRole,
+  storeId?: string,
+) {
+  return post<void>(API_ROUTES.ADMINS.APPROVE_REQUEST(requestId), {
+    role,
+    storeId,
+  });
 }
 
 export function rejectJoinRequest(requestId: string) {
