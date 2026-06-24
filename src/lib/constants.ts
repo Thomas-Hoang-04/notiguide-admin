@@ -66,6 +66,8 @@ export const API_ROUTES = {
       `/api/queue/admin/${storeId}/device-tickets`,
     AVAILABLE_DEVICES: (storeId: string) =>
       `/api/queue/admin/${storeId}/available-devices`,
+    RECONCILE_OFFLINE: (storeId: string) =>
+      `/api/queue/admin/${storeId}/reconcile-offline`,
   },
   ANALYTICS: {
     REALTIME: (storeId: string) => `/api/analytics/${storeId}/realtime`,

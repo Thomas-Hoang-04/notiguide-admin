@@ -6,6 +6,8 @@ import type {
   IssueDeviceTicketRequest,
   NextTicketResponse,
   QueueSizeResponse,
+  ReconcileOfflineRequest,
+  ReconcileOfflineResponse,
   TicketDto,
   TicketStatusResponse,
 } from "@/types/queue";
@@ -101,4 +103,14 @@ export function issueDeviceTicket(
   request: IssueDeviceTicketRequest,
 ) {
   return post<TicketDto>(API_ROUTES.QUEUE.DEVICE_TICKETS(storeId), request);
+}
+
+export function reconcileOffline(
+  storeId: string,
+  body: ReconcileOfflineRequest,
+) {
+  return post<ReconcileOfflineResponse>(
+    API_ROUTES.QUEUE.RECONCILE_OFFLINE(storeId),
+    body,
+  );
 }

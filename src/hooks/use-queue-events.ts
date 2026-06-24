@@ -14,15 +14,20 @@ type QueueEventHandler = (event: QueueSseEvent) => void;
 export function useQueueEvents(
   storeId: string | null,
   onEvent: QueueEventHandler,
+  onConnectionChange?: (state: "open" | "closed") => void,
 ) {
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
+  const onConnRef = useRef(onConnectionChange);
+  onConnRef.current = onConnectionChange;
 
   useEffect(() => {
     if (!storeId) return;
 
     const url = `${API_BASE_URL}${API_ROUTES.QUEUE.EVENTS(storeId)}`;
     const eventSource = new EventSource(url, { withCredentials: true });
+    eventSource.onopen = () => onConnRef.current?.("open");
+    eventSource.onerror = () => onConnRef.current?.("closed");
 
     const eventTypes = [
       "TICKET_ISSUED",

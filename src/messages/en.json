@@ -431,7 +431,15 @@
       "dispatchButton": "Dispatch",
       "pageIndicator": "Page {current} / {total}",
       "prevPage": "Previous page",
-      "nextPage": "Next page"
+      "nextPage": "Next page",
+      "banner": {
+        "serialFallback": "Transmitter offline — dispatching over USB.",
+        "offline": "No connection — running the queue locally over USB. Changes sync when you're back online."
+      },
+      "offlineIssueDisabled": "Can't add new pagers while offline. You can still call and finish current ones.",
+      "rePageUsb": "Re-page over USB",
+      "errorReceiverNotOnHub": "Receiver isn't paired to this hub.",
+      "syncedToast": "Synced {count} offline updates."
     },
     "reloadTickets": "Reload waiting list"
   },

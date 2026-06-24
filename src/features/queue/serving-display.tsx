@@ -28,7 +28,10 @@ import {
   translateCommonApiError,
   translateNetworkError,
 } from "@/lib/api-error";
+import type { DispatchMode } from "@/lib/dispatch/mode";
 import { getTicketStatusTranslationKey } from "@/lib/i18n-keys";
+import type { TransmitResult } from "@/lib/serial/types";
+import { useOfflineDispatchStore } from "@/store/offline-dispatch";
 import { useQueueStore } from "@/store/queue";
 import { ApiError } from "@/types/api";
 import type { TicketDto } from "@/types/queue";
@@ -38,6 +41,11 @@ import "@/styles/queue.css";
 interface ServingDisplayProps {
   storeId: string;
   allowNoShow: boolean;
+  mode: DispatchMode;
+  dispatchSerial: (
+    target: { id: string; hubSlot: number | null },
+    action: "call" | "stop",
+  ) => Promise<TransmitResult>;
 }
 
 const ticketTimeFormatter = new Intl.DateTimeFormat("en-US", {
@@ -46,7 +54,12 @@ const ticketTimeFormatter = new Intl.DateTimeFormat("en-US", {
   hour12: true,
 });
 
-export function ServingDisplay({ storeId, allowNoShow }: ServingDisplayProps) {
+export function ServingDisplay({
+  storeId,
+  allowNoShow,
+  mode,
+  dispatchSerial,
+}: ServingDisplayProps) {
   const { servingTickets } = useQueueStore();
   const tQueue = useTranslations("queue");
   const [settings, setSettings] = useState<StoreSettingsDto | null>(null);
@@ -82,6 +95,8 @@ export function ServingDisplay({ storeId, allowNoShow }: ServingDisplayProps) {
           isPrimary={index === 0}
           settings={settings}
           allowNoShow={allowNoShow}
+          mode={mode}
+          dispatchSerial={dispatchSerial}
         />
       ))}
     </div>
@@ -94,6 +109,11 @@ interface ServingTicketCardProps {
   isPrimary: boolean;
   settings: StoreSettingsDto | null;
   allowNoShow: boolean;
+  mode: DispatchMode;
+  dispatchSerial: (
+    target: { id: string; hubSlot: number | null },
+    action: "call" | "stop",
+  ) => Promise<TransmitResult>;
 }
 
 function useGraceCountdown(
@@ -134,6 +154,8 @@ function ServingTicketCard({
   isPrimary,
   settings,
   allowNoShow,
+  mode,
+  dispatchSerial,
 }: ServingTicketCardProps) {
   const { removeServingTicket } = useQueueStore();
   const tErrors = useTranslations("errors");
@@ -142,6 +164,7 @@ function ServingTicketCard({
   const [cancelLoading, setCancelLoading] = useState(false);
   const [noShowLoading, setNoShowLoading] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [rePageLoading, setRePageLoading] = useState(false);
 
   const gracePeriodSec = settings?.gracePeriodSec ?? 0;
   const graceRemaining = useGraceCountdown(ticket.calledAt, gracePeriodSec);
@@ -165,6 +188,30 @@ function ServingTicketCard({
       return;
     setServeLoading(true);
     try {
+      if (mode === "OFFLINE_SERIAL") {
+        const store = useOfflineDispatchStore.getState();
+        if (!ticket.deviceId) {
+          toast.warning(tQueue("dispatch.offlineIssueDisabled"));
+          return;
+        }
+        const hubSlot = store.slotFor(ticket.deviceId);
+        if (hubSlot != null) {
+          const res = await dispatchSerial(
+            { id: ticket.deviceId, hubSlot },
+            "stop",
+          );
+          if (res.status !== "applied" && res.reason === "slot_not_found") {
+            toast.error(tQueue("dispatch.errorReceiverNotOnHub"));
+          }
+        }
+        store.appendOutbox({
+          ticketId: ticket.id,
+          action: "SERVE",
+          at: new Date().toISOString(),
+        });
+        removeServingTicket(ticket.id);
+        return;
+      }
       await serveTicket(storeId, ticket.id);
       toast.success(tQueue("servedToast", { number: ticket.number }));
       removeServingTicket(ticket.id);
@@ -177,7 +224,15 @@ function ServingTicketCard({
     } finally {
       setServeLoading(false);
     }
-  }, [removeServingTicket, ticket, storeId, tErrors, tQueue]);
+  }, [
+    removeServingTicket,
+    ticket,
+    storeId,
+    tErrors,
+    tQueue,
+    mode,
+    dispatchSerial,
+  ]);
 
   const handleNoShow = useCallback(async () => {
     if (
@@ -188,6 +243,30 @@ function ServingTicketCard({
       return;
     setNoShowLoading(true);
     try {
+      if (mode === "OFFLINE_SERIAL") {
+        const store = useOfflineDispatchStore.getState();
+        if (!ticket.deviceId) {
+          toast.warning(tQueue("dispatch.offlineIssueDisabled"));
+          return;
+        }
+        const hubSlot = store.slotFor(ticket.deviceId);
+        if (hubSlot != null) {
+          const res = await dispatchSerial(
+            { id: ticket.deviceId, hubSlot },
+            "stop",
+          );
+          if (res.status !== "applied" && res.reason === "slot_not_found") {
+            toast.error(tQueue("dispatch.errorReceiverNotOnHub"));
+          }
+        }
+        store.appendOutbox({
+          ticketId: ticket.id,
+          action: "NO_SHOW",
+          at: new Date().toISOString(),
+        });
+        removeServingTicket(ticket.id);
+        return;
+      }
       await triggerNoShow(storeId, ticket.id);
       toast.warning(tQueue("noShowSuccess", { number: ticket.number }));
       removeServingTicket(ticket.id);
@@ -200,7 +279,15 @@ function ServingTicketCard({
     } finally {
       setNoShowLoading(false);
     }
-  }, [removeServingTicket, ticket, storeId, tErrors, tQueue]);
+  }, [
+    removeServingTicket,
+    ticket,
+    storeId,
+    tErrors,
+    tQueue,
+    mode,
+    dispatchSerial,
+  ]);
 
   const openCancelDialog = useCallback(() => {
     if (
@@ -241,6 +328,30 @@ function ServingTicketCard({
   async function handleCancel() {
     setCancelLoading(true);
     try {
+      if (mode === "OFFLINE_SERIAL") {
+        const store = useOfflineDispatchStore.getState();
+        if (!ticket.deviceId) {
+          toast.warning(tQueue("dispatch.offlineIssueDisabled"));
+          return;
+        }
+        const hubSlot = store.slotFor(ticket.deviceId);
+        if (hubSlot != null) {
+          const res = await dispatchSerial(
+            { id: ticket.deviceId, hubSlot },
+            "stop",
+          );
+          if (res.status !== "applied" && res.reason === "slot_not_found") {
+            toast.error(tQueue("dispatch.errorReceiverNotOnHub"));
+          }
+        }
+        store.appendOutbox({
+          ticketId: ticket.id,
+          action: "CANCEL",
+          at: new Date().toISOString(),
+        });
+        removeServingTicket(ticket.id);
+        return;
+      }
       await cancelTicket(storeId, ticket.id);
       toast.warning(tQueue("cancelledToast", { number: ticket.number }));
       removeServingTicket(ticket.id);
@@ -255,6 +366,29 @@ function ServingTicketCard({
       setCancelDialogOpen(false);
     }
   }
+
+  async function handleRePage() {
+    if (rePageLoading || !ticket.deviceId) return;
+    setRePageLoading(true);
+    try {
+      const hubSlot = useOfflineDispatchStore
+        .getState()
+        .slotFor(ticket.deviceId);
+      const res = await dispatchSerial(
+        { id: ticket.deviceId, hubSlot },
+        "call",
+      );
+      if (res.status === "rejected" && res.reason === "slot_not_found") {
+        toast.error(tQueue("dispatch.errorReceiverNotOnHub"));
+      }
+    } finally {
+      setRePageLoading(false);
+    }
+  }
+
+  const showRePage =
+    !!ticket.deviceId &&
+    (mode === "ONLINE_SERIAL_FALLBACK" || mode === "OFFLINE_SERIAL");
 
   return (
     <div className="glass-card glass-context-action ticket-display rounded-xl">
@@ -365,6 +499,26 @@ function ServingTicketCard({
             </Kbd>
           )}
         </Button>
+
+        {showRePage && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void handleRePage()}
+            disabled={rePageLoading}
+            className="queue-action-btn"
+          >
+            {rePageLoading ? (
+              <Loader2
+                aria-hidden="true"
+                className="mr-2 size-4 animate-spin"
+              />
+            ) : (
+              <Radio aria-hidden="true" className="mr-2 size-4" />
+            )}
+            {tQueue("dispatch.rePageUsb")}
+          </Button>
+        )}
       </div>
 
       <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>

@@ -431,7 +431,15 @@
       "dispatchButton": "Phát vé",
       "pageIndicator": "Trang {current} / {total}",
       "prevPage": "Trang trước",
-      "nextPage": "Trang sau"
+      "nextPage": "Trang sau",
+      "banner": {
+        "serialFallback": "Bộ phát ngoại tuyến — đang phát tín hiệu qua USB.",
+        "offline": "Mất kết nối — đang chạy hàng đợi cục bộ qua USB. Thay đổi sẽ đồng bộ khi có mạng trở lại."
+      },
+      "offlineIssueDisabled": "Không thể cấp thiết bị mới khi ngoại tuyến. Vẫn có thể gọi và phục vụ khách hiện tại.",
+      "rePageUsb": "Gọi lại qua USB",
+      "errorReceiverNotOnHub": "Bộ thu chưa ghép nối với bộ phát này.",
+      "syncedToast": "Đã đồng bộ {count} cập nhật ngoại tuyến."
     },
     "reloadTickets": "Tải lại danh sách chờ"
   },

@@ -40,6 +40,11 @@ export interface TransmitPayload {
   proto_any: boolean;
 }
 
+export interface TransmitSlotPayload {
+  slot: number;
+  action: "call" | "stop";
+}
+
 export interface LifecyclePayload {
   action: "suspend" | "resume" | "decommission";
 }
@@ -141,6 +146,7 @@ export interface SerialCommandMap {
   update_mqtt: { payload: UpdateMqttPayload; response: RestartResult };
   factory_reset: { payload: undefined; response: RestartResult };
   transmit: { payload: TransmitPayload; response: TransmitResult };
+  transmit_slot: { payload: TransmitSlotPayload; response: TransmitResult };
   lifecycle: { payload: LifecyclePayload; response: LifecycleResult };
   "roster.list": { payload: undefined; response: RosterListResult };
   "roster.unpair": {

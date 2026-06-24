@@ -14,9 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { callNext, getPublicStoreInfo } from "@/features/queue/api";
+import {
+  callNext,
+  getAvailableDevices,
+  getPublicStoreInfo,
+  listWaitingTickets,
+  reconcileOffline,
+} from "@/features/queue/api";
 import { CleanupButton } from "@/features/queue/cleanup-button";
 import { DeviceDispatchPanel } from "@/features/queue/device-dispatch-panel";
+import { DispatchModeBanner } from "@/features/queue/dispatch-mode-banner";
 import { QueueStateToggle } from "@/features/queue/queue-state-toggle";
 import { QueueStats } from "@/features/queue/queue-stats";
 import { ServingDisplay } from "@/features/queue/serving-display";
@@ -24,13 +31,19 @@ import { useStoreName } from "@/features/queue/store-selector";
 import { TicketLookup } from "@/features/queue/ticket-lookup";
 import { WaitingList } from "@/features/queue/waiting-list";
 import { getStore, listServiceTypes } from "@/features/store/api";
+import { useBackendReachability } from "@/hooks/use-backend-reachability";
+import { useDispatchMode } from "@/hooks/use-dispatch-mode";
 import { useQueueEvents } from "@/hooks/use-queue-events";
+import { useSerialDispatch } from "@/hooks/use-serial-dispatch";
 import {
   translateCommonApiError,
   translateNetworkError,
 } from "@/lib/api-error";
+import { createDispatchDedupe } from "@/lib/dispatch/dedupe";
+import { useSerial } from "@/lib/serial/use-serial";
 import { useAuthStore } from "@/store/auth";
 import { useLayoutStore } from "@/store/layout";
+import { useOfflineDispatchStore } from "@/store/offline-dispatch";
 import { useQueueStore } from "@/store/queue";
 import { ApiError } from "@/types/api";
 import type { ServiceTypeDto } from "@/types/store";
@@ -47,6 +60,14 @@ export default function QueuePage() {
     removeServingTicket,
     hydrateQueue,
   } = useQueueStore();
+
+  // Resilient USB dispatch: serial port, backend reachability, and derived mode
+  const serial = useSerial();
+  const { reachable, onConnectionChange } = useBackendReachability();
+  const [dispatchReady, setDispatchReady] = useState(false);
+  const mode = useDispatchMode({ reachable, dispatchReady, serial });
+  const serialDispatch = useSerialDispatch(storeId ?? "", serial);
+  const dedupe = useRef(createDispatchDedupe()).current;
 
   const [serviceTypes, setServiceTypes] = useState<ServiceTypeDto[]>([]);
   const [selectedServiceTypeId, setSelectedServiceTypeId] = useState(() => {
@@ -107,6 +128,59 @@ export default function QueuePage() {
     })();
   }, [storeId]);
 
+  // Hydrate persisted offline-dispatch state once on mount
+  useEffect(() => {
+    useOfflineDispatchStore.getState().hydrate();
+  }, []);
+
+  // Page-owned device availability fetch: drives dispatchReady and captures
+  // device->slot mappings while devices are available (slots persist after).
+  // Separate from DeviceDispatchPanel's own fetch by design (decoupled concerns).
+  useEffect(() => {
+    // Re-run whenever a device dispatch bumps the signal.
+    void deviceRefreshSignal;
+    if (!storeId) return;
+    void (async () => {
+      try {
+        const res = await getAvailableDevices(storeId);
+        setDispatchReady(res.dispatchReady);
+        const store = useOfflineDispatchStore.getState();
+        for (const device of res.devices) {
+          if (device.hubSlot != null) {
+            store.setSlot(device.id, device.hubSlot);
+          }
+        }
+      } catch {
+        // leave dispatchReady as-is on failure
+      }
+    })();
+  }, [storeId, deviceRefreshSignal]);
+
+  // Maintain the waiting-ticket snapshot — the only data source for offline
+  // call-next (Task 17). Only refreshed while the backend is reachable.
+  useEffect(() => {
+    // Re-run whenever stats refresh to keep the snapshot current.
+    void statsRefreshSignal;
+    if (!storeId || !reachable) return;
+    void (async () => {
+      try {
+        const tickets = await listWaitingTickets(storeId);
+        const store = useOfflineDispatchStore.getState();
+        const mapped = tickets
+          .filter((t) => t.deviceId != null)
+          .map((t) => ({
+            ticketId: t.id,
+            number: t.number,
+            deviceId: t.deviceId as string,
+            hubSlot: store.slotFor(t.deviceId as string),
+          }));
+        store.setWaitingSnapshot(mapped);
+      } catch {
+        // keep last known snapshot on failure
+      }
+    })();
+  }, [storeId, statsRefreshSignal, reachable]);
+
   const storeName = useStoreName(storeId);
 
   const handleDeviceDispatched = useCallback(() => {
@@ -121,39 +195,130 @@ export default function QueuePage() {
   }, []);
 
   // SSE: real-time queue events
-  useQueueEvents(storeId, (event) => {
-    setStatsRefreshSignal((s) => s + 1);
+  useQueueEvents(
+    storeId,
+    async (event) => {
+      setStatsRefreshSignal((s) => s + 1);
 
-    if (event.type === "DEVICE_DISPATCH_FAILED") {
-      const reason = event.reason;
-      if (reason === "no_active_transmitter") {
-        toast.error(tQueue("dispatch.errorNoActiveTransmitter"));
-      } else if (reason === "device_not_found") {
-        toast.error(tQueue("dispatch.errorDeviceNotFound"));
-      } else if (reason === "ack_timeout") {
-        toast.error(tQueue("dispatch.errorAckTimeout"));
-      } else {
-        toast.error(tQueue("dispatch.errorInfrastructure"));
-      }
-      setDeviceRefreshSignal((s) => s + 1);
-      return;
-    }
+      if (event.type === "DEVICE_DISPATCH_FAILED") {
+        // Tier-1 serial fallback: backend stayed reachable but its dispatch
+        // path failed; retry the same dispatch over the local USB hub once.
+        if (
+          mode === "ONLINE_SERIAL_FALLBACK" &&
+          event.deviceId &&
+          event.dispatchAction
+        ) {
+          const key = `${event.ticketId}:${event.dispatchAction}:${event.deviceId}`;
+          // A duplicate failure event for a dispatch we already retried —
+          // suppress it silently rather than falling through to an error toast.
+          if (!dedupe.seen(key)) return;
+          const hubSlot = useOfflineDispatchStore
+            .getState()
+            .slotFor(event.deviceId);
+          const result = await serialDispatch(
+            { id: event.deviceId, hubSlot },
+            event.dispatchAction,
+          );
+          if (result.status !== "applied") {
+            toast.error(tQueue("dispatch.errorNoActiveTransmitter"));
+          }
+          setDeviceRefreshSignal((s) => s + 1);
+          return;
+        }
 
-    if (
-      event.type === "TICKET_SERVED" ||
-      event.type === "TICKET_CANCELLED" ||
-      event.type === "TICKET_SKIPPED" ||
-      event.type === "TICKET_REQUEUED"
-    ) {
-      if (servingTicketsRef.current.some((t) => t.id === event.ticketId)) {
-        removeServingTicket(event.ticketId);
+        const reason = event.reason;
+        if (reason === "no_active_transmitter") {
+          toast.error(tQueue("dispatch.errorNoActiveTransmitter"));
+        } else if (reason === "device_not_found") {
+          toast.error(tQueue("dispatch.errorDeviceNotFound"));
+        } else if (reason === "ack_timeout") {
+          toast.error(tQueue("dispatch.errorAckTimeout"));
+        } else {
+          toast.error(tQueue("dispatch.errorInfrastructure"));
+        }
+        setDeviceRefreshSignal((s) => s + 1);
+        return;
       }
-      setDeviceRefreshSignal((s) => s + 1);
-    }
-  });
+
+      if (
+        event.type === "TICKET_SERVED" ||
+        event.type === "TICKET_CANCELLED" ||
+        event.type === "TICKET_SKIPPED" ||
+        event.type === "TICKET_REQUEUED"
+      ) {
+        if (servingTicketsRef.current.some((t) => t.id === event.ticketId)) {
+          removeServingTicket(event.ticketId);
+        }
+        setDeviceRefreshSignal((s) => s + 1);
+      }
+    },
+    onConnectionChange,
+  );
+
+  // Reconcile queued offline transitions on the backend-reachable rising edge.
+  const prevReachableRef = useRef(reachable);
+  useEffect(() => {
+    void (async () => {
+      if (!prevReachableRef.current && reachable) {
+        const store = useOfflineDispatchStore.getState();
+        const transitions = store.outbox.map(({ ticketId, action, at }) => ({
+          ticketId,
+          action,
+          at,
+        }));
+        if (transitions.length && storeId) {
+          try {
+            await reconcileOffline(storeId, { transitions });
+            // applied / superseded / gone are all terminal — clear every item.
+            store.clearOutbox(transitions.map((t) => t.ticketId));
+            toast.success(
+              tQueue("dispatch.syncedToast", { count: transitions.length }),
+            );
+            setDeviceRefreshSignal((s) => s + 1);
+          } catch {
+            // Network error — keep items for the next rising edge.
+          }
+        }
+      }
+      prevReachableRef.current = reachable;
+    })();
+  }, [reachable, storeId, tQueue]);
 
   const handleCallNext = useCallback(async () => {
     if (!storeId || callLoadingRef.current) return;
+
+    if (mode === "OFFLINE_SERIAL") {
+      const next = useOfflineDispatchStore
+        .getState()
+        .shiftWaitingDeviceTicket();
+      if (!next) {
+        setEmptyMessage(true);
+        return;
+      }
+      if (next.hubSlot != null) {
+        const res = await serialDispatch(
+          { id: next.deviceId, hubSlot: next.hubSlot },
+          "call",
+        );
+        if (res.status === "rejected" && res.reason === "slot_not_found") {
+          toast.error(tQueue("dispatch.errorReceiverNotOnHub"));
+        }
+      }
+      setEmptyMessage(false);
+      addServingTicket({
+        id: next.ticketId,
+        number: next.number,
+        status: "CALLED",
+        calledAt: new Date().toISOString(),
+        issuedAt: null,
+        position: null,
+        deviceId: next.deviceId,
+        deviceName: null,
+      });
+      setStatsRefreshSignal((s) => s + 1);
+      return;
+    }
+
     setCallLoading(true);
     setEmptyMessage(false);
 
@@ -177,7 +342,15 @@ export default function QueuePage() {
     } finally {
       setCallLoading(false);
     }
-  }, [storeId, selectedServiceTypeId, addServingTicket, tErrors]);
+  }, [
+    storeId,
+    selectedServiceTypeId,
+    addServingTicket,
+    tErrors,
+    mode,
+    serialDispatch,
+    tQueue,
+  ]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -247,6 +420,9 @@ export default function QueuePage() {
             </div>
           </div>
         )}
+
+        {/* Dispatch mode banner — serial fallback / offline */}
+        <DispatchModeBanner mode={mode} />
 
         <div className="grid gap-4 l:gap-6 2xl:min-h-0 2xl:flex-1 2xl:grid-cols-3">
           {/* Left column — main controls */}
@@ -338,13 +514,19 @@ export default function QueuePage() {
             )}
 
             {/* Currently Serving */}
-            <ServingDisplay storeId={storeId} allowNoShow={allowNoShow} />
+            <ServingDisplay
+              storeId={storeId}
+              allowNoShow={allowNoShow}
+              mode={mode}
+              dispatchSerial={serialDispatch}
+            />
 
             {/* Receivers — inline device dispatch */}
             <DeviceDispatchPanel
               storeId={storeId}
               refreshSignal={deviceRefreshSignal}
               onDispatched={handleDeviceDispatched}
+              mode={mode}
             />
           </div>
 

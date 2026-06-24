@@ -55,6 +55,8 @@ export interface QueueSseEvent {
   ticketNumber: string | null;
   counterId: string | null;
   reason: string | null;
+  deviceId?: string | null;
+  dispatchAction?: "call" | "stop" | null;
   timestamp: number;
 }
 
@@ -68,4 +70,22 @@ export interface AvailableDevicesResponse {
 export interface IssueDeviceTicketRequest {
   deviceId: string;
   serviceTypeId?: string | null;
+  allowSerialFallback?: boolean;
+}
+
+export type OfflineAction = "SERVE" | "CANCEL" | "NO_SHOW";
+export interface OfflineTransition {
+  ticketId: string;
+  action: OfflineAction;
+  at?: string;
+}
+export interface ReconcileItemResult {
+  ticketId: string;
+  result: "applied" | "superseded" | "gone";
+}
+export interface ReconcileOfflineRequest {
+  transitions: OfflineTransition[];
+}
+export interface ReconcileOfflineResponse {
+  results: ReconcileItemResult[];
 }

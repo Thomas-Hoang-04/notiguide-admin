@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  AlertTriangle,
-  ChevronLeft,
-  ChevronRight,
-  RefreshCcw,
-  Search,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCcw, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -20,6 +14,7 @@ import {
   translateCommonApiError,
   translateNetworkError,
 } from "@/lib/api-error";
+import type { DispatchMode } from "@/lib/dispatch/mode";
 import { ApiError } from "@/types/api";
 import type { DeviceDto } from "@/types/device";
 import { DeviceDispatchCard } from "./device-dispatch-card";
@@ -30,20 +25,23 @@ const DEFAULT_PAGE_SIZE = 5;
 
 interface DeviceDispatchPanelProps {
   storeId: string;
+  mode: DispatchMode;
   refreshSignal: number;
   onDispatched: () => void;
 }
 
 export function DeviceDispatchPanel({
   storeId,
+  mode,
   refreshSignal,
   onDispatched,
 }: DeviceDispatchPanelProps) {
   const tQueue = useTranslations("queue");
   const tErrors = useTranslations("errors");
 
+  const canDispatch = mode !== "DISABLED" && mode !== "OFFLINE_SERIAL";
+
   const [devices, setDevices] = useState<DeviceDto[]>([]);
-  const [dispatchReady, setDispatchReady] = useState(false);
   const [loading, setLoading] = useState(true);
   const [reloading, setReloading] = useState(false);
   const [query, setQuery] = useState("");
@@ -61,10 +59,8 @@ export function DeviceDispatchPanel({
     try {
       const res = await getAvailableDevices(storeId);
       setDevices(res.devices);
-      setDispatchReady(res.dispatchReady);
     } catch {
       setDevices([]);
-      setDispatchReady(false);
     } finally {
       setLoading(false);
     }
@@ -87,7 +83,10 @@ export function DeviceDispatchPanel({
     async (deviceId: string) => {
       setDispatchingIds((prev) => new Set(prev).add(deviceId));
       try {
-        const ticket = await issueDeviceTicket(storeId, { deviceId });
+        const ticket = await issueDeviceTicket(storeId, {
+          deviceId,
+          allowSerialFallback: mode === "ONLINE_SERIAL_FALLBACK",
+        });
         toast.success(
           tQueue("dispatch.successToast", { number: ticket.number }),
         );
@@ -112,7 +111,7 @@ export function DeviceDispatchPanel({
         });
       }
     },
-    [storeId, onDispatched, tQueue, tErrors],
+    [storeId, mode, onDispatched, tQueue, tErrors],
   );
 
   const filtered = useMemo(() => {
@@ -171,44 +170,40 @@ export function DeviceDispatchPanel({
         </div>
       </div>
 
-      {/* No-hub warning (between title row and first card; also above the
-          empty-state message when there are no available receivers) */}
-      {!loading && !dispatchReady && (
-        <div className="flex items-center gap-2.5 rounded-xl border border-warning/40 bg-warning/15 px-3 py-2.5 text-xs text-warning dark:border-warning/50 dark:bg-warning/20">
-          <AlertTriangle
-            aria-hidden="true"
-            className="size-4 shrink-0 text-warning"
-          />
-          {tQueue("dispatch.disabledNoHub")}
-        </div>
-      )}
-
       {/* Card list — flex-filled; height is layout-determined, not content-driven */}
       <div
         ref={listRef}
         className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden"
       >
-        {loading &&
-          ["a", "b", "c"].map((id) => (
-            <Skeleton key={id} className="queue-device-card rounded-lg" />
-          ))}
-
-        {!loading && filtered.length === 0 && (
+        {mode === "OFFLINE_SERIAL" ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
-            {tQueue("dispatch.disabledNoDevice")}
+            {tQueue("dispatch.offlineIssueDisabled")}
           </p>
-        )}
+        ) : (
+          <>
+            {loading &&
+              ["a", "b", "c"].map((id) => (
+                <Skeleton key={id} className="queue-device-card rounded-lg" />
+              ))}
 
-        {!loading &&
-          visible.map((device) => (
-            <DeviceDispatchCard
-              key={device.id}
-              device={device}
-              dispatchReady={dispatchReady}
-              dispatching={dispatchingIds.has(device.id)}
-              onDispatch={handleDispatch}
-            />
-          ))}
+            {!loading && filtered.length === 0 && (
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                {tQueue("dispatch.disabledNoDevice")}
+              </p>
+            )}
+
+            {!loading &&
+              visible.map((device) => (
+                <DeviceDispatchCard
+                  key={device.id}
+                  device={device}
+                  dispatchReady={canDispatch}
+                  dispatching={dispatchingIds.has(device.id)}
+                  onDispatch={handleDispatch}
+                />
+              ))}
+          </>
+        )}
       </div>
 
       {/* Pagination footer */}
