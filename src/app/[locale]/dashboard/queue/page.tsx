@@ -24,6 +24,7 @@ import {
 import { CleanupButton } from "@/features/queue/cleanup-button";
 import { DeviceDispatchPanel } from "@/features/queue/device-dispatch-panel";
 import { DispatchModeBanner } from "@/features/queue/dispatch-mode-banner";
+import { QueueSerialControl } from "@/features/queue/queue-serial-control";
 import { QueueStateToggle } from "@/features/queue/queue-state-toggle";
 import { QueueStats } from "@/features/queue/queue-stats";
 import { ServingDisplay } from "@/features/queue/serving-display";
@@ -201,13 +202,11 @@ export default function QueuePage() {
       setStatsRefreshSignal((s) => s + 1);
 
       if (event.type === "DEVICE_DISPATCH_FAILED") {
-        // Tier-1 serial fallback: backend stayed reachable but its dispatch
-        // path failed; retry the same dispatch over the local USB hub once.
-        if (
-          mode === "ONLINE_SERIAL_FALLBACK" &&
-          event.deviceId &&
-          event.dispatchAction
-        ) {
+        const hubConnectedViaUsb =
+          serial.portState === "open" &&
+          serial.deviceKind === "TRANSMITTER_HUB";
+
+        if (hubConnectedViaUsb && event.deviceId && event.dispatchAction) {
           const key = `${event.ticketId}:${event.dispatchAction}:${event.deviceId}`;
           // A duplicate failure event for a dispatch we already retried —
           // suppress it silently rather than falling through to an error toast.
@@ -215,15 +214,23 @@ export default function QueuePage() {
           const hubSlot = useOfflineDispatchStore
             .getState()
             .slotFor(event.deviceId);
-          const result = await serialDispatch(
-            { id: event.deviceId, hubSlot },
-            event.dispatchAction,
-          );
-          if (result.status !== "applied") {
-            toast.error(tQueue("dispatch.errorNoActiveTransmitter"));
+          let applied: boolean;
+          try {
+            const result = await serialDispatch(
+              { id: event.deviceId, hubSlot },
+              event.dispatchAction,
+            );
+            applied = result.status === "applied";
+          } catch {
+            applied = false;
           }
-          setDeviceRefreshSignal((s) => s + 1);
-          return;
+          // USB dispatch succeeded — the backend MQTT failure is expected (e.g. the
+          // hub is offline over the network), so don't alarm the operator.
+          if (applied) {
+            setDeviceRefreshSignal((s) => s + 1);
+            return;
+          }
+          // Serial retry unavailable or rejected — fall through to the backend error.
         }
 
         const reason = event.reason;
@@ -420,6 +427,9 @@ export default function QueuePage() {
             </div>
           </div>
         )}
+
+        {/* USB serial connect / status — establishes the local hub link */}
+        <QueueSerialControl serial={serial} />
 
         {/* Dispatch mode banner — serial fallback / offline */}
         <DispatchModeBanner mode={mode} />

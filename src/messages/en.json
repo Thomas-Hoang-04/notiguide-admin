@@ -436,6 +436,12 @@
         "serialFallback": "Transmitter offline — dispatching over USB.",
         "offline": "No connection — running the queue locally over USB. Changes sync when you're back online."
       },
+      "serial": {
+        "connectHint": "Connect the hub over USB to dispatch without the network.",
+        "connected": "Hub connected over USB",
+        "notHub": "Connected device isn't a transmitter hub",
+        "hubInactive": "Hub isn't activated yet — dispatch stays off"
+      },
       "offlineIssueDisabled": "Can't add new pagers while offline. You can still call and finish current ones.",
       "rePageUsb": "Re-page over USB",
       "errorReceiverNotOnHub": "Receiver isn't paired to this hub.",

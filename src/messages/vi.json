@@ -436,6 +436,12 @@
         "serialFallback": "Bộ phát ngoại tuyến — đang phát tín hiệu qua USB.",
         "offline": "Mất kết nối — đang chạy hàng đợi cục bộ qua USB. Thay đổi sẽ đồng bộ khi có mạng trở lại."
       },
+      "serial": {
+        "connectHint": "Kết nối hub qua USB để phát tín hiệu khi mất mạng.",
+        "connected": "Đã kết nối hub qua USB",
+        "notHub": "Thiết bị đang kết nối không phải hub phát",
+        "hubInactive": "Hub chưa được kích hoạt — chưa thể phát tín hiệu"
+      },
       "offlineIssueDisabled": "Không thể cấp thiết bị mới khi ngoại tuyến. Vẫn có thể gọi và phục vụ khách hiện tại.",
       "rePageUsb": "Gọi lại qua USB",
       "errorReceiverNotOnHub": "Bộ thu chưa ghép nối với bộ phát này.",
