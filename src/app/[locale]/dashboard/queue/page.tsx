@@ -40,7 +40,7 @@ import {
   translateNetworkError,
 } from "@/lib/api-error";
 import { createDispatchDedupe } from "@/lib/dispatch/dedupe";
-import { useSerial } from "@/lib/serial/use-serial";
+import { useSerialSession } from "@/lib/serial/serial-session";
 import { useAuthStore } from "@/store/auth";
 import { useLayoutStore } from "@/store/layout";
 import { useOfflineDispatchStore } from "@/store/offline-dispatch";
@@ -62,7 +62,7 @@ export default function QueuePage() {
   } = useQueueStore();
 
   // Resilient USB dispatch: serial port, backend reachability, and derived mode
-  const serial = useSerial();
+  const serial = useSerialSession();
   const { reachable, onConnectionChange } = useBackendReachability();
   const [dispatchReady, setDispatchReady] = useState(false);
   const mode = useDispatchMode({ reachable, dispatchReady, serial });

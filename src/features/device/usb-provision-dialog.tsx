@@ -21,9 +21,9 @@ import {
   translateCommonApiError,
   translateNetworkError,
 } from "@/lib/api-error";
+import { useSerialSession } from "@/lib/serial/serial-session";
 import type { TestWifiResult } from "@/lib/serial/types";
 import { isReceiverKind } from "@/lib/serial/types";
-import { useSerial } from "@/lib/serial/use-serial";
 import { useAuthStore } from "@/store/auth";
 import { ApiError } from "@/types/api";
 import type { StoreDto } from "@/types/store";
@@ -102,7 +102,7 @@ export function UsbProvisionDialog({
     sendCommand,
     deviceState,
     events,
-  } = useSerial();
+  } = useSerialSession();
 
   const [step, setStep] = useState<ProvisionStep>("connect");
   const [stores, setStores] = useState<StoreDto[]>([]);

@@ -45,7 +45,7 @@ import {
   translateCommonApiError,
   translateNetworkError,
 } from "@/lib/api-error";
-import { useSerial } from "@/lib/serial/use-serial";
+import { useSerialSession } from "@/lib/serial/serial-session";
 import { ApiError } from "@/types/api";
 import type { DeviceDetailDto } from "@/types/device";
 
@@ -56,7 +56,7 @@ export default function DeviceDetailPage() {
   const tDevices = useTranslations("devices");
   const tErrors = useTranslations("errors");
 
-  const serial = useSerial();
+  const serial = useSerialSession();
   const tUsb = useTranslations("devices.usb");
 
   const [device, setDevice] = useState<DeviceDetailDto | null>(null);

@@ -29,7 +29,7 @@ import {
   translateCommonApiError,
   translateNetworkError,
 } from "@/lib/api-error";
-import type { SerialCommandMap } from "@/lib/serial/types";
+import type { SerialCommandMap, TransmitResult } from "@/lib/serial/types";
 import { ApiError } from "@/types/api";
 import type { DeviceDto } from "@/types/device";
 import { getUsbDispatchPayload } from "./api";
@@ -116,21 +116,33 @@ export function UsbDispatchDialog({
 
   async function handleReceiverDispatch() {
     if (!selectedDeviceId || loading) return;
+    const device = devices.find((d) => d.id === selectedDeviceId);
+    if (!device) return;
     setLoading(true);
     try {
-      const payload = await getUsbDispatchPayload({
-        storeId,
-        deviceId: selectedDeviceId,
-        action,
-      });
+      let result: TransmitResult;
+      if (device.hubSlot != null) {
+        // Hub-paired receivers have no backend RF code; the hub resolves
+        // the code from its own roster, mirroring slot-based MQTT dispatch.
+        result = await sendCommand("transmit_slot", {
+          slot: device.hubSlot,
+          action,
+        });
+      } else {
+        const payload = await getUsbDispatchPayload({
+          storeId,
+          deviceId: selectedDeviceId,
+          action,
+        });
 
-      const result = await sendCommand("transmit", {
-        receiver_public_id: payload.receiverPublicId,
-        band: payload.band,
-        rf_code_hex: payload.rfCodeHex,
-        rf_code_bits: payload.rfCodeBits,
-        proto_any: payload.protoAny,
-      });
+        result = await sendCommand("transmit", {
+          receiver_public_id: payload.receiverPublicId,
+          band: payload.band,
+          rf_code_hex: payload.rfCodeHex,
+          rf_code_bits: payload.rfCodeBits,
+          proto_any: payload.protoAny,
+        });
+      }
 
       if (result.status === "applied") {
         toast.success(tUsb("test_dispatch"));
@@ -338,7 +350,7 @@ export function UsbDispatchDialog({
                     onValueChange={(v) => setBand(v as "433M" | "2_4G")}
                   >
                     <SelectTrigger className="h-10 w-full gap-2 px-3">
-                      <span>{band}</span>
+                      <span>{band === "433M" ? "433 MHz" : "2.4GHz"}</span>
                     </SelectTrigger>
                     <SelectContent
                       align="start"
