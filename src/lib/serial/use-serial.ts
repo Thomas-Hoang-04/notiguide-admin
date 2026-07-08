@@ -236,6 +236,12 @@ export function useSerial(): UseSerialReturn {
 
     if (portRef.current) {
       try {
+        await portRef.current.setSignals({ requestToSend: false });
+        await portRef.current.setSignals({ dataTerminalReady: false });
+      } catch {
+        // ignore signal errors — port may already be gone
+      }
+      try {
         await portRef.current.close();
       } catch {
         // ignore close errors
