@@ -19,7 +19,7 @@ export function useDispatchMode(args: {
       deriveDispatchMode({
         backendReachable: reachable,
         dispatchReady,
-        hubConnectedForStore: !!hubConnectedForStore,
+        hubConnectedForStore: hubConnectedForStore,
       }),
     [reachable, dispatchReady, hubConnectedForStore],
   );
