@@ -20,6 +20,7 @@ import { Kbd } from "@/components/ui/kbd";
 import {
   cancelTicket,
   getStoreSettings,
+  rePageTicket,
   serveTicket,
   triggerNoShow,
 } from "@/features/queue/api";
@@ -31,21 +32,29 @@ import {
 import type { DispatchMode } from "@/lib/dispatch/mode";
 import { getTicketStatusTranslationKey } from "@/lib/i18n-keys";
 import type { TransmitResult } from "@/lib/serial/types";
-import { useOfflineDispatchStore } from "@/store/offline-dispatch";
+import {
+  type OfflineDispatchState,
+  useOfflineDispatchStore,
+} from "@/store/offline-dispatch";
 import { useQueueStore } from "@/store/queue";
 import { ApiError } from "@/types/api";
 import type { TicketDto } from "@/types/queue";
 import type { StoreSettingsDto } from "@/types/store";
 import "@/styles/queue.css";
 
+type DispatchSerialFn = (
+  target: { id: string; hubSlot: number | null },
+  action: "call" | "stop",
+  ticketId?: string,
+) => Promise<TransmitResult>;
+
+type QueueTranslator = ReturnType<typeof useTranslations<"queue">>;
+
 interface ServingDisplayProps {
   storeId: string;
   allowNoShow: boolean;
   mode: DispatchMode;
-  dispatchSerial: (
-    target: { id: string; hubSlot: number | null },
-    action: "call" | "stop",
-  ) => Promise<TransmitResult>;
+  dispatchSerial: DispatchSerialFn;
 }
 
 const ticketTimeFormatter = new Intl.DateTimeFormat("en-US", {
@@ -110,10 +119,31 @@ interface ServingTicketCardProps {
   settings: StoreSettingsDto | null;
   allowNoShow: boolean;
   mode: DispatchMode;
-  dispatchSerial: (
-    target: { id: string; hubSlot: number | null },
-    action: "call" | "stop",
-  ) => Promise<TransmitResult>;
+  dispatchSerial: DispatchSerialFn;
+}
+
+async function offlineDispatchCheck(
+  ticket: TicketDto,
+  tQueue: QueueTranslator,
+  store: OfflineDispatchState,
+  dispatchSerial: DispatchSerialFn,
+): Promise<boolean> {
+  if (!ticket.deviceId) {
+    toast.warning(tQueue("dispatch.offlineIssueDisabled"));
+    return false;
+  }
+  const hubSlot = store.slotFor(ticket.deviceId);
+  if (hubSlot != null) {
+    const res = await dispatchSerial(
+      { id: ticket.deviceId, hubSlot },
+      "stop",
+      ticket.id,
+    );
+    if (res.status !== "applied" && res.reason === "slot_not_found") {
+      toast.error(tQueue("dispatch.errorReceiverNotOnHub"));
+    }
+  }
+  return true;
 }
 
 function useGraceCountdown(
@@ -190,19 +220,10 @@ function ServingTicketCard({
     try {
       if (mode === "OFFLINE_SERIAL") {
         const store = useOfflineDispatchStore.getState();
-        if (!ticket.deviceId) {
-          toast.warning(tQueue("dispatch.offlineIssueDisabled"));
+        if (
+          !(await offlineDispatchCheck(ticket, tQueue, store, dispatchSerial))
+        ) {
           return;
-        }
-        const hubSlot = store.slotFor(ticket.deviceId);
-        if (hubSlot != null) {
-          const res = await dispatchSerial(
-            { id: ticket.deviceId, hubSlot },
-            "stop",
-          );
-          if (res.status !== "applied" && res.reason === "slot_not_found") {
-            toast.error(tQueue("dispatch.errorReceiverNotOnHub"));
-          }
         }
         store.appendOutbox({
           ticketId: ticket.id,
@@ -245,19 +266,10 @@ function ServingTicketCard({
     try {
       if (mode === "OFFLINE_SERIAL") {
         const store = useOfflineDispatchStore.getState();
-        if (!ticket.deviceId) {
-          toast.warning(tQueue("dispatch.offlineIssueDisabled"));
+        if (
+          !(await offlineDispatchCheck(ticket, tQueue, store, dispatchSerial))
+        ) {
           return;
-        }
-        const hubSlot = store.slotFor(ticket.deviceId);
-        if (hubSlot != null) {
-          const res = await dispatchSerial(
-            { id: ticket.deviceId, hubSlot },
-            "stop",
-          );
-          if (res.status !== "applied" && res.reason === "slot_not_found") {
-            toast.error(tQueue("dispatch.errorReceiverNotOnHub"));
-          }
         }
         store.appendOutbox({
           ticketId: ticket.id,
@@ -330,19 +342,10 @@ function ServingTicketCard({
     try {
       if (mode === "OFFLINE_SERIAL") {
         const store = useOfflineDispatchStore.getState();
-        if (!ticket.deviceId) {
-          toast.warning(tQueue("dispatch.offlineIssueDisabled"));
+        if (
+          !(await offlineDispatchCheck(ticket, tQueue, store, dispatchSerial))
+        ) {
           return;
-        }
-        const hubSlot = store.slotFor(ticket.deviceId);
-        if (hubSlot != null) {
-          const res = await dispatchSerial(
-            { id: ticket.deviceId, hubSlot },
-            "stop",
-          );
-          if (res.status !== "applied" && res.reason === "slot_not_found") {
-            toast.error(tQueue("dispatch.errorReceiverNotOnHub"));
-          }
         }
         store.appendOutbox({
           ticketId: ticket.id,
@@ -367,28 +370,44 @@ function ServingTicketCard({
     }
   }
 
+  const rePageOverUsb =
+    mode === "ONLINE_SERIAL_FALLBACK" || mode === "OFFLINE_SERIAL";
+
   async function handleRePage() {
     if (rePageLoading || !ticket.deviceId) return;
     setRePageLoading(true);
     try {
-      const hubSlot = useOfflineDispatchStore
-        .getState()
-        .slotFor(ticket.deviceId);
-      const res = await dispatchSerial(
-        { id: ticket.deviceId, hubSlot },
-        "call",
-      );
-      if (res.status === "rejected" && res.reason === "slot_not_found") {
-        toast.error(tQueue("dispatch.errorReceiverNotOnHub"));
+      if (rePageOverUsb) {
+        const hubSlot = useOfflineDispatchStore
+          .getState()
+          .slotFor(ticket.deviceId);
+        const res = await dispatchSerial(
+          { id: ticket.deviceId, hubSlot },
+          "call",
+          ticket.id,
+        );
+        if (res.status === "rejected" && res.reason === "slot_not_found") {
+          toast.error(tQueue("dispatch.errorReceiverNotOnHub"));
+        }
+        return;
+      }
+      // Normal channel: the backend re-runs the CALL dispatch pipeline (election,
+      // MQTT publish, ack tracking) — a failure comes back asynchronously as a
+      // DEVICE_DISPATCH_FAILED event and goes through the usual USB fallback.
+      await rePageTicket(storeId, ticket.id);
+      toast.success(tQueue("dispatch.rePageSent", { number: ticket.number }));
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(translateCommonApiError(err, tErrors));
+      } else {
+        toast.error(translateNetworkError(tErrors));
       }
     } finally {
       setRePageLoading(false);
     }
   }
 
-  const showRePage =
-    !!ticket.deviceId &&
-    (mode === "ONLINE_SERIAL_FALLBACK" || mode === "OFFLINE_SERIAL");
+  const showRePage = !!ticket.deviceId && mode !== "DISABLED";
 
   return (
     <div className="glass-card glass-context-action ticket-display rounded-xl">
@@ -516,7 +535,9 @@ function ServingTicketCard({
             ) : (
               <Radio aria-hidden="true" className="mr-2 size-4" />
             )}
-            {tQueue("dispatch.rePageUsb")}
+            {rePageOverUsb
+              ? tQueue("dispatch.rePageUsb")
+              : tQueue("dispatch.rePage")}
           </Button>
         )}
       </div>

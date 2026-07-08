@@ -444,6 +444,8 @@
       },
       "offlineIssueDisabled": "Can't add new pagers while offline. You can still call and finish current ones.",
       "rePageUsb": "Re-page over USB",
+      "rePage": "Resend signal",
+      "rePageSent": "Signal resent for ticket #{number}.",
       "errorReceiverNotOnHub": "Receiver isn't paired to this hub.",
       "syncedToast": "Synced {count} offline updates."
     },

@@ -57,6 +57,10 @@ export function callSpecificTicket(storeId: string, ticketId: string) {
   );
 }
 
+export function rePageTicket(storeId: string, ticketId: string) {
+  return post<void>(API_ROUTES.QUEUE.RE_PAGE(storeId, ticketId));
+}
+
 export function serveTicket(storeId: string, ticketId: string) {
   return post<void>(API_ROUTES.QUEUE.SERVE(storeId, ticketId));
 }

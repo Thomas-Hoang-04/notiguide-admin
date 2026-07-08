@@ -40,7 +40,11 @@ import {
   translateCommonApiError,
   translateNetworkError,
 } from "@/lib/api-error";
-import { createDispatchDedupe } from "@/lib/dispatch/dedupe";
+import {
+  createAppliedRegistry,
+  createDispatchDedupe,
+} from "@/lib/dispatch/dedupe";
+import type { SerialDispatchAction } from "@/lib/dispatch/serial-command";
 import { useSerialSession } from "@/lib/serial/serial-session";
 import { useAuthStore } from "@/store/auth";
 import { useLayoutStore } from "@/store/layout";
@@ -67,8 +71,24 @@ export default function QueuePage() {
   const { reachable, onConnectionChange } = useBackendReachability();
   const [dispatchReady, setDispatchReady] = useState(false);
   const mode = useDispatchMode({ reachable, dispatchReady, serial });
-  const serialDispatch = useSerialDispatch(storeId ?? "", serial);
+  const rawSerialDispatch = useSerialDispatch(storeId ?? "", serial);
   const dedupe = useRef(createDispatchDedupe()).current;
+  const usbApplied = useRef(createAppliedRegistry()).current;
+
+  const serialDispatch = useCallback(
+    async (
+      target: { id: string; hubSlot: number | null },
+      action: SerialDispatchAction,
+      ticketId?: string,
+    ) => {
+      const result = await rawSerialDispatch(target, action);
+      if (result.status === "applied" && ticketId) {
+        usbApplied.mark(`${ticketId}:${action}`);
+      }
+      return result;
+    },
+    [rawSerialDispatch, usbApplied],
+  );
 
   const [serviceTypes, setServiceTypes] = useState<ServiceTypeDto[]>([]);
   const [selectedServiceTypeId, setSelectedServiceTypeId] = useState(() => {
@@ -202,6 +222,12 @@ export default function QueuePage() {
       setStatsRefreshSignal((s) => s + 1);
 
       if (event.type === "DEVICE_DISPATCH_FAILED") {
+        const failedAction = event.dispatchAction ?? "call";
+        if (usbApplied.has(`${event.ticketId}:${failedAction}`)) {
+          setDeviceRefreshSignal((s) => s + 1);
+          return;
+        }
+
         const hubConnectedViaUsb =
           serial.portState === "open" &&
           serial.deviceKind === "TRANSMITTER_HUB";
@@ -219,6 +245,7 @@ export default function QueuePage() {
             const result = await serialDispatch(
               { id: event.deviceId, hubSlot },
               event.dispatchAction,
+              event.ticketId,
             );
             applied = result.status === "applied";
           } catch {
@@ -238,7 +265,12 @@ export default function QueuePage() {
           toast.error(tQueue("dispatch.errorNoActiveTransmitter"));
         } else if (reason === "device_not_found") {
           toast.error(tQueue("dispatch.errorDeviceNotFound"));
-        } else if (reason === "ack_timeout") {
+        } else if (
+          reason === "ack_timeout" ||
+          reason?.startsWith("transmit_rejected")
+        ) {
+          // Hub NACKs (transmit_rejected:*) mean the hub tried but the pager didn't
+          // take the signal — same operator guidance as an ack timeout.
           toast.error(tQueue("dispatch.errorAckTimeout"));
         } else {
           toast.error(tQueue("dispatch.errorInfrastructure"));
@@ -306,6 +338,7 @@ export default function QueuePage() {
         const res = await serialDispatch(
           { id: next.deviceId, hubSlot: next.hubSlot },
           "call",
+          next.ticketId,
         );
         if (res.status === "rejected" && res.reason === "slot_not_found") {
           toast.error(tQueue("dispatch.errorReceiverNotOnHub"));

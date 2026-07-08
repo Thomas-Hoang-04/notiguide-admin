@@ -52,6 +52,8 @@ export const API_ROUTES = {
       `/api/queue/admin/${storeId}/tickets/${ticketId}`,
     CALL_TICKET: (storeId: string, ticketId: string) =>
       `/api/queue/admin/${storeId}/tickets/${ticketId}/call`,
+    RE_PAGE: (storeId: string, ticketId: string) =>
+      `/api/queue/admin/${storeId}/tickets/${ticketId}/re-page`,
     SERVE: (storeId: string, ticketId: string) =>
       `/api/queue/admin/${storeId}/tickets/${ticketId}/serve`,
     CANCEL: (storeId: string, ticketId: string) =>

@@ -444,6 +444,8 @@
       },
       "offlineIssueDisabled": "Không thể cấp thiết bị mới khi ngoại tuyến. Vẫn có thể gọi và phục vụ khách hiện tại.",
       "rePageUsb": "Gọi lại qua USB",
+      "rePage": "Gửi lại tín hiệu",
+      "rePageSent": "Đã gửi lại tín hiệu cho vé #{number}.",
       "errorReceiverNotOnHub": "Bộ thu chưa ghép nối với bộ phát này.",
       "syncedToast": "Đã đồng bộ {count} cập nhật ngoại tuyến."
     },

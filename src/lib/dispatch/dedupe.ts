@@ -9,3 +9,16 @@ export function createDispatchDedupe(ttlMs = 5000) {
     },
   };
 }
+
+export function createAppliedRegistry(ttlMs = 60_000) {
+  const appliedAt = new Map<string, number>();
+  return {
+    mark(key: string, now: number = Date.now()): void {
+      appliedAt.set(key, now);
+    },
+    has(key: string, now: number = Date.now()): boolean {
+      const at = appliedAt.get(key);
+      return at !== undefined && now - at < ttlMs;
+    },
+  };
+}

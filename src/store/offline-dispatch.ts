@@ -22,7 +22,7 @@ interface PersistShape {
   outbox: OutboxEntry[];
 }
 
-interface OfflineDispatchState extends PersistShape {
+export interface OfflineDispatchState extends PersistShape {
   setSlot: (deviceId: string, hubSlot: number) => void;
   slotFor: (deviceId: string) => number | null;
   setWaitingSnapshot: (tickets: SnapshotTicket[]) => void;
