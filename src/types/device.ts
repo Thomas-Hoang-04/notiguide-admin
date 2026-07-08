@@ -125,6 +125,17 @@ export interface DeviceDiagnosticsRelayRequest {
   firmwareVersion: string | null;
 }
 
+export interface RosterRelayReceiver {
+  slot: number;
+  band: string;
+  label: string | null;
+}
+
+export interface RosterRelayRequest {
+  seq: number;
+  receivers: RosterRelayReceiver[];
+}
+
 export interface DeviceDetailDto extends DeviceDto {
   lifecycleCommand?: {
     commandId: string;

@@ -101,6 +101,7 @@ export const API_ROUTES = {
     TOKEN_BY_HASH: (hash: string) => `/api/devices/enrollment-tokens/${hash}`,
     USB_DISPATCH_PAYLOAD: "/api/devices/usb-dispatch-payload",
     DIAGNOSTICS: (id: string) => `/api/devices/${id}/diagnostics`,
+    ROSTER_RELAY: (id: string) => `/api/devices/${id}/roster/relay`,
     HUB_HEALTH: "/api/devices/hub-health",
     RENAME: (id: string) => `/api/devices/${id}/name`,
   },

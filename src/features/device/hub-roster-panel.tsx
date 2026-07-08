@@ -18,12 +18,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { RosterReceiver } from "@/lib/serial/types";
 import type { UseSerialReturn } from "@/lib/serial/use-serial";
+import { relayRoster } from "./api";
 
 interface HubRosterPanelProps {
   serial: UseSerialReturn;
+  /** Backend device id of the connected hub — target of the roster relay. */
+  deviceId: string;
 }
 
-export function HubRosterPanel({ serial }: HubRosterPanelProps) {
+export function HubRosterPanel({ serial, deviceId }: HubRosterPanelProps) {
   const tRoster = useTranslations("devices.usb.roster");
   const tUsb = useTranslations("devices.usb");
   const tCommon = useTranslations("common");
@@ -43,6 +46,22 @@ export function HubRosterPanel({ serial }: HubRosterPanelProps) {
       setReceivers(result.receivers);
       setMaxSlots(result.max);
       setPairingDisabled(false);
+
+      // Redundant roster sync (hub → Web Serial → backend): mirrors the MQTT
+      // roster-sync path so receivers paired while the hub is offline reach the
+      // backend as soon as an admin views the roster over USB. The seq keeps it
+      // idempotent server-side; older firmware without seq is skipped. Failures
+      // are silent — MQTT sync remains the primary road.
+      if (result.seq != null) {
+        void relayRoster(deviceId, {
+          seq: result.seq,
+          receivers: result.receivers.map((rx) => ({
+            slot: rx.slot,
+            band: rx.band,
+            label: rx.name || null,
+          })),
+        }).catch(() => {});
+      }
     } catch (err) {
       if (err instanceof Error && err.message.includes("pairing_disabled")) {
         setPairingDisabled(true);
@@ -50,7 +69,7 @@ export function HubRosterPanel({ serial }: HubRosterPanelProps) {
     } finally {
       setLoading(false);
     }
-  }, [sendCommand]);
+  }, [sendCommand, deviceId]);
 
   useEffect(() => {
     void fetchRoster();

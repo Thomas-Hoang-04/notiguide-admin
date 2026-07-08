@@ -13,6 +13,7 @@ import type {
   IssueEnrollmentTokenRequest,
   PassiveDeviceRegistrationRequest,
   RenameDeviceRequest,
+  RosterRelayRequest,
   RotateRfCodeRequest,
   UsbDispatchPayloadRequest,
   UsbDispatchPayloadResponse,
@@ -82,6 +83,10 @@ export function relayDiagnostics(
   data: DeviceDiagnosticsRelayRequest,
 ) {
   return post<void>(API_ROUTES.DEVICES.DIAGNOSTICS(id), data);
+}
+
+export function relayRoster(id: string, data: RosterRelayRequest) {
+  return post<{ applied: boolean }>(API_ROUTES.DEVICES.ROSTER_RELAY(id), data);
 }
 
 export function renameDevice(id: string, request: RenameDeviceRequest) {

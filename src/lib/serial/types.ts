@@ -119,6 +119,8 @@ export interface RosterReceiver {
 export interface RosterListResult {
   count: number;
   max: number;
+  /** Roster sequence for idempotent backend relay; absent on older firmware. */
+  seq?: number;
   receivers: RosterReceiver[];
 }
 

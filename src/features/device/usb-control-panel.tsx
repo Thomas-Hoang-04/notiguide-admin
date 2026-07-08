@@ -292,7 +292,9 @@ export function UsbControlPanel({
               </div>
             )}
 
-            {isConnected && !isMismatched && <HubRosterPanel serial={serial} />}
+            {isConnected && !isMismatched && (
+              <HubRosterPanel serial={serial} deviceId={deviceId} />
+            )}
 
             {isConnected && (
               <div className="flex flex-wrap items-center gap-2">
